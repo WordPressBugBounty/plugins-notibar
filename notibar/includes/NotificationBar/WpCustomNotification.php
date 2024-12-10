@@ -68,31 +68,41 @@ class WpCustomNotification
     update_option('njt_nofi_lb_url_mobile_wpml_translate', get_theme_mod( 'njt_nofi_lb_url_mobile', $this->valueDefault['lb_url_mobile']));
 
     add_action('customize_register', array( $this, 'njt_nofi_customizeNotification'), 10);
-    add_action('admin_enqueue_scripts', array($this, 'addScriptsCustomizer'));
+    if( is_admin() ){
+      add_action('admin_enqueue_scripts', array($this, 'addScriptsCustomizer'));
+    }
     add_action('wp_enqueue_scripts', array( $this, 'njt_nofi_enqueueCustomizeControls'));
     add_action('customize_save_after', array( $this, 'njt_nofi_customize_save_after'));
 
     add_action( 'wp_ajax_njt_nofi_text', array( $this, 'njt_nofi_text_shortcode' ) );
   }
 
-  public function njt_nofi_text_shortcode()
+  public function njt_nofi_text_shortcode() 
   {
     if ( isset( $_POST ) ) {
-			$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : null;
+        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : null;
+        if ( ! wp_verify_nonce( $nonce, 'njt-nofi-notification' ) ) {
+            wp_send_json_error( array( 'status' => 'Wrong nonce validate!' ) );
+            exit();
+        }
 
-			if ( ! wp_verify_nonce( $nonce, 'njt-nofi-notification' ) ) {
-				wp_send_json_error( array( 'status' => 'Wrong nonce validate!' ) );
-				exit();
-			}
-    
-      $njt_nofi_text = isset( $_POST['text'] ) ? $_POST['text'] : null;
-      
-      $a = do_shortcode($njt_nofi_text);
-      
-      wp_send_json_success(wp_unslash($a));
-		}
-		wp_send_json_error( array( 'message' => 'Update fail!' ) );
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            wp_send_json_error( array( 'status' => 'Insufficient permissions.' ) );
+            exit();
+        }
+
+        $njt_nofi_text = isset( $_POST['text'] ) ? sanitize_text_field( $_POST['text'] ) : null;
+
+        $output = do_shortcode( $njt_nofi_text );
+
+        wp_send_json_success( wp_kses_post( $output ) );
+        exit();
+    }
+
+    wp_send_json_error( array( 'message' => 'Update fail!' ) );
+    exit();
   }
+
 
    /**
      * Enqueue script for customizer control

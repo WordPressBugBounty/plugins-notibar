@@ -424,12 +424,9 @@ class overrideOldVer
                 && !$excludeDisplayPageOrPostId
             ) {
                 $logicDisplayPage = 'hide_all_page';
-                $logicDisplayPost = 'dis_all_post';
+                $logicDisplayPost = 'hide_all_post';
             }
             
-
-
-
             $arrUniqueDisplayPage = implode(',', array_unique(explode(',', $mergeDisplayPage)));
             $arrUniqueDisplayPost = implode(',', array_unique(explode(',', $mergeDisplayPost)));
 

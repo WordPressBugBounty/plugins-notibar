@@ -192,6 +192,11 @@ if ( !class_exists('NjtCross') ) {
 
         public function ajax_install_plugin(){
             check_ajax_referer("njt_filebird_cross_nonce", 'nonce', true);
+
+            if (!current_user_can('install_plugins') || !current_user_can('activate_plugins')) {
+                wp_send_json_error(array('message' => _('You do not have permission to install plugins.')));
+                wp_die();
+            }
             
             $installed = $this->pluginInstaller('filebird');
             if ($installed === false) {
@@ -234,6 +239,11 @@ if ( !class_exists('NjtCross') ) {
                     ),
                 )
             );
+
+            if (is_wp_error($api)) {
+                throw new \Exception(_('Could not fetch plugin information.'));
+            }
+            
             $skin     = new \WP_Ajax_Upgrader_Skin();
             $upgrader = new \Plugin_Upgrader( $skin );
             try {
