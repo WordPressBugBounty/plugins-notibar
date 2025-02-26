@@ -282,6 +282,7 @@ class WpCustomNotification
       'primarySetting'      => 'njt_nofi_text',
       'container_inclusive' => true,
       'fallback_refresh'    => false,
+      'sanitize_callback'   => 'wp_kses_post',
     ) );
 
     $customNoti->add_control( 'njt_nofi_text_control', array(
@@ -289,6 +290,7 @@ class WpCustomNotification
       'section'  => 'njt_nofi_content',
       'settings' => 'njt_nofi_text',
       'type'     => 'textarea',
+      'sanitize_callback' => 'wp_kses_post',
     ));
 
     //Switch on/off button

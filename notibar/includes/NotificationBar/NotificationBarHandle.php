@@ -81,7 +81,7 @@ class NotificationBarHandle
       wp_register_script('njt-nofi', NJT_NOFI_PLUGIN_URL . 'assets/frontend/js/notibar.js', array('jquery'),NJT_NOFI_VERSION, true );
       wp_enqueue_script('njt-nofi');
 
-      wp_localize_script('njt-nofi', 'wpData', array(
+      wp_localize_script('njt-nofi', 'njt_wp_data', array(
         'admin_ajax' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce("njt-nofi-notification"),
         'isPositionFix' => get_theme_mod( 'njt_nofi_position_type', $this->valueDefault['position_type'] ) == 'fixed' ? true : false,

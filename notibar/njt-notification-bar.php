@@ -3,7 +3,7 @@
  * Plugin Name: Notibar - WordPress Notification Bar
  * Plugin URI: https://ninjateam.org/notibar-wordpress-notification-bar
  * Description: Custom notification bar for alert, promo code, marketing campaign, top banner
- * Version: 2.1.5
+ * Version: 2.1.6
  * Author: Ninja Team
  * Author URI: https://ninjateam.org
  * Text Domain: notibar
@@ -17,7 +17,7 @@ namespace NjtNotificationBar;
 defined('ABSPATH') || exit;
 
 define('NJT_NOFI_PREFIX', 'njt_nofi');
-define('NJT_NOFI_VERSION', '2.1.5');
+define('NJT_NOFI_VERSION', '2.1.6');
 define('NJT_NOFI_DOMAIN', 'notibar');
 
 define('NJT_NOFI_PLUGIN_URL', plugin_dir_url(__FILE__));

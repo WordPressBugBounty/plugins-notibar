@@ -4,8 +4,8 @@ Donate link: https://codecanyon.net/item/media-folders-manager-for-wordpress/217
 Tags: notification bar, sticky banner, top bar, announcement, notifications
 Requires at least: 4.0
 Requires PHP: 5.3.1
-Tested up to: 6.7.1
-Stable tag: 2.1.5
+Tested up to: 6.7.2
+Stable tag: 2.1.6
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -103,6 +103,9 @@ Upon activation, you will see a new **Notification Bar** menu. Simply click to c
 
 
 == Changelog ==
+
+= Feb 26, 2025 - Version 2.1.6 =
+- Fixed: Security - Authenticated (Administrator+) Stored Cross-Site Scripting (WordFence reported)
 
 = Dec 10, 2024 - Version 2.1.5 =
 - Fixed: Security (WordFence reported)

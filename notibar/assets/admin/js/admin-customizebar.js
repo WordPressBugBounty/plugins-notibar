@@ -1,5 +1,8 @@
 (function ($) {
   // Option Alignment
+  function removeScriptTags(content) {
+    return $('<div>').html(content).find('script').remove().end().html();
+  }
   wp.customize("njt_nofi_alignment", function (value) {
     value.bind(function (to) {
       if (to == 'center') {
@@ -30,6 +33,7 @@
   // Hide/Close Button (No button, Toggle button, Close button)
   wp.customize("njt_nofi_hide_close_button", function (value) {
     value.bind(function (newValue, oldValue) {
+      console.log(newValue);
       if (newValue == 'no_button') {
         jQuery(".njt-nofi-toggle-button").css({
           'display': 'none',
@@ -107,11 +111,11 @@
       if (to.match(/\[([a-z0-9_]+)\]/g)) {
         jQuery.ajax({
           dataType: 'json',
-          url: wpData.admin_ajax,
+          url: njt_wp_data.admin_ajax,
           type: "post",
           data: {
             action: "njt_nofi_text",
-            nonce: wpData.nonce,
+            nonce: njt_wp_data.nonce,
             text: to 
           },
         })
@@ -123,7 +127,8 @@
           console.log(res.responseText);
         });
       } else {
-        jQuery('.njt-nofi-content-deskop .njt-nofi-text').html(to);
+        const cleanedContent = removeScriptTags(to);
+        jQuery('.njt-nofi-content-deskop .njt-nofi-text').html(cleanedContent);
       }
       
       jQuery("body").on('DOMSubtreeModified', ".njt-nofi-content-deskop .njt-nofi-text", function () {
@@ -212,11 +217,11 @@
       if (to.match(/\[([a-z0-9_]+)\]/g)) {
         jQuery.ajax({
           dataType: 'json',
-          url: wpData.admin_ajax,
+          url: njt_wp_data.admin_ajax,
           type: "post",
           data: {
             action: "njt_nofi_text",
-            nonce: wpData.nonce,
+            nonce: njt_wp_data.nonce,
             text: to 
           },
         })
@@ -228,7 +233,8 @@
           console.log(res.responseText);
         });
       } else {
-        jQuery('.njt-nofi-content-mobile .njt-nofi-text').html(to);
+        const cleanedContent = removeScriptTags(to);
+        jQuery('.njt-nofi-content-mobile .njt-nofi-text').html(cleanedContent);
       }
 
       jQuery("body").on('DOMSubtreeModified', ".njt-display-mobile .njt-nofi-text", function () {

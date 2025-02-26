@@ -29,11 +29,11 @@ const homeNotificationBar = {
   },
   hideBarWithCookie() {
     const valueCookie = homeNotificationBar.getCookie('njt-close-notibar')
-    const hideCloseButton = wpData.hideCloseButton
-    if (valueCookie == 'true' && !wpData.is_customize_preview && hideCloseButton == 'close_button') {
+    const hideCloseButton = njt_wp_data.hideCloseButton
+    if (valueCookie == 'true' && !njt_wp_data.is_customize_preview && hideCloseButton == 'close_button') {
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       jQuery('body').css({ 'padding-top': -barHeight })
-      if(wpData.wp_get_theme !== 'Divi' ||  wpData.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
+      if(njt_wp_data.wp_get_theme !== 'Divi' ||  njt_wp_data.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
         jQuery('body').css({
           'position': 'relative',
         })
@@ -42,7 +42,7 @@ const homeNotificationBar = {
     }
 
     const toggleCookie = homeNotificationBar.getCookie('njt-toggle-close-notibar')
-    if (toggleCookie == 'true' && !wpData.is_customize_preview && hideCloseButton == 'toggle_button') {
+    if (toggleCookie == 'true' && !njt_wp_data.is_customize_preview && hideCloseButton == 'toggle_button') {
       setTimeout(function(){
         jQuery('.njt-nofi-toggle-button').click()
       }, 500);
@@ -72,7 +72,7 @@ const homeNotificationBar = {
       homeNotificationBar.setCookie('njt-close-notibar', 'true', 1)
 
       //Custom js for theme
-      if(wpData.wp_get_theme == 'Essentials') {
+      if(njt_wp_data.wp_get_theme == 'Essentials') {
         if (jQuery('.admin-bar').length > 0) {
           jQuery('body.admin-bar #masthead.pix-header').css({
             'top': '32px'
@@ -84,7 +84,7 @@ const homeNotificationBar = {
         }
       }
       
-      if(wpData.wp_get_theme == 'Nayma'){
+      if(njt_wp_data.wp_get_theme == 'Nayma'){
         jQuery('.njt-nofi-notification-bar').addClass('njt-nofi-toggle-close');
 
         if (jQuery('.admin-bar').length > 0) {
@@ -98,7 +98,7 @@ const homeNotificationBar = {
         }
       }
 
-      if(wpData.wp_get_theme == 'Konte'){
+      if(njt_wp_data.wp_get_theme == 'Konte'){
         if (jQuery('.admin-bar').length > 0) {
           jQuery('body.admin-bar #masthead.header-sticky--normal').css({
             'top': 0
@@ -113,7 +113,7 @@ const homeNotificationBar = {
         }
       }
 
-      if(wpData.wp_get_theme == 'Divi' ||  wpData.wp_get_theme == 'Divi Child Theme for CDW Studios'){
+      if(njt_wp_data.wp_get_theme == 'Divi' ||  njt_wp_data.wp_get_theme == 'Divi Child Theme for CDW Studios'){
         if (jQuery('.admin-bar').length > 0) {
           jQuery('body #main-header').css({
             'top': '32px'
@@ -129,7 +129,7 @@ const homeNotificationBar = {
         })
       }
 
-      if(wpData.wp_get_theme == 'AccessPress Parallax Pro Child'){
+      if(njt_wp_data.wp_get_theme == 'AccessPress Parallax Pro Child'){
         if (jQuery('.admin-bar').length > 0) {
           jQuery('header#masthead').css({
             'top': '32px'
@@ -144,13 +144,13 @@ const homeNotificationBar = {
         }
       }
 
-      if(wpData.wp_get_theme == 'Uptime Child'){
+      if(njt_wp_data.wp_get_theme == 'Uptime Child'){
         jQuery('.navbar').css({
           'top': 0
         })
       }
 
-      if(wpData.wp_get_theme == 'Salient'){
+      if(njt_wp_data.wp_get_theme == 'Salient'){
           jQuery('header#top').css({
             'top': 0
           })
@@ -175,7 +175,7 @@ const homeNotificationBar = {
         })
 
         //Essentials Theme
-        if(wpData.wp_get_theme == 'Essentials') {
+        if(njt_wp_data.wp_get_theme == 'Essentials') {
           if (jQuery('.admin-bar').length > 0) {
             // jQuery('body.admin-bar #masthead.pix-header').css({
             //   'top': '32px'
@@ -187,7 +187,7 @@ const homeNotificationBar = {
           }
         }
 
-        if(wpData.wp_get_theme == 'Nayma'){
+        if(njt_wp_data.wp_get_theme == 'Nayma'){
           jQuery('.njt-nofi-notification-bar').addClass('njt-nofi-toggle-close');
 
           if (jQuery('.admin-bar').length > 0) {
@@ -231,7 +231,7 @@ const homeNotificationBar = {
         jQuery('.njt-nofi-container').animate({ top: wpAdminBarHeight }, 1000)
 
         //Essentials Theme
-        if(wpData.wp_get_theme == 'Essentials') {
+        if(njt_wp_data.wp_get_theme == 'Essentials') {
           if (jQuery('.admin-bar').length > 0) {
             // jQuery('body.admin-bar #masthead.pix-header').css({
             //   'top': barHeight + 32
@@ -243,7 +243,7 @@ const homeNotificationBar = {
           }
         }
 
-        if(wpData.wp_get_theme == 'Nayma'){
+        if(njt_wp_data.wp_get_theme == 'Nayma'){
           jQuery('.njt-nofi-notification-bar').removeClass('njt-nofi-toggle-close');
           if (jQuery('.admin-bar').length > 0) {
             jQuery('body.admin-bar #masthead .fixed-header').css({
@@ -267,7 +267,8 @@ const homeNotificationBar = {
     })
   },
   customStyleBar() {
-    const newValue = wpData.hideCloseButton
+    const newValue = njt_wp_data.hideCloseButton
+    console.log();
     if (newValue == 'no_button') {
       jQuery(".njt-nofi-toggle-button").css({
         'display': 'none',
@@ -295,14 +296,14 @@ const homeNotificationBar = {
       })
     }
 
-    if (wpData.wp_get_theme == 'Twenty Twenty-Two') {
+    if (njt_wp_data.wp_get_theme == 'Twenty Twenty-Two') {
       jQuery(".njt-nofi-notification-bar .njt-nofi-hide .njt-nofi-close-icon").css({
         'width': '15px',
         'height': '15px'
       })
     }
 
-    const textButtonColor = wpData.textButtonColor
+    const textButtonColor = njt_wp_data.textButtonColor
 
     if(textButtonColor) {
       jQuery(".njt-nofi-notification-bar .njt-nofi-button-text").css({
@@ -310,7 +311,7 @@ const homeNotificationBar = {
       })
     }
 
-    const alignContent = wpData.alignContent
+    const alignContent = njt_wp_data.alignContent
     const width = jQuery(window).width();
     if (alignContent == 'center') {
       jQuery(".njt-nofi-container .njt-nofi-align-content").css({
@@ -346,7 +347,7 @@ const homeNotificationBar = {
       })
     }
 
-    const textColorNotification = wpData.textColorNotification
+    const textColorNotification = njt_wp_data.textColorNotification
     jQuery(".njt-nofi-container .njt-nofi-text-color").css({
       'color': textColorNotification
     })
@@ -364,7 +365,7 @@ const homeNotificationBar = {
     });
   },
   setPositionBar() {
-    const isPositionFix = wpData.isPositionFix
+    const isPositionFix = njt_wp_data.isPositionFix
     const wpAdminBarHeight = jQuery('#wpadminbar').length > 0  ? jQuery('#wpadminbar').outerHeight() : 0
     let barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
     if (isPositionFix) {
@@ -373,19 +374,19 @@ const homeNotificationBar = {
         'top': wpAdminBarHeight || '0px'
       })
       
-      if(wpData.wp_get_theme !== 'Divi' ||  wpData.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
+      if(njt_wp_data.wp_get_theme !== 'Divi' ||  njt_wp_data.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
         jQuery('body').css({
           'padding-top': barHeight,
           'position': 'relative'
         })
       }
-      if(wpData.wp_get_theme == 'Divi Child'){
+      if(njt_wp_data.wp_get_theme == 'Divi Child'){
         jQuery('body').css({
           'padding-top': barHeight,
           'position': 'relative'
         })
       }
-      if(wpData.wp_get_theme == 'Hathor Child'){
+      if(njt_wp_data.wp_get_theme == 'Hathor Child'){
         let barHeight = jQuery('.njt-nofi-notification-bar .njt-nofi-content').outerHeight();
         jQuery('body').css({
           'padding-top': barHeight,
@@ -401,7 +402,7 @@ const homeNotificationBar = {
         'padding-top': barHeight,
         'position': 'relative'
       })
-      if(wpData.wp_get_theme == 'Salient'){
+      if(njt_wp_data.wp_get_theme == 'Salient'){
         jQuery('body').css({
           'padding-top': '291px',
           'position': 'relative'
@@ -443,7 +444,7 @@ const homeNotificationBar = {
     });
   },
   supportEnfoldTheme() {
-    if(wpData.wp_get_theme === 'Enfold' && jQuery(".njt-nofi-container").css('position') === 'absolute'){
+    if(njt_wp_data.wp_get_theme === 'Enfold' && jQuery(".njt-nofi-container").css('position') === 'absolute'){
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       setTimeout(() => {
         if(!jQuery("header").hasClass("av_header_transparency")) {
@@ -479,7 +480,7 @@ const homeNotificationBar = {
     }
   },
   supportNaymaTheme() {
-    if(wpData.wp_get_theme == 'Nayma' && jQuery(".njt-nofi-container").css('position') == 'fixed'){
+    if(njt_wp_data.wp_get_theme == 'Nayma' && jQuery(".njt-nofi-container").css('position') == 'fixed'){
       jQuery(window).bind('mousewheel', function(event) {
         let barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
         if(jQuery('.njt-nofi-notification-bar').hasClass('njt-nofi-toggle-close')){
@@ -501,7 +502,7 @@ const homeNotificationBar = {
     }
   },
   supportKonteTheme() {
-    if(wpData.wp_get_theme == 'Konte' && jQuery(".njt-nofi-container").css('position') == 'fixed'){
+    if(njt_wp_data.wp_get_theme == 'Konte' && jQuery(".njt-nofi-container").css('position') == 'fixed'){
       jQuery(window).bind('mousewheel', function(event) {
         let barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
         var valueCookie = homeNotificationBar.getCookie('njt-close-notibar')
@@ -554,7 +555,7 @@ const homeNotificationBar = {
     }
   },
   supportDiviTheme() {
-    if(wpData.wp_get_theme == 'Divi' ||  wpData.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
+    if(njt_wp_data.wp_get_theme == 'Divi' ||  njt_wp_data.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       setTimeout(function(){
         if(jQuery('.admin-bar').length > 0) {
@@ -639,8 +640,8 @@ const homeNotificationBar = {
     }
   },
   supportAccessPressParallaxTheme() {
-    if(wpData.wp_get_theme == 'AccessPress Parallax Pro Child'){
-      console.log(wpData.wp_get_theme);
+    if(njt_wp_data.wp_get_theme == 'AccessPress Parallax Pro Child'){
+      console.log(njt_wp_data.wp_get_theme);
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       setTimeout(function(){
         if(jQuery('.admin-bar').length > 0) {
@@ -671,7 +672,7 @@ const homeNotificationBar = {
     }
   },
   supportUncodeTheme() {
-    if(wpData.wp_get_theme == 'Uncode'){
+    if(njt_wp_data.wp_get_theme == 'Uncode'){
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       setTimeout(function(){
         jQuery('body').css({
@@ -697,7 +698,7 @@ const homeNotificationBar = {
     }
   },
   supportUptimeChildTheme() {
-    if(wpData.wp_get_theme == 'Uptime Child' && jQuery(".njt-nofi-container").css('position') == 'fixed'){
+    if(njt_wp_data.wp_get_theme == 'Uptime Child' && jQuery(".njt-nofi-container").css('position') == 'fixed'){
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       jQuery(window).bind('mousewheel', function(event) {
         if(homeNotificationBar.getCookie('njt-close-notibar') != 'true') {
@@ -718,7 +719,7 @@ const homeNotificationBar = {
     }
   },
   supportThemifyUltraTheme() {
-    if (wpData.wp_get_theme === 'Themify Ultra') {
+    if (njt_wp_data.wp_get_theme === 'Themify Ultra') {
         const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
         const isBarVisible = jQuery('.njt-nofi-notification-bar').is(':visible');
         const hasAdminBar = jQuery('#wpadminbar').length > 0;
@@ -738,7 +739,7 @@ const homeNotificationBar = {
     }
 },
   supportSalient() {
-    if(wpData.wp_get_theme == 'Salient'){
+    if(njt_wp_data.wp_get_theme == 'Salient'){
      
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       if(jQuery('.njt-nofi-notification-bar').is(':visible')) {
@@ -751,7 +752,7 @@ const homeNotificationBar = {
     }
   },
   supportRadiateChild() {
-    if(wpData.wp_get_theme == 'Radiate Child'){
+    if(njt_wp_data.wp_get_theme == 'Radiate Child'){
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
       const isBarVisible = jQuery('.njt-nofi-notification-bar').is(':visible');
       const hasAdminBar = jQuery('#wpadminbar').length > 0;
@@ -801,17 +802,17 @@ jQuery(document).ready(() => {
     homeNotificationBar.supportSalient()
     , 1500)
   
-  if (wpData.is_customize_preview) {
+  if (njt_wp_data.is_customize_preview) {
     homeNotificationBar.windownResizeforCustomize()
   }
-  if(wpData.wp_get_theme == 'Essentials') {
+  if(njt_wp_data.wp_get_theme == 'Essentials') {
     const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
-    if(wpData.hideCloseButton == 'close_button') {
-      if(wpData.isPositionFix) {
+    if(njt_wp_data.hideCloseButton == 'close_button') {
+      if(njt_wp_data.isPositionFix) {
         homeNotificationBar.supportEssentialsTheme();
       }
     } else {
-      if(wpData.isPositionFix) {
+      if(njt_wp_data.isPositionFix) {
         if(jQuery('.admin-bar').length > 0) {
           // jQuery('body.admin-bar header#masthead').css({
           //   'top': barHeight + 32
@@ -823,7 +824,7 @@ jQuery(document).ready(() => {
         }
       }
     }
-    if(!wpData.isPositionFix) {
+    if(!njt_wp_data.isPositionFix) {
       jQuery(window).bind('mousewheel', function(event) {
         if (event.originalEvent.wheelDelta < 0) {
           jQuery('body.admin-bar #masthead.pix-header.is-scroll').css({
