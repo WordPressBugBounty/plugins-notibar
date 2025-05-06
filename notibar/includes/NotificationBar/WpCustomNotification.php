@@ -18,6 +18,7 @@ use NjtNotificationBar\NotificationBar\WpPosts;
 class WpCustomNotification
 {
   protected static $instance = null;
+  public $valueDefault = null;
 
   public static function getInstance()
   {
