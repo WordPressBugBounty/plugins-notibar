@@ -38,7 +38,6 @@ const homeNotificationBar = {
           'position': 'relative',
         })
       }
-      jQuery('.njt-nofi-container').remove();
     }
 
     const toggleCookie = homeNotificationBar.getCookie('njt-toggle-close-notibar')
@@ -60,16 +59,16 @@ const homeNotificationBar = {
       })
       if (jQuery(".njt-nofi-container").css('position') == 'fixed') {
         jQuery('.njt-nofi-container').animate({ top: a + "px" }, 1000, function() {
-          jQuery('.njt-nofi-container .njt-nofi-notification-bar').hide();
+          jQuery('.njt-nofi-container-content').remove();
         })
       }
       if (jQuery(".njt-nofi-container").css('position') == 'absolute') {
         jQuery('.njt-nofi-container').animate({ top: -barHeight + "px" }, 1000, function() {
-          jQuery('.njt-nofi-container .njt-nofi-notification-bar').hide();
+          jQuery('.njt-nofi-container-content').remove();
         })
       }
       //set cookie
-      homeNotificationBar.setCookie('njt-close-notibar', 'true', 1)
+      homeNotificationBar.setCookie('njt-close-notibar', 'true', njt_wp_data.open_after_day.value)
 
       //Custom js for theme
       if(njt_wp_data.wp_get_theme == 'Essentials') {
@@ -214,7 +213,7 @@ const homeNotificationBar = {
       })
 
       //Set Cookie toggle close
-      homeNotificationBar.setCookie('njt-toggle-close-notibar', 'true', 1)
+      homeNotificationBar.setCookie('njt-toggle-close-notibar', 'true', njt_wp_data.open_after_day.value)
     })
 
     //Option Toggle Opent

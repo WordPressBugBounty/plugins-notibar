@@ -1007,6 +1007,18 @@ jQuery( document ).ready(function()  {
         'background-color': jQuery(this).val()
       })
     });
+
+    jQuery("#_customize-input-njt_nofi_hide_close_button_control").on('change',function(e){
+      if(jQuery(this).val() == 'close_button' || jQuery(this).val() == 'toggle_button'){
+        jQuery("#customize-control-njt_nofi_open_after_day_control").css({
+          'display': 'block',
+        })
+      } else {
+        jQuery("#customize-control-njt_nofi_open_after_day_control").css({
+          'display': 'none',
+        })
+      }
+    })
   }
 
   var select2MultiplelogicDisplayPost = function(){

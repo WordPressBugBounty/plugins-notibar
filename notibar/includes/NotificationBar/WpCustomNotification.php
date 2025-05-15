@@ -57,7 +57,8 @@ class WpCustomNotification
       'dp_pp_id'          => '',
       'font_weight_display' => '400',
       'logic_display_page' => 'dis_all_page',
-      'logic_display_post' => 'dis_all_post'
+      'logic_display_post' => 'dis_all_post',
+      'open_after_day'    => 1
     )) ;
 
     //Set default value for each option text ues wpml translate
@@ -69,9 +70,7 @@ class WpCustomNotification
     update_option('njt_nofi_lb_url_mobile_wpml_translate', get_theme_mod( 'njt_nofi_lb_url_mobile', $this->valueDefault['lb_url_mobile']));
 
     add_action('customize_register', array( $this, 'njt_nofi_customizeNotification'), 10);
-    if( is_admin() ){
-      add_action('admin_enqueue_scripts', array($this, 'addScriptsCustomizer'));
-    }
+    add_action('customize_controls_enqueue_scripts', array($this, 'addScriptsCustomizer'));
     add_action('wp_enqueue_scripts', array( $this, 'njt_nofi_enqueueCustomizeControls'));
     add_action('customize_save_after', array( $this, 'njt_nofi_customize_save_after'));
 
@@ -117,7 +116,6 @@ class WpCustomNotification
 
   }
   public function addScriptsCustomizer(){
-    if(is_customize_preview()){
       wp_register_script('njt-nofi-cus-control-select2', NJT_NOFI_PLUGIN_URL . 'assets/admin/js/select2.min.js', array('jquery'), NJT_NOFI_VERSION, true);
       wp_enqueue_script('njt-nofi-cus-control-select2');
       wp_register_style('njt-nofi-cus-control-select2', NJT_NOFI_PLUGIN_URL . 'assets/admin/css/select2.min.css', array(), NJT_NOFI_VERSION);
@@ -134,7 +132,6 @@ class WpCustomNotification
         'list_posts_selected' => WpPosts::get_list_pages_posts_selected(get_theme_mod('njt_nofi_list_display_post')),
         'list_pages_selected' => WpPosts::get_list_pages_posts_selected(get_theme_mod('njt_nofi_list_display_page')),
       ));
-    }
   }
 
   public function njt_nofi_customize_save_after()
@@ -143,8 +140,36 @@ class WpCustomNotification
     update_option('njt_nofi_text_mobile_wpml_translate', get_theme_mod('njt_nofi_text_mobile', $this->valueDefault['text_mobile']));
     update_option('njt_nofi_lb_text_wpml_translate', get_theme_mod('njt_nofi_lb_text', $this->valueDefault['lb_text']));
     update_option('njt_nofi_lb_text_mobile_wpml_translate', get_theme_mod('njt_nofi_lb_text_mobile', $this->valueDefault['lb_text_mobile']));
-	update_option('njt_nofi_lb_url_wpml_translate', get_theme_mod( 'njt_nofi_lb_url', $this->valueDefault['lb_url']));
-	update_option('njt_nofi_lb_url_mobile_wpml_translate', get_theme_mod( 'njt_nofi_lb_url_mobile', $this->valueDefault['lb_url_mobile']));
+    update_option('njt_nofi_lb_url_wpml_translate', get_theme_mod( 'njt_nofi_lb_url', $this->valueDefault['lb_url']));
+    update_option('njt_nofi_lb_url_mobile_wpml_translate', get_theme_mod( 'njt_nofi_lb_url_mobile', $this->valueDefault['lb_url_mobile']));
+
+    $open_after_day = get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']);
+    $option_open_after_day = +get_option('njt_nofi_open_after_day');
+
+    if($open_after_day != $option_open_after_day) {
+      update_option('njt_nofi_open_after_day', $open_after_day);
+
+      $cookie_close_notibar=  $_COOKIE['njt-close-notibar'] ?? null;
+      $cookie_toggle_close_notibar=  $_COOKIE['njt-toggle-close-notibar'] ?? null;
+
+      if($cookie_close_notibar == 'true' || $open_after_day == 0) {
+        setcookie(
+          'njt-close-notibar',
+          'true',                  
+          time() + ($open_after_day * DAY_IN_SECONDS),
+          '/'                      
+        );
+      }
+
+      if($cookie_toggle_close_notibar == 'true' || $open_after_day == 0) {
+        setcookie(
+          'njt-toggle-close-notibar',
+          'true',                  
+          time() + ($open_after_day * DAY_IN_SECONDS),
+          '/'                      
+        );
+      }
+    }
 }
   
   public function njt_nofi_sanitizeSelect( $input, $setting ){
@@ -231,6 +256,24 @@ class WpCustomNotification
         'toggle_button' => esc_html__( 'Toggle button', NJT_NOFI_DOMAIN ),
         'close_button'  => esc_html__( 'Close button', NJT_NOFI_DOMAIN ),
       ),
+    ));
+
+    // Open notibar after day
+    $customNoti->add_setting('njt_nofi_open_after_day', array(
+      'default'           => 1,
+      'sanitize_callback' => 'absint',
+      'transport'         => 'postMessage'
+    ));
+
+    $customNoti->add_control( 'njt_nofi_open_after_day_control', array(
+      'label'    => __( 'Show Notibar again after close (days)', NJT_NOFI_DOMAIN ),
+      'section'  => 'njt_nofi_general',
+      'settings' => 'njt_nofi_open_after_day',
+      'type'     => 'number',
+      'input_attrs' => array(
+        'min' => 0,
+        'step' => 1
+      )
     ));
 
     // Content Width (px)
@@ -688,6 +731,8 @@ class WpCustomNotification
         'type'        => 'multiple-select',
       )
     ));
+
+
 
   }
 }

@@ -5,7 +5,7 @@ Tags: notification bar, sticky banner, top bar, announcement, notifications
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 6.8
-Stable tag: 2.1.7
+Stable tag: 2.1.8
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -103,6 +103,9 @@ Upon activation, you will see a new **Notification Bar** menu. Simply click to c
 
 
 == Changelog ==
+
+= May 15, 2025 - Version 2.1.8 =
+- Fixed: CSS refactor for notification bar
 
 = May 6, 2025 - Version 2.1.7 =
 - Fixed: Resolve the bug that is deprecated in PHP 8

@@ -6,6 +6,7 @@ defined('ABSPATH') || exit;
 use NjtNotificationBar\NotificationBar\WpCustomNotification;
 use NjtNotificationBar\NotificationBar\WpMobileDetect;
 use NjtNotificationBar\NotificationBar\WpPosts;
+use NjtNotificationBar\NotiHelper;
 
 class NotificationBarHandle
 {
@@ -74,7 +75,7 @@ class NotificationBarHandle
     $isEnableNotification = get_theme_mod('njt_nofi_enable_bar', 1) == 1 ? true : false;
     $isdevicesDisplay = $this->njt_nofi_devicesDisplay();
 
-    if($this->njt_nofi_checkDisplayNotification() && $isdevicesDisplay) {
+    if($this->njt_nofi_checkDisplayNotification() && $isdevicesDisplay && !NotiHelper::is_hide_notibar_with_cookie()) {
       wp_register_style('njt-nofi', NJT_NOFI_PLUGIN_URL . 'assets/frontend/css/notibar.css', array(), NJT_NOFI_VERSION);
       wp_enqueue_style('njt-nofi');
 
@@ -94,6 +95,10 @@ class NotificationBarHandle
         'wp_is_mobile' => wp_is_mobile(),
         'is_customize_preview' => is_customize_preview(),
         'wp_get_theme' => wp_get_theme()->get( 'Name' ),
+        'open_after_day' => [
+          'value' => get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']),
+          'is_new_update' => get_option('njt_nofi_open_after_day') != get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']) ? true : false,
+        ],
       ));
     }
 
@@ -218,14 +223,19 @@ class NotificationBarHandle
     $listDisplayPage = explode(',',get_theme_mod('njt_nofi_list_display_page'));
     $logicDisplayPost = get_theme_mod('njt_nofi_logic_display_post', $this->valueDefault['logic_display_post']);
     $listDisplayPost = explode(',',get_theme_mod('njt_nofi_list_display_post'));
-    $currentPageOrPostID = $wp_query->get_queried_object_id();
+
+    if(function_exists( 'is_shop' ) && is_shop()) {
+      $currentPageOrPostID = wc_get_page_id( 'shop' );
+    } else {
+      $currentPageOrPostID = $wp_query->get_queried_object_id();
+    }
 
     if ($logicDisplayPage == 'dis_selected_page' ) {
-      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPost) && is_front_page()) return true;
+      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return true;
     }
 
     if ($logicDisplayPage == 'hide_selected_page' ) {
-      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPost) && is_front_page()) return false;
+      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return false;
     }
 
     if ( $this->njt_nofi_is_page()) {
@@ -285,12 +295,15 @@ class NotificationBarHandle
 
     if($isDisplayNotification && $isEnableNotification && $isdevicesDisplay && !is_customize_preview()) {
       add_action( 'wp_footer', array( $this, 'display_notification' ),10);
+      add_action( 'wp_footer', array( $this, 'njt_nofi_rederInput' ),10);
      }
-    add_action( 'wp_footer', array( $this, 'njt_nofi_rederInput' ),10);
   }
 
   public function display_notification()
   {
+    if (NotiHelper::is_hide_notibar_with_cookie()) {
+      return;
+    }
     
     if(wp_get_theme()->get( 'Name' ) == 'Nayma') {
       $widthStyle = 'auto';
@@ -343,6 +356,7 @@ class NotificationBarHandle
   }
 
   public function njt_nofi_rederInput() {
+    
     global $wp_query;
     $dataDisplay = array(
       'is_home' => is_home(),
