@@ -8,6 +8,27 @@
   display: flex;
   align-items: center;
   padding: 0 10px;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.njt-nofi-container-content {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.njt-nofi-container-content.njt-nofi-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.njt-nofi-container-content.njt-nofi-visible .njt-nofi-notification-bar {
+  transform: translateY(0);
+}
+
+body.njt-nofi-reserve-space {
+  padding-top: 60px;
 }
 
 .njt-nofi-notification-bar .njt-nofi-content {
@@ -77,6 +98,34 @@
   -ms-transform: scale(1.1); /* IE 9 */
   -webkit-transform: scale(1.1); /* Safari 3-8 */
   transform: scale(1.1);
+}
+
+/* Focus styles for keyboard navigation - WCAG Level A compliance */
+.njt-nofi-close-button:focus,
+.njt-nofi-toggle-button:focus,
+.njt-nofi-display-toggle:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
+}
+
+.njt-nofi-close-button:focus .njt-nofi-close-icon-container,
+.njt-nofi-toggle-button:focus .njt-nofi-close-icon-container,
+.njt-nofi-display-toggle:focus .njt-nofi-close-icon-container {
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+/* Ensure focusable elements are keyboard accessible */
+.njt-nofi-close-button[tabindex="0"],
+.njt-nofi-toggle-button[tabindex="0"],
+.njt-nofi-display-toggle[tabindex="0"] {
+  outline: none;
+}
+
+.njt-nofi-close-button[tabindex="0"]:focus,
+.njt-nofi-toggle-button[tabindex="0"]:focus,
+.njt-nofi-display-toggle[tabindex="0"]:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
 }
 .njt-nofi-display-toggle {
   position: absolute;

@@ -37,35 +37,35 @@
       if (newValue == 'no_button') {
         jQuery(".njt-nofi-toggle-button").css({
           'display': 'none',
-        })
+        }).attr('tabindex', '-1');
         jQuery(".njt-nofi-close-button").css({
           'display': 'none',
-        })
+        }).attr('tabindex', '-1');
       }
 
       if (newValue == 'toggle_button') {
         jQuery(".njt-nofi-toggle-button").css({
           'display': 'block',
-        })
+        }).attr('tabindex', '0');
         jQuery(".njt-nofi-close-button").css({
           'display': 'none',
-        })
+        }).attr('tabindex', '-1');
       }
 
       if (newValue == 'close_button') {
         jQuery(".njt-nofi-close-button").css({
           'display': 'block',
-        })
+        }).attr('tabindex', '0');
         jQuery(".njt-nofi-toggle-button").css({
           'display': 'none',
-        })
+        }).attr('tabindex', '-1');
       }
 
       jQuery('body').animate({ top: 0 }, 1000)
       jQuery('.njt-nofi-display-toggle').css({
         'display': 'none',
         'top': 0,
-      })
+      }).attr('tabindex', '-1');
       if (jQuery(".njt-nofi-container").css('position') == 'fixed') {
         const wpAdminBarHeight = jQuery('#wpadminbar').length > 0  ? jQuery('#wpadminbar').outerHeight() : 0;
         jQuery('.njt-nofi-container').animate({ top: wpAdminBarHeight }, 1000)

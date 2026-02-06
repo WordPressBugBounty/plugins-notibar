@@ -99,6 +99,13 @@ class NotificationBarHandle
           'value' => get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']),
           'is_new_update' => get_option('njt_nofi_open_after_day') != get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']) ? true : false,
         ],
+        // CLS Optimization data
+        'cls_optimization' => array(
+          'enabled' => true,
+          'delay_ms' => 100,
+          'reserve_space' => true,
+          'smooth_transition' => true
+        ),
       ));
     }
 
@@ -231,40 +238,44 @@ class NotificationBarHandle
     }
 
     if ($logicDisplayPage == 'dis_selected_page' ) {
-      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return true;
+      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return $this->applyNotificationFilter(true, $currentPageOrPostID);
     }
 
     if ($logicDisplayPage == 'hide_selected_page' ) {
-      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return false;
+      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return $this->applyNotificationFilter(false, $currentPageOrPostID);
     }
 
     if ( $this->njt_nofi_is_page()) {
-      if( $logicDisplayPage == 'dis_all_page' ) return true;
-      if( $logicDisplayPage == 'hide_all_page' ) return false;
+      if( $logicDisplayPage == 'dis_all_page' ) return $this->applyNotificationFilter(true, $currentPageOrPostID);
+      if( $logicDisplayPage == 'hide_all_page' ) return $this->applyNotificationFilter(false, $currentPageOrPostID) ;
       if ($logicDisplayPage == 'dis_selected_page' ) {
-        if(!empty($listDisplayPage) && in_array($currentPageOrPostID, $listDisplayPage)) return true;
-        return false;
+        if(!empty($listDisplayPage) && in_array($currentPageOrPostID, $listDisplayPage)) return $this->applyNotificationFilter(true, $currentPageOrPostID);
+        return $this->applyNotificationFilter(false, $currentPageOrPostID);
       }
       if ($logicDisplayPage == 'hide_selected_page' ) {
-        if( !empty($listDisplayPage) && in_array($currentPageOrPostID, $listDisplayPage)) return false;
-        return true;
+        if( !empty($listDisplayPage) && in_array($currentPageOrPostID, $listDisplayPage)) return $this->applyNotificationFilter(false, $currentPageOrPostID);
+        return $this->applyNotificationFilter(true, $currentPageOrPostID);
       }
     }
 
     if (is_single()) {
-      if( $logicDisplayPost == 'dis_all_post' ) return true;
-      if( $logicDisplayPost == 'hide_all_post' ) return false;
+      if( $logicDisplayPost == 'dis_all_post' ) return $this->applyNotificationFilter(true, $currentPageOrPostID);
+      if( $logicDisplayPost == 'hide_all_post' ) return $this->applyNotificationFilter(false, $currentPageOrPostID);
       if ($logicDisplayPost == 'dis_selected_post' ) {
-        if(!empty($listDisplayPost) && in_array($currentPageOrPostID, $listDisplayPost)) return true;
-        return false;
+        if(!empty($listDisplayPost) && in_array($currentPageOrPostID, $listDisplayPost)) return $this->applyNotificationFilter(true, $currentPageOrPostID);
+        return $this->applyNotificationFilter(false, $currentPageOrPostID);
       }
       if ($logicDisplayPost == 'hide_selected_post' ) {
-        if( !empty($listDisplayPost) && in_array($currentPageOrPostID, $listDisplayPost)) return false;
-        return true;
+        if( !empty($listDisplayPost) && in_array($currentPageOrPostID, $listDisplayPost)) return $this->applyNotificationFilter(false, $currentPageOrPostID);
+        return $this->applyNotificationFilter(true, $currentPageOrPostID);
       }
     }
 
-    return false;
+    return $this->applyNotificationFilter(false, $currentPageOrPostID);
+  }
+
+  private function applyNotificationFilter($should_display, $current_page_id) {
+    return apply_filters('njt_nofi_is_display_notification', $should_display, $current_page_id);
   }
 
   public function njt_nofi_devicesDisplay() {
@@ -323,8 +334,6 @@ class NotificationBarHandle
     $lbColorNotification = get_theme_mod('njt_nofi_lb_color', $this->valueDefault['lb_color']);
     $notificationFontSize = get_theme_mod('njt_nofi_font_size', $this->valueDefault['font_size']);
 
-
-
     if(wp_get_theme()->get( 'Name' ) == 'Nayma') {
       ?>
         <style>
@@ -339,15 +348,40 @@ class NotificationBarHandle
 
     ?>
       <style>
+        /* CLS Optimization Styles */
+        .njt-nofi-container-content {
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease-in-out;
+        }
+        
+        .njt-nofi-container-content.njt-nofi-visible {
+          opacity: 1;
+          visibility: visible;
+        }
+        
+        /* Reserve space for notification bar */
+        body.njt-nofi-reserve-space {
+          padding-top: 60px;
+        }
+        
+        /* Smooth transition for notification bar */
+        .njt-nofi-notification-bar {
+          transform: translateY(-100%);
+          transition: transform 0.3s ease-in-out;
+        }
+        
+        .njt-nofi-container-content.njt-nofi-visible .njt-nofi-notification-bar {
+          transform: translateY(0);
+        }
+        
+        /* Existing styles */
         .njt-nofi-notification-bar .njt-nofi-hide-button {
           display: none;
         }
         .njt-nofi-notification-bar .njt-nofi-content {
           font-size : <?php echo esc_html($notificationFontSize.'px') ?>;
         }
-        /* body{
-          padding-top: 49px;
-        } */
       </style>
     <?php
 

@@ -17,6 +17,11 @@ class Plugin {
   }
 
   private function __construct() {
+    add_action('plugins_loaded', array($this, 'loadPluginCross'));
+  }
+
+  public function loadPluginCross() {
+    \FileBirdCross::get_instance('filebird', 'filebird+ninjateam', NJT_NOFI_PLUGIN_URL, array('filebird/filebird.php', 'filebird-pro/filebird.php'));
   }
 
   /** Plugin activated hook */

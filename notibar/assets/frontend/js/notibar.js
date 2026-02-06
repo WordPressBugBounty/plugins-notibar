@@ -27,12 +27,55 @@ const homeNotificationBar = {
     }
     return '';
   },
+  initCLSOptimization() {
+    if (njt_wp_data.isPositionFix) {
+      jQuery('body').addClass('njt-nofi-reserve-space');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.showNotificationBar();
+      });
+    } else {
+      setTimeout(() => {
+        this.showNotificationBar();
+      }, 100);
+    }
+  },
+  showNotificationBar() {
+    if (this.shouldShowNotificationBar()) {
+      jQuery('.njt-nofi-container-content').addClass('njt-nofi-visible');
+      
+      setTimeout(() => {
+        jQuery('body').removeClass('njt-nofi-reserve-space');
+      }, 300);
+    } else {
+      jQuery('body').removeClass('njt-nofi-reserve-space');
+    }
+  },
+  shouldShowNotificationBar() {
+    const valueCookie = this.getCookie('njt-close-notibar');
+    const toggleCookie = this.getCookie('njt-toggle-close-notibar');
+    
+    if (valueCookie === 'true' && !njt_wp_data.is_customize_preview && njt_wp_data.hideCloseButton === 'close_button') {
+      return false;
+    }
+    
+    if (toggleCookie === 'true' && !njt_wp_data.is_customize_preview && njt_wp_data.hideCloseButton === 'toggle_button') {
+      return false;
+    }
+    
+    return true;
+  },
   hideBarWithCookie() {
     const valueCookie = homeNotificationBar.getCookie('njt-close-notibar')
     const hideCloseButton = njt_wp_data.hideCloseButton
     if (valueCookie == 'true' && !njt_wp_data.is_customize_preview && hideCloseButton == 'close_button') {
+      jQuery('.njt-nofi-container-content').removeClass('njt-nofi-visible');
+      jQuery('body').removeClass('njt-nofi-reserve-space');
+      
       const barHeight = jQuery('.njt-nofi-notification-bar').outerHeight();
-      jQuery('body').css({ 'padding-top': -barHeight })
+      jQuery('body').css({ 'padding-top': 0 })
       if(njt_wp_data.wp_get_theme !== 'Divi' ||  njt_wp_data.wp_get_theme !== 'Divi Child Theme for CDW Studios'){
         jQuery('body').css({
           'position': 'relative',
@@ -157,6 +200,14 @@ const homeNotificationBar = {
       
     })
 
+    // Option Close - Keyboard Support (WCAG Level A)
+    jQuery(".njt-nofi-container .njt-nofi-close-button").on("keydown", function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        jQuery(this).trigger('click');
+      }
+    })
+
 
     //Option Toggle Close
     jQuery(".njt-nofi-container .njt-nofi-toggle-button").on("click", function (isCloaseBar) {
@@ -210,10 +261,18 @@ const homeNotificationBar = {
       jQuery('.njt-nofi-display-toggle').css({
         'display': 'block',
         'top': barHeight,
-      })
+      }).attr('tabindex', '0');
 
       //Set Cookie toggle close
       homeNotificationBar.setCookie('njt-toggle-close-notibar', 'true', njt_wp_data.open_after_day.value)
+    })
+
+    // Option Toggle Close - Keyboard Support (WCAG Level A)
+    jQuery(".njt-nofi-container .njt-nofi-toggle-button").on("keydown", function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        jQuery(this).trigger('click');
+      }
     })
 
     //Option Toggle Opent
@@ -223,7 +282,7 @@ const homeNotificationBar = {
       jQuery('.njt-nofi-display-toggle').css({
         'display': 'none',
         'top': 0,
-      })
+      }).attr('tabindex', '-1');
       if (jQuery(".njt-nofi-container").css('position') == 'fixed') {
         const wpAdminBarHeight = jQuery('#wpadminbar').length > 0  ? jQuery('#wpadminbar').outerHeight() : 0;
         jQuery('.njt-nofi-container .njt-nofi-notification-bar').show();
@@ -264,6 +323,14 @@ const homeNotificationBar = {
        //Set Cookie toggle close
        homeNotificationBar.setCookie('njt-toggle-close-notibar', 'false', 0)
     })
+
+    // Option Toggle Open - Keyboard Support (WCAG Level A)
+    jQuery(".njt-nofi-display-toggle").on("keydown", function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        jQuery(this).trigger('click');
+      }
+    })
   },
   customStyleBar() {
     const newValue = njt_wp_data.hideCloseButton
@@ -271,28 +338,28 @@ const homeNotificationBar = {
     if (newValue == 'no_button') {
       jQuery(".njt-nofi-toggle-button").css({
         'display': 'none',
-      })
+      }).attr('tabindex', '-1');
       jQuery(".njt-nofi-close-button").css({
         'display': 'none',
-      })
+      }).attr('tabindex', '-1');
     }
 
     if (newValue == 'toggle_button') {
       jQuery(".njt-nofi-toggle-button").css({
         'display': 'block',
-      })
+      }).attr('tabindex', '0');
       jQuery(".njt-nofi-close-button").css({
         'display': 'none',
-      })
+      }).attr('tabindex', '-1');
     }
 
     if (newValue == 'close_button') {
       jQuery(".njt-nofi-close-button").css({
         'display': 'block',
-      })
+      }).attr('tabindex', '0');
       jQuery(".njt-nofi-toggle-button").css({
         'display': 'none',
-      })
+      }).attr('tabindex', '-1');
     }
 
     if (njt_wp_data.wp_get_theme == 'Twenty Twenty-Two') {
@@ -784,6 +851,9 @@ const homeNotificationBar = {
 }
 
 jQuery(document).ready(() => {
+  // Initialize CLS optimization first
+  homeNotificationBar.initCLSOptimization();
+  
   homeNotificationBar.hideBarWithCookie();
   homeNotificationBar.setPaddingTop();
   homeNotificationBar.actionButtonClose();

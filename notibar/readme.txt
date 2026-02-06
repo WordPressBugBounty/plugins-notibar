@@ -1,11 +1,11 @@
 === Notibar - Notification Bar for WordPress===
 Contributors: ninjateam
 Donate link: https://codecanyon.net/item/media-folders-manager-for-wordpress/21715379
-Tags: notification bar, sticky banner, top bar, announcement, notifications
+Tags: notification bar, banner, top bar, announcement, notifications
 Requires at least: 4.0
 Requires PHP: 5.3.1
-Tested up to: 6.8
-Stable tag: 2.1.8
+Tested up to: 6.9
+Stable tag: 2.1.9
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -103,6 +103,9 @@ Upon activation, you will see a new **Notification Bar** menu. Simply click to c
 
 
 == Changelog ==
+
+= Jan 26, 2026 - Version 2.1.9 =
+- Improved: WCAG Level AA compliance
 
 = May 15, 2025 - Version 2.1.8 =
 - Fixed: CSS refactor for notification bar

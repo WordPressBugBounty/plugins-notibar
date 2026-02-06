@@ -54,7 +54,7 @@ if ( !class_exists('NjtCross') ) {
                     $notificationOption = get_option("njt_notification_{$this->pluginPrefix}_cross"); //Save the next time notification will appear
                     $popupOption        = get_option("njt_popup_{$this->pluginPrefix}_cross"); //Save the next time notification will appear
          
-                    if ($notificationOption === false || time() >= $notificationOption) {
+                    if ($notificationOption === false || time() >= +$notificationOption) {
                         add_action('admin_notices', array($this, 'add_notification'));
                         add_action("wp_ajax_njt_{$this->pluginPrefix}_cross_notification", array($this, 'ajax_set_notification'));
                     }
