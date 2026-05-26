@@ -26,11 +26,11 @@ class I18n {
 		} else {
 			$locale = is_admin() ? get_user_locale() : get_locale();
 		}
-		unload_textdomain( NJT_NOFI_DOMAIN );
-		load_textdomain( NJT_NOFI_DOMAIN, NJT_NOFI_PLUGIN_PATH . '/i18n/languages/notibar-' . $locale . '.mo' );
+		unload_textdomain( 'notibar' );
+		load_textdomain( 'notibar', NJT_NOFI_PLUGIN_PATH . '/i18n/languages/notibar-' . $locale . '.mo' );
 
     load_plugin_textdomain(
-      NJT_NOFI_DOMAIN,
+      'notibar',
       false,
       NJT_NOFI_PLUGIN_PATH . 'i18n/languages/'
     );

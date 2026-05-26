@@ -1,738 +1,113 @@
 <?php
+/**
+ * Customizer registration — Notibar v3 thin shell.
+ *
+ * Hosts the v3 Customizer panel/section/setting/control registration.
+ * Will be renamed to CustomizerRegistrar in v3.1.
+ *
+ * Registers:
+ *   - Section: njt_nofi_bars_section ("Notibar", top-level, priority 160)
+ *   - Setting: njt_nofi_bars   (theme_mod, postMessage, Schema::sanitizeBars)
+ *   - Setting: njt_nofi_global (theme_mod, postMessage, Schema::sanitizeGlobal)
+ *   - Control: WpCustomControlNotibarApp (SPA mount div)
+ *
+ * NOTE: v3.0 wrapped this in a Panel; v3.1 flattened to a single section
+ * to eliminate a wasted nav-hop (panel hosted only one section).
+ *
+ * Legacy v2 panel/section/settings/controls and all 12 WpCustomControl* class
+ * files have been removed in v3.0.0 (phase-09 cleanup).
+ *
+ * @package NjtNotificationBar\NotificationBar
+ * @since   3.0.0
+ */
+
 namespace NjtNotificationBar\NotificationBar;
 
-defined('ABSPATH') || exit; 
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class WpCustomNotification
+ *
+ * Singleton. Hooks into customize_register to register the v3 panel/section/settings/control.
+ */
+class WpCustomNotification {
+
+	/** @var WpCustomNotification|null */
+	protected static $instance = null;
+
+	/**
+	 * Return (or create) the singleton instance.
+	 *
+	 * @return WpCustomNotification
+	 */
+	public static function getInstance(): self {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Private constructor — wires Customizer hooks.
+	 */
+	private function __construct() {
+		add_action( 'customize_register', [ $this, 'register' ], 10 );
+	}
+
+	/**
+	 * Register the v3 Customizer panel, section, settings, and App control.
+	 *
+	 * @param \WP_Customize_Manager $wp_customize WP Customizer manager instance.
+	 * @return void
+	 */
+	public function register( \WP_Customize_Manager $wp_customize ): void {
+
+		// -----------------------------------------------------------------
+		// Section (v3.1 — flattened; the prior panel hosted only one
+		// section so the panel-level click was a wasted hop. Section pinned
+		// to the very top of the Customizer sidebar — WP core's topmost
+		// "Site Identity" section sits at priority 20, so priority 1 sorts
+		// above every built-in section.)
+		// -----------------------------------------------------------------
+		$wp_customize->add_section( 'njt_nofi_bars_section', [
+			'title'    => __( 'Notibar', 'notibar' ),
+			'priority' => 1,
+		] );
+
+		// -----------------------------------------------------------------
+		// Settings
+		// -----------------------------------------------------------------
+		// v3.2 — type=option (was theme_mod) so settings persist across theme switches.
+		// Migration::maybeMigrateThemeModToOption() copies prior theme_mod data on upgrade.
+		$wp_customize->add_setting( 'njt_nofi_bars', [
+			'type'              => 'option',
+			'default'           => wp_json_encode( [ Schema::defaultBar() ] ),
+			'sanitize_callback' => [ Schema::class, 'sanitizeBars' ],
+			'transport'         => 'postMessage',
+			'capability'        => 'edit_theme_options',
+		] );
+
+		$wp_customize->add_setting( 'njt_nofi_global', [
+			'type'              => 'option',
+			'default'           => wp_json_encode( Schema::defaultGlobal() ),
+			'sanitize_callback' => [ Schema::class, 'sanitizeGlobal' ],
+			'transport'         => 'postMessage',
+			'capability'        => 'edit_theme_options',
+		] );
+
+		// -----------------------------------------------------------------
+		// Control — SPA mount point (both settings managed from JS)
+		// -----------------------------------------------------------------
+		require_once __DIR__ . '/WpCustomControlNotibarApp.php';
+
+		$wp_customize->add_control( new WpCustomControlNotibarApp(
+			$wp_customize,
+			'njt_notibar_app',
+			[
+				'section'  => 'njt_nofi_bars_section',
+				'settings' => [ 'njt_nofi_bars', 'njt_nofi_global' ],
+			]
+		) );
+	}
 
-use NjtNotificationBar\NotificationBar\WpCustomControlColorBg;
-use NjtNotificationBar\NotificationBar\WpCustomControlColorText;
-use NjtNotificationBar\NotificationBar\WpCustomControlColorLb;
-use NjtNotificationBar\NotificationBar\WpCustomControlTextColorLb;
-use NjtNotificationBar\NotificationBar\WpCustomControlColorPreset;
-use NjtNotificationBar\NotificationBar\WpCustomControlPositionType;
-use NjtNotificationBar\NotificationBar\WpCustomControlHandleButton;
-use NjtNotificationBar\NotificationBar\WpCustomControlEnableBar;
-use NjtNotificationBar\NotificationBar\WpCustomControlMultiselect;
-use NjtNotificationBar\NotificationBar\WpCustomControlSelect2;
-use NjtNotificationBar\NotificationBar\WpPosts;
-
-class WpCustomNotification
-{
-  protected static $instance = null;
-  public $valueDefault = null;
-
-  public static function getInstance()
-  {
-    if (null == self::$instance) {
-      self::$instance = new self;
-    }
-
-    return self::$instance;
-  }
-  private function __construct()
-  {
-    $this->valueDefault = apply_filters( 'njt_nofi_notification_bar_default_values', array(
-      'align_content'     => 'center',
-      'hide_close_button' => 'close_button',
-      'content_width'     => '900',
-      'position_type'     => 'fixed',
-      'link_style'        => 'button',
-      'text'              => esc_html('This is default text for notification bar'),
-      'lb_text'           => esc_html('Learn more'),
-      'lb_url'            => '',
-      'new_windown'       => true,
-      'text_mobile'       => esc_html('This is default text for notification bar'),
-      'lb_text_mobile'    => esc_html('Learn more'),
-      'lb_url_mobile'     => '',
-      'new_windown_mobile'=> true,
-      'preset_color'      => 1,
-      'bg_color'          => '#9af4cf',
-      'text_color'        => '#1919cf',
-      'lb_color'          => '#1919cf',
-      'lb_text_color'     => '#ffffff',
-      'font_size'         => '15',
-      'dp_homepage'       => true,
-      'dp_pages'          => true,
-      'dp_posts'          => true,
-      'devices_display'   => 'all_devices',
-      'dp_pp_id'          => '',
-      'font_weight_display' => '400',
-      'logic_display_page' => 'dis_all_page',
-      'logic_display_post' => 'dis_all_post',
-      'open_after_day'    => 1
-    )) ;
-
-    //Set default value for each option text ues wpml translate
-    update_option('njt_nofi_text_wpml_translate', get_theme_mod('njt_nofi_text', $this->valueDefault['text']));
-    update_option('njt_nofi_text_mobile_wpml_translate', get_theme_mod('njt_nofi_text_mobile', $this->valueDefault['text_mobile']));
-    update_option('njt_nofi_lb_text_wpml_translate', get_theme_mod('njt_nofi_lb_text', $this->valueDefault['lb_text']));
-    update_option('njt_nofi_lb_text_mobile_wpml_translate', get_theme_mod('njt_nofi_lb_text_mobile', $this->valueDefault['lb_text_mobile']));
-    update_option('njt_nofi_lb_url_wpml_translate', get_theme_mod( 'njt_nofi_lb_url', $this->valueDefault['lb_url']));
-    update_option('njt_nofi_lb_url_mobile_wpml_translate', get_theme_mod( 'njt_nofi_lb_url_mobile', $this->valueDefault['lb_url_mobile']));
-
-    add_action('customize_register', array( $this, 'njt_nofi_customizeNotification'), 10);
-    add_action('customize_controls_enqueue_scripts', array($this, 'addScriptsCustomizer'));
-    add_action('wp_enqueue_scripts', array( $this, 'njt_nofi_enqueueCustomizeControls'));
-    add_action('customize_save_after', array( $this, 'njt_nofi_customize_save_after'));
-
-    add_action( 'wp_ajax_njt_nofi_text', array( $this, 'njt_nofi_text_shortcode' ) );
-  }
-
-  public function njt_nofi_text_shortcode() 
-  {
-    if ( isset( $_POST ) ) {
-        $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : null;
-        if ( ! wp_verify_nonce( $nonce, 'njt-nofi-notification' ) ) {
-            wp_send_json_error( array( 'status' => 'Wrong nonce validate!' ) );
-            exit();
-        }
-
-        if ( ! current_user_can( 'edit_posts' ) ) {
-            wp_send_json_error( array( 'status' => 'Insufficient permissions.' ) );
-            exit();
-        }
-
-        $njt_nofi_text = isset( $_POST['text'] ) ? sanitize_text_field( $_POST['text'] ) : null;
-
-        $output = do_shortcode( $njt_nofi_text );
-
-        wp_send_json_success( wp_kses_post( $output ) );
-        exit();
-    }
-
-    wp_send_json_error( array( 'message' => 'Update fail!' ) );
-    exit();
-  }
-
-
-   /**
-     * Enqueue script for customizer control
-     */
-  public function njt_nofi_enqueueCustomizeControls()
-  {
-    if(is_customize_preview()){
-      wp_register_script('njt-nofi-admin-customizebar', NJT_NOFI_PLUGIN_URL . 'assets/admin/js/admin-customizebar.js', array('jquery'),NJT_NOFI_VERSION,true);
-      wp_enqueue_script('njt-nofi-admin-customizebar');
-    }
-
-  }
-  public function addScriptsCustomizer(){
-      wp_register_script('njt-nofi-cus-control-select2', NJT_NOFI_PLUGIN_URL . 'assets/admin/js/select2.min.js', array('jquery'), NJT_NOFI_VERSION, true);
-      wp_enqueue_script('njt-nofi-cus-control-select2');
-      wp_register_style('njt-nofi-cus-control-select2', NJT_NOFI_PLUGIN_URL . 'assets/admin/css/select2.min.css', array(), NJT_NOFI_VERSION);
-      wp_enqueue_style('njt-nofi-cus-control-select2');
-
-      wp_register_script('njt-nofi-cus-control', NJT_NOFI_PLUGIN_URL . 'assets/admin/js/admin-customizer-control.js', array('jquery'), NJT_NOFI_VERSION, true);
-      wp_enqueue_script('njt-nofi-cus-control');
-      wp_register_style('njt-nofi-cus-control', NJT_NOFI_PLUGIN_URL . 'assets/admin/css/admin-customizer-control.css', array(), NJT_NOFI_VERSION);
-      wp_enqueue_style('njt-nofi-cus-control');
-
-      wp_localize_script('njt-nofi-cus-control-select2', 'wpNoFi', array(
-        'admin_ajax' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce("njt-nofi-cus-control-select2"),
-        'list_posts_selected' => WpPosts::get_list_pages_posts_selected(get_theme_mod('njt_nofi_list_display_post')),
-        'list_pages_selected' => WpPosts::get_list_pages_posts_selected(get_theme_mod('njt_nofi_list_display_page')),
-      ));
-  }
-
-  public function njt_nofi_customize_save_after()
-  {
-    update_option('njt_nofi_text_wpml_translate', get_theme_mod('njt_nofi_text', $this->valueDefault['text']));
-    update_option('njt_nofi_text_mobile_wpml_translate', get_theme_mod('njt_nofi_text_mobile', $this->valueDefault['text_mobile']));
-    update_option('njt_nofi_lb_text_wpml_translate', get_theme_mod('njt_nofi_lb_text', $this->valueDefault['lb_text']));
-    update_option('njt_nofi_lb_text_mobile_wpml_translate', get_theme_mod('njt_nofi_lb_text_mobile', $this->valueDefault['lb_text_mobile']));
-    update_option('njt_nofi_lb_url_wpml_translate', get_theme_mod( 'njt_nofi_lb_url', $this->valueDefault['lb_url']));
-    update_option('njt_nofi_lb_url_mobile_wpml_translate', get_theme_mod( 'njt_nofi_lb_url_mobile', $this->valueDefault['lb_url_mobile']));
-
-    $open_after_day = get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']);
-    $option_open_after_day = +get_option('njt_nofi_open_after_day');
-
-    if($open_after_day != $option_open_after_day) {
-      update_option('njt_nofi_open_after_day', $open_after_day);
-
-      $cookie_close_notibar=  $_COOKIE['njt-close-notibar'] ?? null;
-      $cookie_toggle_close_notibar=  $_COOKIE['njt-toggle-close-notibar'] ?? null;
-
-      if($cookie_close_notibar == 'true' || $open_after_day == 0) {
-        setcookie(
-          'njt-close-notibar',
-          'true',                  
-          time() + ($open_after_day * DAY_IN_SECONDS),
-          '/'                      
-        );
-      }
-
-      if($cookie_toggle_close_notibar == 'true' || $open_after_day == 0) {
-        setcookie(
-          'njt-toggle-close-notibar',
-          'true',                  
-          time() + ($open_after_day * DAY_IN_SECONDS),
-          '/'                      
-        );
-      }
-    }
-}
-  
-  public function njt_nofi_sanitizeSelect( $input, $setting ){
-          
-    $input = sanitize_key($input);
-
-    $choices = $setting->manager->get_control( $setting->id.'_control' )->choices;
-                      
-    return ( array_key_exists( $input, $choices ) ? $input : $setting->default );                
-  }
-
-  function njt_nofi_sanitizeCheckbox( $input ){
-    //returns true if checkbox is checked
-    if(isset($input)) {
-      return ( $input ? true : false );
-    }
-     return false;
-  }
-
-  public function njt_nofi_customizeNotification($customNoti)
-  {
-    $customNoti->add_panel( 'njt_notification-bar', array(
-      'title'       => __('Notibar',NJT_NOFI_DOMAIN),
-      'description' => __('This is panel WordPress Notification Bar',NJT_NOFI_DOMAIN),
-      'priority'    => 10,
-    ) );
-
-    /* Option General */
-    $customNoti->add_section( 'njt_nofi_general', array(
-      'title'    => __( 'General Options',NJT_NOFI_DOMAIN),
-      'priority' => 10,
-      'panel'    => 'njt_notification-bar',
-    ) );
-
-    /*Enable/Disable Notibar*/
-    $customNoti->add_setting('njt_nofi_enable_bar', array(
-      'default'           => 1,
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlEnableBar( $customNoti, 'njt_nofi_enable_bar',
-      array(
-        'label'    => __('Enable/Disable Notibar', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_general',
-        'settings' => 'njt_nofi_enable_bar'
-      )
-    ));
-
-    // Option Alignment
-    $customNoti->add_setting('njt_nofi_alignment', array(
-      'default'           => $this->valueDefault['align_content'],
-      'sanitize_callback' => array($this,'njt_nofi_sanitizeSelect'),
-      'transport'         => 'postMessage',
-    ));
-    
-    $customNoti->add_control( 'njt_nofi_alignment_control', array(
-      'label'           => __( 'Alignment Option', NJT_NOFI_DOMAIN ),
-      'section'         => 'njt_nofi_general',
-      'settings'        => 'njt_nofi_alignment',
-      'type'            => 'select',
-      'choices'         => array(
-        'center'        => esc_html__( 'Center', NJT_NOFI_DOMAIN ),
-        'left'          => esc_html__( 'Left', NJT_NOFI_DOMAIN ),
-        'right'         => esc_html__( 'Right', NJT_NOFI_DOMAIN ),
-        'space_around' => esc_html__( 'Space around', NJT_NOFI_DOMAIN ),
-      ),
-    ));
-
-    // Hide/Close Button (No button, Toggle button, Close button)
-    $customNoti->add_setting('njt_nofi_hide_close_button', array(
-      'default'           => $this->valueDefault['hide_close_button'],
-      'sanitize_callback' => array($this,'njt_nofi_sanitizeSelect'),
-       'transport'         => 'postMessage',
-    ));
-    
-    $customNoti->add_control( 'njt_nofi_hide_close_button_control', array(
-      'label'           => __( 'Hide/Close Button', NJT_NOFI_DOMAIN ),
-      'section'         => 'njt_nofi_general',
-      'settings'        => 'njt_nofi_hide_close_button',
-      'type'            => 'select',
-      'choices'         => array(
-        'no_button'     => esc_html__( 'No button', NJT_NOFI_DOMAIN ),
-        'toggle_button' => esc_html__( 'Toggle button', NJT_NOFI_DOMAIN ),
-        'close_button'  => esc_html__( 'Close button', NJT_NOFI_DOMAIN ),
-      ),
-    ));
-
-    // Open notibar after day
-    $customNoti->add_setting('njt_nofi_open_after_day', array(
-      'default'           => 1,
-      'sanitize_callback' => 'absint',
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control( 'njt_nofi_open_after_day_control', array(
-      'label'    => __( 'Show Notibar again after close (days)', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_general',
-      'settings' => 'njt_nofi_open_after_day',
-      'type'     => 'number',
-      'input_attrs' => array(
-        'min' => 0,
-        'step' => 1
-      )
-    ));
-
-    // Content Width (px)
-    $customNoti->add_setting('njt_nofi_content_width', array(
-      'default'           => $this->valueDefault['content_width'],
-      'sanitize_callback' => 'absint', //converts value to a non-negative integer
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control( 'njt_nofi_content_width_control', array(
-      'label'    => __( 'Content Width (px)', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_general',
-      'settings' => 'njt_nofi_content_width',
-      'type'     => 'number',
-    ));
-
-    //Position Type
-    $customNoti->add_setting('njt_nofi_position_type', array(
-      'default'           => $this->valueDefault['position_type'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses',
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlPositionType( $customNoti, 'njt_nofi_position_type',
-      array(
-        'label'    => __( 'Position Type', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_general',
-        'settings' => 'njt_nofi_position_type'
-      )
-    ));
-
-    /*Content*/
-    $customNoti->add_section( 'njt_nofi_content', array(
-      'title'    => __( 'Content Options',NJT_NOFI_DOMAIN),
-      'priority' => 10,
-      'panel'    => 'njt_notification-bar',
-    ));
-
-    
-    //Text
-    $customNoti->add_setting('njt_nofi_text', array(
-      'default'           => $this->valueDefault['text'],
-      'sanitize_callback' => 'wp_kses_post', //keeps only HTML tags that are allowed in post content
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->selective_refresh->add_partial( 'njt_nofi_text', array(
-      'selector'            => '.njt-display-deskop',
-      'primarySetting'      => 'njt_nofi_text',
-      'container_inclusive' => true,
-      'fallback_refresh'    => false,
-      'sanitize_callback'   => 'wp_kses_post',
-    ) );
-
-    $customNoti->add_control( 'njt_nofi_text_control', array(
-      'label'    => __('Text', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_text',
-      'type'     => 'textarea',
-      'sanitize_callback' => 'wp_kses_post',
-    ));
-
-    //Switch on/off button
-    $customNoti->add_setting('njt_nofi_handle_button', array(
-      'default'           => 1,
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlHandleButton( $customNoti, 'njt_nofi_handle_button',
-      array(
-        'label'    => __( 'On/Off Button', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_content',
-        'settings' => 'njt_nofi_handle_button'
-      )
-    ));
-
-    //Link/Button Text
-    $customNoti->add_setting('njt_nofi_lb_text', array(
-      'default'           => $this->valueDefault['lb_text'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses', //removes all HTML from content
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control('njt_nofi_lb_text_control', array(
-      'label'    => __('Button Text', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_lb_text',
-      'type'     => 'text',
-    ));
-
-    //Link/Button URL
-    $customNoti->add_setting('njt_nofi_lb_url', array(
-      'default'           => $this->valueDefault['lb_url'],
-      'sanitize_callback' => 'esc_url_raw', //cleans URL from all invalid characters
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control('njt_nofi_lb_url_control', array(
-      'label'    => __('Button URL', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_lb_url',
-      'type'     => 'text',
-    ));
-
-    //Link/Button Font Weight
-    $customNoti->add_setting('njt_nofi_lb_font_weight', array(
-      'default'           => $this->valueDefault['font_weight_display'],
-      'sanitize_callback' => array($this,'njt_nofi_sanitizeSelect'),
-       'transport'         => 'postMessage',
-    ));
-    
-    $customNoti->add_control( 'njt_nofi_lb_font_weight_control', array(
-      'label'           => __( 'Font Weight:', NJT_NOFI_DOMAIN ),
-      'section'         => 'njt_nofi_content',
-      'settings'        => 'njt_nofi_lb_font_weight',
-      'type'            => 'select',
-      'choices'         => array(
-        '400'     => esc_html__( 'Normal', NJT_NOFI_DOMAIN ),
-        '500'     => esc_html__( 'Medium', NJT_NOFI_DOMAIN ),
-        '600'     => esc_html__( 'Semi Bold', NJT_NOFI_DOMAIN ),
-        '700'     => esc_html__( 'Bold', NJT_NOFI_DOMAIN ),
-      ),
-    ));
-
-    //Open in new window
-    $customNoti->add_setting('njt_nofi_open_new_windown', array(
-      'default'           => $this->valueDefault['new_windown'],
-      'sanitize_callback' => array($this, 'njt_nofi_sanitizeCheckbox'),
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control( 'njt_nofi_open_new_windown_control', array(
-      'label'    => __( 'Open in new window', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_open_new_windown',
-      'type'     => 'checkbox',
-    ));
-
-    //You want different content for mobile
-    $customNoti->add_setting('njt_nofi_content_mobile', array(
-      'default'           => 0,
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlContentMobile( $customNoti, 'njt_nofi_content_mobile',
-      array(
-        'label'    => __( 'You want different content for mobile?', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_content',
-        'settings' => 'njt_nofi_content_mobile'
-      )
-    ));
-    
-
-    //text mobile
-    $customNoti->add_setting('njt_nofi_text_mobile', array(
-      'default'           => $this->valueDefault['text_mobile'],
-      'sanitize_callback' => 'wp_kses_post', //keeps only HTML tags that are allowed in post content
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->selective_refresh->add_partial( 'njt_nofi_text_mobile', array(
-      'selector'            => '.njt-display-mobile',
-      'primarySetting'      => 'njt_nofi_text_mobile',
-      'container_inclusive' => true,
-      'fallback_refresh'    => false,
-    ) );
-
-    $customNoti->add_control( 'njt_nofi_text_mobile_control', array(
-      'label'    => __('Text', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_text_mobile',
-      'type'     => 'textarea',
-    ));
-
-    //Switch on/off button mobiile
-    $customNoti->add_setting('njt_nofi_handle_button_mobile', array(
-      'default'           => 0,
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlHandleButtonMobile( $customNoti, 'njt_nofi_handle_button_mobile',
-      array(
-        'label'    => __( 'On/Off Button', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_content',
-        'settings' => 'njt_nofi_handle_button_mobile'
-      )
-    ));
-
-    //Link/Button Text Mobile
-    $customNoti->add_setting('njt_nofi_lb_text_mobile', array(
-      'default'           => $this->valueDefault['lb_text_mobile'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses', //removes all HTML from content
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control('njt_nofi_lb_text_mobile_control', array(
-      'label'    => __('Button Text', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_lb_text_mobile',
-      'type'     => 'text',
-    ));
-
-    //Link/Button URL Mobile
-    $customNoti->add_setting('njt_nofi_lb_url_mobile', array(
-      'default'           => $this->valueDefault['lb_url_mobile'],
-      'sanitize_callback' => 'esc_url_raw', //cleans URL from all invalid characters
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control('njt_nofi_lb_url_mobile_control', array(
-      'label'    => __('Button URL', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_lb_url_mobile',
-      'type'     => 'text',
-    ));
-
-    //Link/Button Font Weight Mobild
-    $customNoti->add_setting('njt_nofi_lb_font_weight_mobile', array(
-      'default'           => $this->valueDefault['font_weight_display'],
-      'sanitize_callback' => array($this,'njt_nofi_sanitizeSelect'),
-       'transport'         => 'postMessage',
-    ));
-    
-    $customNoti->add_control( 'njt_nofi_lb_font_weight_mobile_control', array(
-      'label'           => __( 'Font Weight:', NJT_NOFI_DOMAIN ),
-      'section'         => 'njt_nofi_content',
-      'settings'        => 'njt_nofi_lb_font_weight_mobile',
-      'type'            => 'select',
-      'choices'         => array(
-        '400'     => esc_html__( 'Normal', NJT_NOFI_DOMAIN ),
-        '500'     => esc_html__( 'Medium', NJT_NOFI_DOMAIN ),
-        '600'     => esc_html__( 'Semi Bold', NJT_NOFI_DOMAIN ),
-        '700'     => esc_html__( 'Bold', NJT_NOFI_DOMAIN ),
-      ),
-    ));
-
-    //Open in new window mobile
-    $customNoti->add_setting('njt_nofi_open_new_windown_mobile', array(
-      'default'           => $this->valueDefault['new_windown_mobile'],
-      'sanitize_callback' => array($this, 'njt_nofi_sanitizeCheckbox'),
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control( 'njt_nofi_open_new_windown_mobile_control', array(
-      'label'    => __( 'Open in new window', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_content',
-      'settings' => 'njt_nofi_open_new_windown_mobile',
-      'type'     => 'checkbox',
-    ));
-
-    /*Style*/
-    $customNoti->add_section( 'njt_nofi_style', array(
-      'title'    => __( 'Style Options',NJT_NOFI_DOMAIN),
-      'priority' => 10,
-      'panel'    => 'njt_notification-bar',
-    ));
-
-    //Preset Color
-    $customNoti->add_setting( 'njt_nofi_preset_color', array(
-        'default' => $this->valueDefault['preset_color'],
-        'transport'         => 'postMessage',
-      )
-    );
-    
-    $customNoti->add_control(
-      new WpCustomControlColorPreset( $customNoti, 'njt_nofi_preset_color',
-      array(
-        'label'    => __('Preset Color', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_style',
-        'settings' => 'njt_nofi_preset_color'
-      )
-    ));
-
-    //Background Color
-    $customNoti->add_setting( 'njt_nofi_bg_color',
-      array(
-          'default'           => $this->valueDefault['bg_color'],
-          'sanitize_callback' => 'sanitize_hex_color',
-          'transport'         => 'postMessage',
-      )
-    );
-    
-    $customNoti->add_control(
-      new WpCustomControlColorBg( $customNoti, 'njt_nofi_bg_color',
-      array(
-        'label'    => __('Background Color', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_style',
-        'settings' => 'njt_nofi_bg_color'
-      )
-    ));
-
-    //Text Color
-    $customNoti->add_setting( 'njt_nofi_text_color',
-      array(
-          'default'           => $this->valueDefault['text_color'],
-          'sanitize_callback' => 'sanitize_hex_color',
-          'transport'         => 'postMessage',
-      )
-    );
-  
-    $customNoti->add_control(
-      new WpCustomControlColorText( $customNoti, 'njt_nofi_text_color',
-      array(
-        'label'    => __('Text Color', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_style',
-        'settings' => 'njt_nofi_text_color',
-      )
-    ));
-
-    //Button Color 
-    $customNoti->add_setting('njt_nofi_lb_color', array(
-      'default'           =>$this->valueDefault['lb_color'],
-      'sanitize_callback' => 'sanitize_hex_color',
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlColorLb( $customNoti, 'njt_nofi_lb_color',
-      array(
-        'label'    => __('Button Color', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_style',
-        'settings' => 'njt_nofi_lb_color'
-      )
-    ));
-
-    //Button Text Color
-    $customNoti->add_setting('njt_nofi_lb_text_color', array(
-      'default'           =>$this->valueDefault['lb_text_color'],
-      'sanitize_callback' => 'sanitize_hex_color',
-      'transport'         => 'postMessage',
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlTextColorLb( $customNoti, 'njt_nofi_lb_text_color',
-      array(
-        'label'    => __('Button Text Color', NJT_NOFI_DOMAIN ),
-        'section'  => 'njt_nofi_style',
-        'settings' => 'njt_nofi_lb_text_color'
-      )
-    ));
-
-    //Font Size (px)
-    $customNoti->add_setting('njt_nofi_font_size', array(
-      'default'           => $this->valueDefault['font_size'],
-      'sanitize_callback' => 'absint', //converts value to a non-negative integer
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control('njt_nofi_font_size_control', array(
-      'label'    => __('Font Size (px)', NJT_NOFI_DOMAIN ),
-      'section'  => 'njt_nofi_style',
-      'settings' => 'njt_nofi_font_size',
-      'type'     => 'number',
-    ));
-
-    /* Display */
-    $customNoti->add_section( 'njt_nofi_display', array(
-      'title'    => __( 'Display Options',NJT_NOFI_DOMAIN),
-      'priority' => 10,
-      'panel'    => 'njt_notification-bar',
-    ));
-
-    //Select devices want to display
-    $customNoti->add_setting('njt_nofi_devices_display', array(
-      'default'           => $this->valueDefault['devices_display'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses',
-       'transport'         => 'postMessage',
-    ));
-    
-    $customNoti->add_control( 'njt_nofi_devices_display_control', array(
-        'label'           => __( 'Select devices want to display', NJT_NOFI_DOMAIN ),
-        'section'         => 'njt_nofi_display',
-        'settings'        => 'njt_nofi_devices_display',
-        'type'            => 'select',
-        'choices'         => array(
-          'all_devices'   => esc_html__( 'All devices', NJT_NOFI_DOMAIN ),
-          'desktop'       => esc_html__( 'Only desktop', NJT_NOFI_DOMAIN ),
-          'mobile'        => esc_html__( 'Only mobile', NJT_NOFI_DOMAIN ),
-        )
-    ));
-
-    //Logic display Pages
-    $customNoti->add_setting('njt_nofi_logic_display_page', array(
-      'default'           => $this->valueDefault['logic_display_page'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses', //removes all HTML from content
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control( 'njt_nofi_logic_display_page',
-      array(
-        'label'       => __( 'Option display pages', NJT_NOFI_DOMAIN ),
-        'section'     => 'njt_nofi_display',
-        'settings'    => 'njt_nofi_logic_display_page',
-        'type'        => 'select',
-        'choices'         => array(
-          'dis_all_page'     => esc_html__( 'Display on all page', NJT_NOFI_DOMAIN ),
-          'dis_selected_page'     => esc_html__( 'Display on selected page', NJT_NOFI_DOMAIN ),
-          'hide_all_page'     => esc_html__( 'Hide on all page', NJT_NOFI_DOMAIN ),
-          'hide_selected_page'     => esc_html__( 'Hide on selected page', NJT_NOFI_DOMAIN ),
-        ),
-    ));
-    //List display Pages
-    $customNoti->add_setting('njt_nofi_list_display_page', array(
-      'default'           => $this->valueDefault['logic_display_page'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses', //removes all HTML from content
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlMultiselect( $customNoti, 'njt_nofi_list_display_page',
-      array(
-        'label'       => __( 'Option display pages', NJT_NOFI_DOMAIN ),
-        'section'     => 'njt_nofi_display',
-        'settings'    => 'njt_nofi_list_display_page',
-        'type'        => 'multiple-select',
-      )
-    ));
-
-    //Logic display Post
-    $customNoti->add_setting('njt_nofi_logic_display_post', array(
-      'default'           => $this->valueDefault['logic_display_post'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses', //removes all HTML from content
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control( 'njt_nofi_logic_display_post', array(
-        'label'       => __( 'Option display posts', NJT_NOFI_DOMAIN ),
-        'section'     => 'njt_nofi_display',
-        'settings'    => 'njt_nofi_logic_display_post',
-        'type'        => 'select',
-        'choices'               => array(
-          'dis_all_post'        => esc_html__( 'Display on all post', NJT_NOFI_DOMAIN ),
-          'dis_selected_post'   => esc_html__( 'Display on selected post', NJT_NOFI_DOMAIN ),
-          'hide_all_post'       => esc_html__( 'Hide on all post', NJT_NOFI_DOMAIN ),
-          'hide_selected_post'  => esc_html__( 'Hide on selected post', NJT_NOFI_DOMAIN ),
-        ),
-    ));
-    //List display Post
-    $customNoti->add_setting('njt_nofi_list_display_post', array(
-      'default'           => $this->valueDefault['dp_pp_id'],
-      'sanitize_callback' => 'wp_filter_nohtml_kses', //removes all HTML from content
-      'transport'         => 'postMessage'
-    ));
-
-    $customNoti->add_control(
-      new WpCustomControlMultiselect( $customNoti, 'njt_nofi_list_display_post',
-      array(
-        'label'       => __( 'Option display Post', NJT_NOFI_DOMAIN ),
-        'section'     => 'njt_nofi_display',
-        'settings'    => 'njt_nofi_list_display_post',
-        'type'        => 'multiple-select',
-      )
-    ));
-
-
-
-  }
 }

@@ -4,28 +4,31 @@ Donate link: https://codecanyon.net/item/media-folders-manager-for-wordpress/217
 Tags: notification bar, banner, top bar, announcement, notifications
 Requires at least: 4.0
 Requires PHP: 5.3.1
-Tested up to: 6.9
-Stable tag: 2.1.9
+Tested up to: 7.0
+Stable tag: 3.1.0
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
 == Description ==
-**Customizer for sticky header, notification bar, alert, promo code, marketing campaign, top banner**
+Multiple notification bars with React-powered customizer, live preview, smart scheduling, and per-bar display rules.
 
-This plugin adds a **top notification bar** to indicate significant announcements on your website. You can set it as a sticky header that is visible when scrolling. 
+This plugin lets you create and manage **multiple notification bars** at once. Configure each bar independently (content, style, devices, display pages, close behaviour) all inside the native WordPress Customizer with **instant live preview**.
 
-The **Dismiss** button can be disabled, closed permanently, or toggled so that your visitors can easily find it again.
+The **Dismiss** button supports three modes: close permanently, collapse/toggle, or disabled.
 
-**Instant live preview** mode helps you see how every setting affects the notification bar before you publish it.
+**Per-bar page/post rules** let you show bars on all pages, no pages, or a specific include/exclude list.
 
 Notibar seamlessly integrates with your existing WordPress theme, ensuring a cohesive look and feel. It has integrated clear and compelling call-to-action buttons to drive user engagement and conversions.
+
+🔔 Check out **[Notibar Pro - Notification Bar for WordPress](https://ninjateam.org/notibar-wordpress-notification-bar/?utm_source=wp-org&utm_medium=notibar)**
 
 ###⚡️ FEATURES
 
 **This alert banner is built to optimize appearance and drive a positive impact on your WordPress website traffic and conversions:**
 
-- Designed with **clean** UI & modern style
-- Display in **absolute** or **fixed** positioning
+- Designed with **clean UI** & modern style
+- **Schedule** the date and time to go live
+- Display in absolute or fixed positioning
 - Custom color, text, click-to-action
 - Various notice bar **style presets**
 - Set text container width and alignment
@@ -33,6 +36,10 @@ Notibar seamlessly integrates with your existing WordPress theme, ensuring a coh
 - WYSIWYG visual banner editor with **live preview**
 - Display on all pages/posts or specific page/post ID
 - Add different content for mobile devices
+- Drag and drop to reorder announcement bars
+- One click to duplicate a bar template
+- Export/Import for a quick migration
+- 100% mobile-responsive
 
 ###🚀 TYPICAL USE CASES
 
@@ -46,7 +53,7 @@ Notibar seamlessly integrates with your existing WordPress theme, ensuring a coh
 - Privacy policy acknowledgments
 - Maintenance messages
 - Service outage or resource shortage
-- Seasonal offers or promotions
+- Seasonal offers or promotions on [WooCommerce stores](https://wpbrandy.com/starter-sites/)
 - Driving traffic to other sites
 
 Notibar is ideal for you to promote upcoming events, new blog posts, product launches, or special offers with ease.
@@ -54,9 +61,7 @@ Notibar is ideal for you to promote upcoming events, new blog posts, product lau
 Did you know? You can even capture email leads by offering incentives and integrating with your email marketing provider.
 
 ###🎉 Supported Themes and Plugins
-
 We have done extra work to ensure complete compatibility with all themes, page builders and other popular plugins.
-
 
 ###📝 Documentation and Support
 If you're having issues, do let us know and we'll try to help you out.
@@ -64,45 +69,85 @@ You can always reach us at [Ninja Team Support Center](http://ninjateam.org/supp
 
 ###♥️ Like this Top Bar Alert Plugin?
 - Rate us 5⭐ stars on [WordPress.org](https://wordpress.org/support/plugin/notibar/reviews/?filter=5#new-post)
-- Learn to [create successful online stores](https://yaycommerce.com/category/woocommerce-tutorials/) with advanced built-in features.
+- Check out these tutorials to [create successful WooCommerce stores](https://yaycommerce.com/category/woocommerce-tutorials/?utm_source=wp-org&utm_medium=notibar)
 
 == Frequently Asked Questions ==
 
-= How can I find page or post ID? =
+= Can the free version display multiple notification bars? =
+Yes. Even on the free plan, you can create and schedule multiple bars. Manage each bar with its own content, design, and display rules.
 
-On your admin dashboard, navigate to **All Pages** or **All Posts**, then hover or click **Edit** the page/post, you'll see '?post=x' in its own editing action link. So 'x' is the ID for this specific page or post.
-Eg: 'https://yourdomain.org/wp-admin/post.php?post=353&action=edit'
-→ Post ID = 353
+= How to control which pages or posts a bar appears on? =
+The free version lets you show or hide specific bars on any page or post. Just select them from the dropdown in the display settings. If you need to show/hide based on custom post types or WooCommerce products, then you will need [Notibar Pro](https://ninjateam.org/notibar-wordpress-notification-bar/?utm_source=wp-org&utm_medium=notibar).
 
-= Which themes does this notification top bar work with? =
+= Can I schedule when a bar appears and disappears? =
+Yes. The free version includes scheduling with a start and end date/time, as well as an auto ON/OFF daily schedule, so your bars go live and expire without any manual work.
 
-**Notibar plugin** is built to work wonderfully with all themes.
+= Can I show different content to mobile visitors? =
+Sure thing! You can set separate content and button for mobile devices, so your notification bar always looks and reads well regardless of screen size.
 
-= Can I use this notification bar plugin on client websites? =
+= Can I reorder or duplicate my bars easily? =
+Yes. The free version includes drag-and-drop reordering and a one-click duplicate option, making it quick to manage and experiment with your bars.
 
-Yes! You can certainly use it on your own websites as well as your clients'.
+= Is it possible to use custom HTML or CSS in my notification bars? =
+Yes, both HTML and CSS are supported in the free version, so developers can fully customize the look and content of the announcements. Moreover, you can use CSS to force the notification display/swap before lazyloading or make it compatible with your caching system.
 
-= Is this top bar compliant with GDPR? =
-
-Absolutely! Notibar doesn't collect or store any personal information. So rest assured.
+= Can a bar reappear after a visitor closes it? =
+Yes, you can configure each bar to re-display after a specified period, so returning visitors will see it again after a set amount of time.
 
 = Is Notibar free? =
-Yes, it's completely free of charge. Notibar comes with all features that you can find in the description above.
+Yes. Notibar is free and includes everything you need to run multiple notification bars: content & styling, HTML/CSS support, mobile-specific content, 3-state dismiss, per-bar page/post display rules, and Export/Import.
 
+Notibar Pro adds advanced conversion tools on top of the free plugin:
+
+- Rotation mode (A/B testing): cycle multiple bars by sequence or random, with a custom interval and pause-on-hover
+- Targeting by custom post type (including WooCommerce products)
+- Advanced reports: per-bar click & dismiss tracking
+- Display a bar at the bottom of the screen
+- Conditional display by user role or specific users
+
+= Does conditional display by role/user work with page caching? =
+Role and user targeting (a Pro feature) is evaluated on the server, so a full-page cache that serves one cached HTML to every visitor can show the wrong bars. The standard fix, which is used by virtually every membership/role-aware plugin, is to **exclude logged-in users from the page cache** (most caching plugins do this by default). Logged-out visitors all correctly receive the "logged-out / everyone" set; logged-in users then get their role/user-specific bars evaluated fresh.
+
+= Does Notibar support multilingual sites (WPML / Polylang)? =
+
+**WPML:** Yes. Notibar v3.0+ integrates with the **WPML String Translation** addon. After you publish a bar, its text, button label, and button URL are auto-registered as translatable strings under the `notibar` domain. Translate them in **WPML → String Translation**, and the right language renders automatically on the front-end. Both WPML core and the String Translation addon must be active, without the addon, Notibar silently serves the original strings.
+
+**Polylang:** Polylang support in v3.0 is a **documented stub only** — there is no automatic per-bar string registration. If you need Polylang translation today, register each string manually with `pll_register_string()` from a child-theme or custom-plugin hook (the string names follow the pattern `bar-{id}-text`, `bar-{id}-textMobile`, `bar-{id}-buttonText`, etc., and live in the `notibar` domain). Full Polylang integration is planned for a future v3.2+ release.
+
+= Which themes does this notification top bar work with? =
+Notibar plugin is built to work wonderfully with all Elementor themes, block themes and other WordPress page builders.
+
+= Is this top bar compliant with GDPR? =
+Absolutely! Notibar doesn't collect or store any personal information. So rest assured.
 
 == Installation ==
 1. Upload the entire plugin folder to the '/wp-content/plugins/' directory.
 2. Activate the plugin through the **Plugins** menu in WordPress.
 
-Upon activation, you will see a new **Notification Bar** menu. Simply click to custom the WordPress notification bar element by changing all default settings for text, styles and effects.
+Upon activation, you will see a new **Notibar** menu. Simply click to customize the WordPress notification bar element by changing all default settings for text, styles and effects.
 
 == Screenshots ==
 
 1. Notification bar settings location
 2. Edit content and preview it
 
-
 == Changelog ==
+
+= May 26, 2026 - Version 3.1.0 =
+- New: Schedule in visitors' local timezones (Pro version only)
+- New: Display bars at bottom (Pro version only)
+- New: Conditional display based on user roles, logged-in, logged-out or specific users (Pro version only)
+- New: Hide/Display bars on WooCommerce products or Custom Post Types (Pro version only)
+- Updated: Compatible with WordPress 7.0
+
+= Feb 25, 2025 - Version 3.0.0 =
+- Added: Admin menu
+- Added: Multiple Bars support (display different content across different pages)
+- Added: Rotation option for alternating bar display (Pro version only)
+- Added: Schedule open/close time for bars
+- Added: Tracking functionality (Pro version only)
+- Added: Import/Export Bars feature 
+- Updated: Refreshed UI design
 
 = Jan 26, 2026 - Version 2.1.9 =
 - Improved: WCAG Level AA compliance

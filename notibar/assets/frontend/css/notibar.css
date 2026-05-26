@@ -1,154 +1,301 @@
+/**
+ * Notibar v3 — Frontend stylesheet.
+ *
+ * Visual language ported 1:1 from v2.1.9 (assets/frontend/css/notibar.css).
+ * The slide-down + fade-in entrance was the "appearance effect" v2 users
+ * expect; v3 wires the same two-layer animation:
+ *
+ *   .njt-nofi-container-content      → opacity 0 → 1 (visibility hidden → visible)
+ *   .njt-nofi-notification-bar      → translateY(-100%) → translateY(0)
+ *
+ *   Trigger: JS adds `.njt-nofi-visible` to the container-content node.
+ *
+ * Architecture:
+ *  - #njt-notibar-slot           : outer JS-managed wrapper (no styling).
+ *  - .njt-nofi-container         : position/z-index layer (data-position attr).
+ *  - .njt-nofi-container-content : opacity transition layer.
+ *  - .njt-nofi-notification-bar  : translateY transition layer + flex row.
+ *
+ * Typo alias `.njt-nofi-content-deskop` kept for one minor version.
+ *
+ * @since 3.0.0
+ */
+
+/* ==========================================================================
+   Position layer
+   ========================================================================== */
+
 .njt-nofi-container {
-  z-index: 999;
+  z-index: 10000;
   width: 100%;
+  top: 0;
+  left: 0;
 }
+
+.njt-nofi-container[data-position='fixed'],
+.njt-nofi-container:not([data-position]) {
+  position: fixed;
+}
+
+.njt-nofi-container[data-position='absolute'] {
+  position: absolute;
+}
+
+/* Bottom placement (Pro) — pin to the bottom edge instead of the top. */
+.njt-nofi-container[data-placement='bottom'] {
+  top: auto;
+  bottom: 0;
+}
+
+/* ==========================================================================
+   Container content — hidden until JS adds .njt-nofi-visible
+   ----------------------------------------------------------------------------
+   Switched from CSS transitions to a @keyframes animation. Transitions
+   require the browser to *detect* a property change between paints, and
+   for innerHTML-injected nodes that detection is fragile — browsers can
+   coalesce the initial and final state into a single paint, producing the
+   "blank then appear" flash. Keyframes play unconditionally from `from`
+   to `to` once their trigger class lands, no detection needed.
+   ========================================================================== */
+
+.njt-nofi-container-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.njt-nofi-container-content.njt-nofi-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   Notification bar — translateY transition (slide-down from above)
+   ========================================================================== */
 
 .njt-nofi-notification-bar {
   position: relative;
   display: flex;
   align-items: center;
   padding: 0 10px;
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
+  width: 100%;
+  box-sizing: border-box;
+  transform: translateY( -100% );
+  /* Inline CSS custom props set by renderBarHTML(). */
+  background: var( --njt-bar-bg, #9af4cf );
+  color: var( --njt-bar-color, #1919cf );
 }
 
-.njt-nofi-container-content {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.njt-nofi-container-content.njt-nofi-visible {
-  opacity: 1;
-  visibility: visible;
+/* Keyframe entrance — plays when .njt-nofi-visible lands on the parent.
+   `both` fill-mode keeps the bar at translateY(0) opacity:1 after the
+   animation completes (otherwise it'd snap back to the initial state). */
+@keyframes njt-nofi-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY( -100% );
+  }
+  to {
+    opacity: 1;
+    transform: translateY( 0 );
+  }
 }
 
 .njt-nofi-container-content.njt-nofi-visible .njt-nofi-notification-bar {
-  transform: translateY(0);
+  animation: njt-nofi-slide-in 0.4s cubic-bezier( 0.16, 1, 0.3, 1 ) both;
 }
 
-body.njt-nofi-reserve-space {
-  padding-top: 60px;
+/* Bottom placement entrance — slide UP from below instead of down from above.
+   Overrides the initial transform + the animation name; duration/easing/fill
+   carry over from the base rule above. */
+.njt-nofi-container[data-placement='bottom'] .njt-nofi-notification-bar {
+  transform: translateY( 100% );
 }
 
-.njt-nofi-notification-bar .njt-nofi-content {
-  text-align: center;
+@keyframes njt-nofi-slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY( 100% );
+  }
+  to {
+    opacity: 1;
+    transform: translateY( 0 );
+  }
+}
+
+.njt-nofi-container-content.njt-nofi-visible
+  .njt-nofi-container[data-placement='bottom'] .njt-nofi-notification-bar {
+  animation-name: njt-nofi-slide-in-bottom;
+}
+
+/* Collapsed state (toggle mode — per-bar via sessionStorage). */
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-content {
+  display: none;
+}
+
+/* ==========================================================================
+   Content blocks (desktop + mobile) — centered, margin:auto for distribution
+   ========================================================================== */
+
+.njt-nofi-content {
+  width: 100%;
   margin: auto;
   padding: 10px 50px;
+  box-sizing: border-box;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  /* display set per variant below; justify-content set via inline style by renderBarHTML(). */
 }
 
-.njt-nofi-notification-bar .njt-nofi-text {
-  display: inline-block;
+.njt-nofi-content-desktop {
+  display: flex;
 }
 
-.njt-nofi-notification-bar .njt-nofi-button {
-  display: inline-block;
+.njt-nofi-content-mobile {
+  display: none;
 }
 
-.njt-nofi-padding-text {
-  padding: 5px;
+/* Typo alias: v2 users may reference .njt-nofi-content-deskop.
+ * @deprecated 3.0.0 — remove in v3.1. */
+.njt-nofi-content-deskop {
+  display: flex;
 }
 
-.njt-nofi-notification-bar .njt-nofi-button .njt-nofi-button-text {
-  text-decoration: none;
+/* Legacy v2 typo classes — keep as no-op selectors so child-theme custom CSS
+ * targeting them still hooks. @deprecated 3.0.0 — remove in v3.1. */
+.diplay-device-deskop,
+.diplay-device-mobile {
+  /* intentionally empty */
 }
 
-.njt-nofi-button-text.njt-nofi-padding-text {
-  padding: 8px 12px;
+/* ==========================================================================
+   Text + button
+   ========================================================================== */
+
+.njt-nofi-text {
+  color: inherit;
 }
 
-.njt-nofi-notification-bar .njt-nofi-button {
+.njt-nofi-button {
   transition: transform 0.5s;
   min-width: fit-content;
 }
 
-.njt-nofi-notification-bar .njt-nofi-button:hover {
-  -ms-transform: scale(1.05);
-  -webkit-transform: scale(1.05);
-  transform: scale(1.05);
+.njt-nofi-button:hover {
+  transform: scale( 1.05 );
 }
 
-.njt-nofi-notification-bar .njt-nofi-hide {
+.njt-nofi-button-text {
+  display: inline-block;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-}
-.njt-nofi-notification-bar .njt-nofi-hide span {
-  display: flex;
-  align-items: center;
+  padding: 8px 12px;
+  border-radius: 3px;
+  /* bg + color + font-weight set via inline style by renderBarHTML(). */
 }
 
-.njt-nofi-notification-bar .njt-nofi-hide .njt-nofi-close-icon {
-  width: 100%;
-  height: 100%;
-  padding: 7px;
-}
+/* ==========================================================================
+   Close / Toggle buttons — flex children at the right edge
+   ----------------------------------------------------------------------------
+   25x25 circle, semi-opaque dark bg, sits on the right via flex (the
+   centred .njt-nofi-content uses margin:auto so the close gets pushed right
+   without needing absolute positioning).
+   ========================================================================== */
 
-.njt-nofi-close-icon-container {
+.njt-nofi-close,
+.njt-nofi-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 25px;
   height: 25px;
-  border-radius: 50px;
+  border: none;
   background: #0000002e;
-  transition: transform 0.5s;
-  display: flex;
-  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+  transition: transform 0.5s, background 0.2s ease;
 }
 
-.njt-nofi-notification-bar .njt-nofi-hide .njt-nofi-close-icon-container:hover {
-  -ms-transform: scale(1.1); /* IE 9 */
-  -webkit-transform: scale(1.1); /* Safari 3-8 */
-  transform: scale(1.1);
+.njt-nofi-close:hover,
+.njt-nofi-toggle:hover {
+  transform: scale( 1.1 );
 }
 
-/* Focus styles for keyboard navigation - WCAG Level A compliance */
-.njt-nofi-close-button:focus,
-.njt-nofi-toggle-button:focus,
-.njt-nofi-display-toggle:focus {
-  outline: 2px solid #4A90E2;
+.njt-nofi-close:focus,
+.njt-nofi-toggle:focus,
+.njt-nofi-close:focus-visible,
+.njt-nofi-toggle:focus-visible {
+  outline: 2px solid #4a90e2;
   outline-offset: 2px;
 }
 
-.njt-nofi-close-button:focus .njt-nofi-close-icon-container,
-.njt-nofi-toggle-button:focus .njt-nofi-close-icon-container,
-.njt-nofi-display-toggle:focus .njt-nofi-close-icon-container {
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+.njt-nofi-close-icon {
+  pointer-events: none;
+  width: 11px;
+  height: 11px;
 }
 
-/* Ensure focusable elements are keyboard accessible */
-.njt-nofi-close-button[tabindex="0"],
-.njt-nofi-toggle-button[tabindex="0"],
-.njt-nofi-display-toggle[tabindex="0"] {
-  outline: none;
+/* When the bar is collapsed via toggle mode, rotate the arrow 45° to hint
+   the inverse "expand" action (matches v2 .njt-nofi-display-toggle icon). */
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-toggle {
+  transform: rotate( 45deg );
 }
 
-.njt-nofi-close-button[tabindex="0"]:focus,
-.njt-nofi-toggle-button[tabindex="0"]:focus,
-.njt-nofi-display-toggle[tabindex="0"]:focus {
-  outline: 2px solid #4A90E2;
-  outline-offset: 2px;
-}
-.njt-nofi-display-toggle {
-  position: absolute;
-  right: 15px;
-  z-index: 9999;
-  padding: 8px 5px;
-  display: none;
-  text-decoration: none;
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-toggle:hover {
+  transform: rotate( 45deg ) scale( 1.1 );
 }
 
-.njt-nofi-display-toggle .njt-nofi-display-toggle-icon {
-  -webkit-transform: rotate(45deg) translate3d(0, 0, 0);
-  transform: rotate(45deg) translate3d(0, 0, 0);
-  width: 100%;
-  height: 100%;
-  padding: 7px;
+/* ==========================================================================
+   WP admin bar offset
+   ========================================================================== */
+
+.admin-bar .njt-nofi-container[data-position='fixed'],
+.admin-bar .njt-nofi-container[data-position='absolute'] {
+  top: 32px;
 }
 
-.njt-nofi-display-toggle .njt-nofi-display-toggle-icon:hover {
-  -ms-transform: scale(1.2) rotate(45deg) translate3d(0, 0, 0); /* IE 9 */
-  -webkit-transform: scale(1.2) rotate(45deg) translate3d(0, 0, 0); /* Safari 3-8 */
-  transform: scale(1.2) rotate(45deg) translate3d(0, 0, 0);
+@media screen and (max-width: 782px) {
+  .admin-bar .njt-nofi-container[data-position='fixed'],
+  .admin-bar .njt-nofi-container[data-position='absolute'] {
+    top: 46px;
+  }
 }
+
+/* Bottom placement ignores the admin-bar top offset — it pins to the bottom
+   edge. Declared after the rules above so it wins at equal specificity. */
+.admin-bar .njt-nofi-container[data-placement='bottom'] {
+  top: auto;
+  bottom: 0;
+}
+
+/* ==========================================================================
+   Mobile responsive — ≤480px
+   ========================================================================== */
+
+@media only screen and (max-width: 480px) {
+  .njt-nofi-content {
+    padding: 10px 20px;
+    /* flex-wrap inherited from base rule — keeps the button on its own line
+       when text+button can't fit on one line. */
+  }
+
+  /* Hide the desktop block ONLY when a separate mobile block was rendered
+     (marker class .njt-nofi-has-mobile, emitted by render-bar.js when
+     content.mobileSeparate is true). Without this guard, bars without a
+     separate mobile content section render blank on screens <=480px. */
+  .njt-nofi-has-mobile .njt-nofi-content-desktop {
+    display: none;
+  }
+
+  .njt-nofi-content-mobile {
+    display: flex;
+  }
+}
+
+/* ==========================================================================
+   Customizer partial edit shortcuts (preserved from v2).
+   ========================================================================== */
 
 .customize-partial-edit-shortcuts-shown
   .njt-nofi-container
@@ -169,49 +316,20 @@ body.njt-nofi-reserve-space {
   cursor: progress;
 }
 
-.njt-nofi-align-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.njt-display-none {
-  display: none;
-}
+/* ==========================================================================
+   Reduced-motion override — disable transitions & slide-down.
+   ========================================================================== */
 
-.diplay-device-deskop {
-  display: block;
-}
-
-.diplay-device-mobile {
-  display: none;
-}
-
-@media only screen and (max-width: 480px) {
-  .njt-nofi-align-content {
-    flex-wrap: wrap;
-  }
-  .njt-nofi-notification-bar .njt-nofi-content {
-    padding: 10px 20px;
+@media (prefers-reduced-motion: reduce) {
+  .njt-nofi-close,
+  .njt-nofi-toggle,
+  .njt-nofi-button {
+    transition: none !important;
   }
 
-  .njt-nofi-notification-bar .njt-nofi-hide {
-    right: 5px;
-    top: 12px;
-  }
-
-  .njt-display-deskop {
-    display: none;
-  }
-
-  .njt-display-mobile {
-    display: block;
-  }
-
-  .diplay-device-deskop {
-    display: none;
-  }
-
-  .diplay-device-mobile {
-    display: block;
+  /* Skip slide-down — bar appears in final state immediately. */
+  .njt-nofi-notification-bar {
+    transform: none !important;
+    animation: none !important;
   }
 }

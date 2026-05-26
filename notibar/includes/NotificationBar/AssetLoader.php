@@ -1,0 +1,335 @@
+<?php
+/**
+ * Asset enqueue helper — registers and enqueues all Notibar v3 JS/CSS bundles.
+ *
+ * Reads build/*.asset.php manifests produced by @wordpress/scripts for
+ * dependency arrays and cache-busting version hashes.
+ *
+ * Hooks registered here:
+ *   - customize_controls_enqueue_scripts → customizer controls SPA
+ *   - customize_preview_init             → customizer preview script
+ *   - wp_enqueue_scripts                 → frontend runtime (gated in phase-07)
+ *   - admin_enqueue_scripts              → settings-app on ?page=notibar-settings
+ *
+ * @package NjtNotificationBar\NotificationBar
+ * @since   3.0.0
+ */
+
+namespace NjtNotificationBar\NotificationBar;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class AssetLoader
+ *
+ * Singleton. Registers WP action hooks on instantiation.
+ * Call AssetLoader::get_instance() once from the plugin bootstrap.
+ */
+class AssetLoader {
+
+	/**
+	 * Hook suffix produced by WP for the Settings submenu.
+	 *
+	 * Pattern: '{sanitize_title(parent_menu_title)}_page_{submenu_slug}'.
+	 * For our menu titled "Notibar" with submenu slug "notibar-settings",
+	 * WP populates $admin_page_hooks['notibar-customize'] = sanitize_title('Notibar') = 'notibar',
+	 * then get_plugin_page_hookname concatenates → 'notibar_page_notibar-settings'.
+	 *
+	 * Keep in sync if either the menu TITLE (not the slug) or the submenu
+	 * slug changes in NotificationBarHandleAdmin::njt_nofi_showMenu().
+	 */
+	const SETTINGS_HOOK_SUFFIX = 'notibar_page_notibar-settings';
+
+	/** @var AssetLoader|null */
+	protected static $instance = null;
+
+	/**
+	 * Return (or create) the singleton instance.
+	 *
+	 * @return AssetLoader
+	 */
+	public static function get_instance(): self {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Private constructor — registers action hooks.
+	 */
+	private function __construct() {
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_customizer_controls' ) );
+		add_action( 'customize_preview_init',             array( $this, 'enqueue_customizer_preview' ) );
+		add_action( 'wp_enqueue_scripts',                 array( $this, 'enqueue_frontend' ) );
+		add_action( 'admin_enqueue_scripts',              array( $this, 'enqueue_settings_app' ) );
+	}
+
+	// -------------------------------------------------------------------------
+	// Enqueue methods
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Enqueue the Customizer controls SPA bundle.
+	 *
+	 * Loaded in the Customizer controls pane (wp-admin side).
+	 * The SPA mounts into #njt-notibar-app (rendered by WpCustomControlNotibarApp).
+	 * Boot data is inlined before the bundle via wp_add_inline_script.
+	 *
+	 * @return void
+	 */
+	public function enqueue_customizer_controls(): void {
+		$asset = $this->load_asset_manifest( 'customizer-app' );
+		if ( null === $asset ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'njt-notibar-customizer-app',
+			NJT_NOFI_PLUGIN_URL . 'build/customizer-app.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+
+		// Inline boot data before the bundle so window.njtNotibarBoot is available.
+		$boot_data = $this->get_boot_data();
+		wp_add_inline_script(
+			'njt-notibar-customizer-app',
+			'window.njtNotibarBoot = ' . wp_json_encode( $boot_data ) . ';',
+			'before'
+		);
+
+		// Enqueue companion stylesheet if the build produced one.
+		$css_path = NJT_NOFI_PLUGIN_PATH . 'build/customizer-app.css';
+		if ( file_exists( $css_path ) ) {
+			// Declare wp-components as a style dependency. WP 7.0+ stopped
+			// auto-loading the wp-components stylesheet in the Customizer
+			// controls pane (it now only auto-loads in the block editor),
+			// so without this dependency our ToggleControl / DropdownMenu
+			// / DateTimePicker / CheckboxControl render unstyled.
+			wp_enqueue_style(
+				'njt-notibar-customizer-app',
+				NJT_NOFI_PLUGIN_URL . 'build/customizer-app.css',
+				array( 'wp-components' ),
+				$asset['version']
+			);
+		}
+	}
+
+	/**
+	 * Build the SPA boot data array localized before the bundle.
+	 *
+	 * colorPresets: ported from legacy WpCustomControlColorPreset data-value attributes.
+	 * Format per entry: { bg, btnBg, text, btnText } — same order as legacy arrColor[0..3].
+	 *
+	 * @return array
+	 */
+	private function get_boot_data(): array {
+		// Role list for the per-bar audience picker (Pro). [{slug,label}].
+		$role_names = function_exists( 'wp_roles' ) ? wp_roles()->get_names() : [];
+		$roles      = [];
+		foreach ( $role_names as $slug => $label ) {
+			$roles[] = [
+				'slug'  => $slug,
+				'label' => function_exists( 'translate_user_role' ) ? translate_user_role( $label ) : $label,
+			];
+		}
+
+		return [
+			'restRoot'     => esc_url_raw( rest_url( 'notibar/v1' ) ),
+			'restNonce'    => wp_create_nonce( 'wp_rest' ),
+			'isPro'        => defined( 'NJT_NOFI_IS_PRO' ) ? (bool) NJT_NOFI_IS_PRO : true,
+			'upgradeUrl'   => defined( 'NJT_NOFI_UPGRADE_URL' ) ? NJT_NOFI_UPGRADE_URL : '',
+			'roles'        => $roles,
+			'defaultBar'   => Schema::defaultBar(),
+			'defaultGlobal' => Schema::defaultGlobal(),
+			'colorPresets' => [
+				[ 'bg' => '#9af4cf', 'btnBg' => '#1919cf', 'text' => '#1919cf', 'btnText' => '#ffffff' ],
+				[ 'bg' => '#fff799', 'btnBg' => '#1919cf', 'text' => '#e65100', 'btnText' => '#ffffff' ],
+				[ 'bg' => '#212121', 'btnBg' => '#dd2c00', 'text' => '#ffffff', 'btnText' => '#ffffff' ],
+				[ 'bg' => '#ffffff', 'btnBg' => '#212121', 'text' => '#212121', 'btnText' => '#ffffff' ],
+				[ 'bg' => '#d50000', 'btnBg' => '#43a047', 'text' => '#ffffff', 'btnText' => '#ffffff' ],
+				[ 'bg' => '#2962ff', 'btnBg' => '#ffffff', 'text' => '#ffffff', 'btnText' => '#0288D1' ],
+				[ 'bg' => '#18ffff', 'btnBg' => '#ffffff', 'text' => '#1919cf', 'btnText' => '#1976D2' ],
+				[ 'bg' => '#78909c', 'btnBg' => '#ff5722', 'text' => '#ffffff', 'btnText' => '#ffffff' ],
+			],
+		];
+	}
+
+	/**
+	 * Enqueue the Customizer preview script.
+	 *
+	 * Loaded inside the preview iframe. Depends on the built-in
+	 * `customize-preview` script so postMessage transport is ready.
+	 *
+	 * @return void
+	 */
+	public function enqueue_customizer_preview(): void {
+		$asset = $this->load_asset_manifest( 'customizer-preview' );
+		if ( null === $asset ) {
+			return;
+		}
+
+		// Ensure customize-preview is in the dep list so the iframe transport is ready.
+		$dependencies = array_unique(
+			array_merge( array( 'customize-preview' ), $asset['dependencies'] )
+		);
+
+		wp_enqueue_script(
+			'njt-notibar-customizer-preview',
+			NJT_NOFI_PLUGIN_URL . 'build/customizer-preview.js',
+			$dependencies,
+			$asset['version'],
+			true
+		);
+
+		// Enqueue the same frontend stylesheet inside the preview iframe so
+		// the bar renders identically to the live site. enqueue_frontend()
+		// gates on shouldRender() which can return false in the preview
+		// (e.g. previewing a page with no matching bar), leaving the iframe
+		// without styles — explicit enqueue here guarantees parity.
+		wp_enqueue_style(
+			'njt-notibar-frontend',
+			NJT_NOFI_PLUGIN_URL . 'assets/frontend/css/notibar.css',
+			array(),
+			$asset['version']
+		);
+	}
+
+	/**
+	 * Enqueue the frontend runtime bundle.
+	 *
+	 * Gated: only enqueues when NotificationBarHandle::shouldRender() returns
+	 * true (i.e. at least one enabled bar passes server-side pre-filter).
+	 * The handler also wires wp_add_inline_script('njt-notibar-frontend', ...)
+	 * with window.njtNotibarData, so the script handle MUST be registered here
+	 * before the footer fires.
+	 *
+	 * @return void
+	 */
+	public function enqueue_frontend(): void {
+		// Gate: skip if no bars will render on this page request.
+		$handle = NotificationBarHandle::getInstance();
+		if ( ! $handle->shouldRender() ) {
+			return;
+		}
+
+		$asset = $this->load_asset_manifest( 'frontend' );
+		if ( null === $asset ) {
+			return;
+		}
+
+		// Register + enqueue the JS bundle (no jQuery dependency — vanilla only).
+		wp_register_script(
+			'njt-notibar-frontend',
+			NJT_NOFI_PLUGIN_URL . 'build/frontend.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+		wp_enqueue_script( 'njt-notibar-frontend' );
+
+		// Enqueue companion CSS.
+		wp_enqueue_style(
+			'njt-notibar-frontend',
+			NJT_NOFI_PLUGIN_URL . 'assets/frontend/css/notibar.css',
+			[],
+			$asset['version']
+		);
+
+	}
+
+	/**
+	 * Enqueue the Settings page SPA bundle.
+	 *
+	 * Gated on the exact hook suffix produced by add_submenu_page for the
+	 * Settings page registered in NotificationBarHandleAdmin::njt_nofi_showMenu()
+	 * (parent slug "notibar-customize", submenu slug "notibar-settings").
+	 *
+	 * @param string $hook_suffix Current admin page hook suffix.
+	 * @return void
+	 */
+	public function enqueue_settings_app( string $hook_suffix ): void {
+		if ( self::SETTINGS_HOOK_SUFFIX !== $hook_suffix ) {
+			return;
+		}
+
+		$asset = $this->load_asset_manifest( 'settings-app' );
+		if ( null === $asset ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'njt-notibar-settings-app',
+			NJT_NOFI_PLUGIN_URL . 'build/settings-app.js',
+			$asset['dependencies'],
+			$asset['version'],
+			true
+		);
+
+		// Inline boot data before the bundle so window.njtNotibarSettingsBoot
+		// is available when index.js reads it at module top-level.
+		$boot_data = [
+			'restRoot'  => esc_url_raw( rest_url( 'notibar/v1' ) ),
+			'restNonce' => wp_create_nonce( 'wp_rest' ),
+			'isPro'     => defined( 'NJT_NOFI_IS_PRO' ) ? (bool) NJT_NOFI_IS_PRO : true,
+			'upgradeUrl' => defined( 'NJT_NOFI_UPGRADE_URL' ) ? NJT_NOFI_UPGRADE_URL : '',
+			'bars'      => json_decode( get_option( 'njt_nofi_bars', '[]' ), true ) ?: [],
+			'siteHost'  => wp_parse_url( home_url(), PHP_URL_HOST ),
+		];
+		wp_add_inline_script(
+			'njt-notibar-settings-app',
+			'window.njtNotibarSettingsBoot = ' . wp_json_encode( $boot_data ) . ';',
+			'before'
+		);
+
+		// Companion stylesheet with explicit wp-components dep (same rationale
+		// as enqueue_customizer_controls — WP no longer auto-loads the
+		// wp-components stylesheet in classic admin pages).
+		$css_path = NJT_NOFI_PLUGIN_PATH . 'build/settings-app.css';
+		if ( file_exists( $css_path ) ) {
+			wp_enqueue_style(
+				'njt-notibar-settings-app',
+				NJT_NOFI_PLUGIN_URL . 'build/settings-app.css',
+				array( 'wp-components' ),
+				$asset['version']
+			);
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Internal helpers
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Load and return a build asset manifest array.
+	 *
+	 * wp-scripts (named-entry mode) generates `build/{entry-name}.asset.php` containing:
+	 *   [ 'dependencies' => string[], 'version' => string ]
+	 *
+	 * e.g. entry 'customizer-app' → build/customizer-app.asset.php
+	 *
+	 * @param string $entry_name  Webpack entry name, e.g. 'customizer-app'.
+	 * @return array{dependencies: string[], version: string}|null
+	 *         Returns null if the manifest file does not exist (build not run yet).
+	 */
+	private function load_asset_manifest( string $entry_name ): ?array {
+		$manifest_path = NJT_NOFI_PLUGIN_PATH . 'build/' . $entry_name . '.asset.php';
+
+		if ( ! file_exists( $manifest_path ) ) {
+			// Build has not been run — silently skip so legacy plugin still loads.
+			return null;
+		}
+
+		$asset = require $manifest_path;
+
+		if ( ! is_array( $asset )
+			|| ! isset( $asset['dependencies'], $asset['version'] )
+		) {
+			return null;
+		}
+
+		return $asset;
+	}
+}

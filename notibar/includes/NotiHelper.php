@@ -1,30 +1,43 @@
 <?php
-namespace NjtNotificationBar;
-use NjtNotificationBar\NotificationBar\WpCustomNotification;
-
-defined('ABSPATH') || exit;
 /**
- * NotiHelper Logic 
+ * NotiHelper — legacy v2 helper class.
+ *
+ * This class was used in v2.x to check cookie-based dismissal state against
+ * legacy flat theme_mods. In v3.0 all dismissal logic is handled client-side
+ * by the frontend JS bundle. This file is retained for autoloader compatibility
+ * and will be removed in v3.1.
+ *
+ * @package NjtNotificationBar
+ * @deprecated 3.0.0 Dismissal is now client-side. No methods should be called.
+ */
+
+namespace NjtNotificationBar;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class NotiHelper
+ *
+ * @deprecated 3.0.0
  */
 class NotiHelper {
-  protected static $instance = null;
 
-  public static function getInstance() {
-    if (null == self::$instance) {
-      self::$instance = new self;
-    }
+	/** @var NotiHelper|null */
+	protected static $instance = null;
 
-    return self::$instance;
-  }
+	/** @return NotiHelper */
+	public static function getInstance(): self {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 
-  public static function is_hide_notibar_with_cookie() {
-    $WpCustomNotification = WpCustomNotification::getInstance();
-    $valueDefault = $WpCustomNotification->valueDefault;
-    $cookie_value =  $_COOKIE['njt-close-notibar'] ?? null;
-    $hide_close_button = get_theme_mod( 'njt_nofi_hide_close_button',$valueDefault['hide_close_button']);
-
-    if ($cookie_value == 'true' && !is_customize_preview() && $hide_close_button == 'close_button') {
-      return true;
-    }
-  }
+	/**
+	 * @deprecated 3.0.0 Dismissal is handled client-side in v3.
+	 * @return bool Always false in v3.
+	 */
+	public static function is_hide_notibar_with_cookie(): bool {
+		return false;
+	}
 }

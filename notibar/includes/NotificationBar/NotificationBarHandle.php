@@ -1,406 +1,371 @@
 <?php
+/**
+ * Notification Bar front-end handler — v3.0 rewrite.
+ *
+ * Replaces legacy display_notification() + njt_nofi_rederInput() with a
+ * single-slot model driven by inline JSON + the new frontend JS bundle.
+ *
+ * Responsibilities:
+ *  - Read njt_nofi_bars / njt_nofi_global theme_mods.
+ *  - Apply filter njt_nofi_resolve_strings (phase 08 WPML bridge hooks here).
+ *  - Server-side pre-filter to detect "nothing to show" → skip asset enqueue.
+ *  - On wp_footer: emit #njt-notibar-slot shell + inline window.njtNotibarData.
+ *  - Admin features (menu, review, action links) delegated to trait.
+ *
+ * @package NjtNotificationBar\NotificationBar
+ * @since   3.0.0
+ */
+
 namespace NjtNotificationBar\NotificationBar;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
-use NjtNotificationBar\NotificationBar\WpCustomNotification;
-use NjtNotificationBar\NotificationBar\WpMobileDetect;
-use NjtNotificationBar\NotificationBar\WpPosts;
-use NjtNotificationBar\NotiHelper;
+require_once __DIR__ . '/NotificationBarHandleAdmin.php';
 
-class NotificationBarHandle
-{
-  protected static $instance = null;
-  private $hook_suffix = array();
-  private $valueDefault = null;
+/**
+ * Class NotificationBarHandle
+ */
+class NotificationBarHandle {
 
-  public static function getInstance()
-  {
-    if (null == self::$instance) {
-      self::$instance = new self;
-    }
+	use NotificationBarHandleAdmin;
 
-    return self::$instance;
-  }
+	/** @var NotificationBarHandle|null */
+	protected static $instance = null;
 
-  private function __construct()
-  {
-    $WpCustomNotification = WpCustomNotification::getInstance();
-    $this->valueDefault = $WpCustomNotification->valueDefault;
+	/** @var bool Whether shouldRender() returned true on this request. */
+	private $should_render = false;
 
-    add_action('admin_menu', array($this, 'njt_nofi_showMenu'));
- 
-    add_action('wp', array( $this, 'njt_nofi_showNotification'));
+	/** @var array All bars (post-filter passthrough to JS). */
+	private $all_bars = [];
 
-    $optionReview = get_option('njt_nofi_review');
-    if (time() >= (int)$optionReview && $optionReview !== '0'){
-      add_action('admin_notices', array($this, 'njt_nofi_give_review'));
-    }
-    
-    add_action('wp_ajax_njt_nofi_save_review', array($this, 'njt_nofi_save_review'));
-    
-    //Register Enqueue
-    add_action('wp_enqueue_scripts', array($this, 'njt_nofi_homeRegisterEnqueue'));
-    add_filter('plugin_action_links_notibar/njt-notification-bar.php', array($this, 'addActionLinks'));
-  }
+	/** @var array Global config. */
+	private $global_config = [];
 
-  public function njt_nofi_showMenu()
-  {
-    global $submenu;
+	/** @var array Computed render context. */
+	private $render_context = [];
 
-    $settings_suffix = add_submenu_page(
-      'options-general.php',
-      __('Notification Bar', NJT_NOFI_DOMAIN),
-      __('Notibar', NJT_NOFI_DOMAIN),
-      'manage_options',
-      'njt_nofi_NotificationBar',
-      array($this, 'njt_nofi_notificationSettings')
-    );
-    $urlEncode = urlencode('autofocus[panel]') ;
-    $link = esc_html(admin_url('/customize.php?'. $urlEncode.'=njt_notification-bar'));
-    if( isset($submenu['options-general.php'])) {
-      foreach($submenu['options-general.php'] as $k=>$item){
-        if ($item[2] == 'njt_nofi_NotificationBar') {
-          $submenu['options-general.php'][$k][2] =  $link;
-        }
-      }
-    }
+	// -------------------------------------------------------------------------
+	// Singleton
+	// -------------------------------------------------------------------------
 
-    $this->hook_suffix = array($settings_suffix);
-  }
+	/**
+	 * @return NotificationBarHandle
+	 */
+	public static function getInstance(): self {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 
-  public function njt_nofi_homeRegisterEnqueue()
-  {
-    $isDisplayNotification = $this->njt_nofi_isDisplayNotification();
-    $isEnableNotification = get_theme_mod('njt_nofi_enable_bar', 1) == 1 ? true : false;
-    $isdevicesDisplay = $this->njt_nofi_devicesDisplay();
+	/**
+	 * Private constructor — registers hooks.
+	 */
+	private function __construct() {
+		add_action( 'admin_menu', [ $this, 'njt_nofi_showMenu' ] );
 
-    if($this->njt_nofi_checkDisplayNotification() && $isdevicesDisplay && !NotiHelper::is_hide_notibar_with_cookie()) {
-      wp_register_style('njt-nofi', NJT_NOFI_PLUGIN_URL . 'assets/frontend/css/notibar.css', array(), NJT_NOFI_VERSION);
-      wp_enqueue_style('njt-nofi');
+		// Evaluate render eligibility after WP query is set up.
+		add_action( 'wp', [ $this, 'maybeRender' ] );
 
-      wp_register_script('njt-nofi', NJT_NOFI_PLUGIN_URL . 'assets/frontend/js/notibar.js', array('jquery'),NJT_NOFI_VERSION, true );
-      wp_enqueue_script('njt-nofi');
+		add_action( 'wp_enqueue_scripts', [ $this, 'njt_nofi_homeRegisterEnqueue' ] );
 
-      wp_localize_script('njt-nofi', 'njt_wp_data', array(
-        'admin_ajax' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce("njt-nofi-notification"),
-        'isPositionFix' => get_theme_mod( 'njt_nofi_position_type', $this->valueDefault['position_type'] ) == 'fixed' ? true : false,
-        'hideCloseButton' => get_theme_mod( 'njt_nofi_hide_close_button',$this->valueDefault['hide_close_button']),
-        'isDisplayButton' => get_theme_mod( 'njt_nofi_handle_button', 1),
-        'presetColor' => get_theme_mod( 'njt_nofi_preset_color', $this->valueDefault['preset_color']),
-        'alignContent' => get_theme_mod( 'njt_nofi_alignment', $this->valueDefault['align_content']),
-        'textColorNotification' => get_theme_mod('njt_nofi_text_color', $this->valueDefault['text_color']),
-        'textButtonColor' => get_theme_mod('njt_nofi_lb_text_color',$this->valueDefault['lb_text_color']),
-        'wp_is_mobile' => wp_is_mobile(),
-        'is_customize_preview' => is_customize_preview(),
-        'wp_get_theme' => wp_get_theme()->get( 'Name' ),
-        'open_after_day' => [
-          'value' => get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']),
-          'is_new_update' => get_option('njt_nofi_open_after_day') != get_theme_mod('njt_nofi_open_after_day', $this->valueDefault['open_after_day']) ? true : false,
-        ],
-        // CLS Optimization data
-        'cls_optimization' => array(
-          'enabled' => true,
-          'delay_ms' => 100,
-          'reserve_space' => true,
-          'smooth_transition' => true
-        ),
-      ));
-    }
+		// Folder-agnostic — works whether the plugin ships as notibar/ (Lite)
+		// or notibar-pro/ (Pro). NJT_NOFI_PLUGIN_BASENAME is defined in the
+		// main plugin file via plugin_basename(__FILE__).
+		add_filter(
+			'plugin_action_links_' . NJT_NOFI_PLUGIN_BASENAME,
+			[ $this, 'addActionLinks' ]
+		);
+	}
 
-   
-  }
+	// -------------------------------------------------------------------------
+	// Public gate — AssetLoader::enqueue_frontend() reads this.
+	// -------------------------------------------------------------------------
 
-  public function njt_nofi_give_review()
-  {
-    if (function_exists('get_current_screen')) {
-      if (get_current_screen()->id == 'plugins') {
-        $this->enqueue_scripts();
-        ?>
-        <div class="notice notice-success is-dismissible" id="njt-nofi-review">
-          <h3><?php _e('Give Notibar a review', NJT_NOFI_DOMAIN)?></h3>
-          <p>
-            <?php _e('Thank you for choosing Notibar. We hope you love it. Could you take a couple of seconds posting a nice review to share your happy experience?', NJT_NOFI_DOMAIN)?>
-          </p>
-          <p>
-            <?php _e('We will be forever grateful. Thank you in advance ;)', NJT_NOFI_DOMAIN)?>
-          </p>
-          <p>
-            <a href="javascript:;" data="rateNow" class="button button-primary" style="margin-right: 5px"><?php _e('Rate now', NJT_NOFI_DOMAIN)?></a>
-            <a href="javascript:;" data="later" class="button" style="margin-right: 5px"><?php _e('Later', NJT_NOFI_DOMAIN)?></a>
-            <a href="javascript:;" data="alreadyDid" class="button"><?php _e('Already did', NJT_NOFI_DOMAIN)?></a>
-          </p>
-        </div>
-        <?php
-      }
-    }
-  }
+	/**
+	 * Returns true when at least one enabled bar passes server-side pre-filter.
+	 *
+	 * @return bool
+	 */
+	public function shouldRender(): bool {
+		return $this->should_render;
+	}
 
-  public function njt_nofi_save_review()
-  {
-    if ( isset( $_POST ) ) {
-      $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : null;
-      $field = isset( $_POST['field'] ) ? sanitize_text_field( $_POST['field'] ) : null;
+	// -------------------------------------------------------------------------
+	// Core render decision — runs on 'wp' hook.
+	// -------------------------------------------------------------------------
 
-      if ( ! wp_verify_nonce( $nonce, 'njt-nofi-review' ) ) {
-        wp_send_json_error( array( 'status' => 'Wrong nonce validate!' ) );
-        exit();
-      }
-      
-      if ($field == 'later'){
-        update_option('njt_nofi_review', time() + 3*60*60*24); //After 3 days show
-      } else if ($field == 'alreadyDid'){
-        update_option('njt_nofi_review', 0);
-      }
-      wp_send_json_success();
-    }
-    wp_send_json_error( array( 'message' => 'Update fail!' ) );
-  }
+	/**
+	 * Evaluate bars and schedule footer output when applicable.
+	 *
+	 * @return void
+	 */
+	public function maybeRender(): void {
+		// Skip in admin, AJAX, and Customizer preview (preview uses its own JS).
+		if ( is_admin() || wp_doing_ajax() || is_customize_preview() ) {
+			return;
+		}
 
-  public function enqueue_scripts(){
-      wp_enqueue_script('njt-nofi-review', NJT_NOFI_PLUGIN_URL . 'assets/admin/js/review.js', array('jquery'), NJT_NOFI_VERSION, false);
-      wp_localize_script('njt-nofi-review', 'wpDataNofi', array(
-          'admin_ajax' => admin_url('admin-ajax.php'),
-          'nonce' => wp_create_nonce("njt-nofi-review"),
-      ));
-  }
+		$bars   = json_decode( get_option( 'njt_nofi_bars', '[]' ), true );
+		$global = json_decode( get_option( 'njt_nofi_global', '{}' ), true );
 
-  public function addActionLinks($links) {
-    $urlEncode = urlencode('autofocus[panel]') ;
-    $linkUrl= esc_html(admin_url('/customize.php?'. $urlEncode.'=njt_notification-bar'));
-    $settingsLinks = array(
-      '<a href="'.$linkUrl.'">Settings</a>',
-    );
-    return array_merge($settingsLinks, $links);
-  }
+		$bars   = is_array( $bars )   ? $bars   : [];
+		$global = is_array( $global ) ? $global : [];
 
- 
-  public function njt_nofi_notificationSettings()
-  {
-    exit;
-  }
+		if ( empty( $bars ) ) {
+			return;
+		}
 
-  public function njt_nofi_checkDisplayNotification() {
-    $isDisplayNotification = $this->njt_nofi_isDisplayNotification();
-    $isEnableNotification = get_theme_mod('njt_nofi_enable_bar', 1) == 1 ? true : false;
-    if($isDisplayNotification && is_customize_preview() ) {
-      return true;
-     }
-    if($isDisplayNotification && $isEnableNotification && !is_customize_preview()) {
-      return true;
-    }
-    return false;
-  }
-
-  public function njt_nofi_is_page() {
-    if ( is_page() 
-    || is_home()
-    || is_front_page()
-    || (function_exists("is_shop") && is_shop()) 
-    || (function_exists("is_search") && is_search()) 
-    || (function_exists("is_preview") && is_preview()) 
-    || (function_exists("is_archive") && is_archive()) 
-    || (function_exists("is_date") && is_date()) 
-    || (function_exists("is_year") && is_year()) 
-    || (function_exists("is_month") && is_month()) 
-    || (function_exists("is_day") && is_day()) 
-    || (function_exists("is_time") && is_time()) 
-    || (function_exists("is_author") && is_author()) 
-    || (function_exists("is_category") && is_category()) 
-    || (function_exists("is_tag") && is_tag()) 
-    || (function_exists("is_tax") && is_tax()) 
-    || (function_exists("is_feed") && is_feed()) 
-    || (function_exists("is_comment_feed") && is_comment_feed()) 
-    || (function_exists("is_trackback") && is_trackback()) 
-    || (function_exists("is_404") && is_404()) 
-    || (function_exists("is_paged") && is_paged()) 
-    || (function_exists("is_attachment") && is_attachment()) 
-    || (function_exists("is_robots") && is_robots()) 
-    || (function_exists("is_posts_page") && is_posts_page()) 
-    || (function_exists("is_post_type_archive") && is_post_type_archive()) ) {
-      return true;
-    }
-    return false;
-  }
-
-  public function njt_nofi_isDisplayNotification() {
-    global $wp_query;
-    $logicDisplayPage = get_theme_mod('njt_nofi_logic_display_page', $this->valueDefault['logic_display_page']);
-    $listDisplayPage = explode(',',get_theme_mod('njt_nofi_list_display_page'));
-    $logicDisplayPost = get_theme_mod('njt_nofi_logic_display_post', $this->valueDefault['logic_display_post']);
-    $listDisplayPost = explode(',',get_theme_mod('njt_nofi_list_display_post'));
-
-    if(function_exists( 'is_shop' ) && is_shop()) {
-      $currentPageOrPostID = wc_get_page_id( 'shop' );
-    } else {
-      $currentPageOrPostID = $wp_query->get_queried_object_id();
-    }
-
-    if ($logicDisplayPage == 'dis_selected_page' ) {
-      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return $this->applyNotificationFilter(true, $currentPageOrPostID);
-    }
-
-    if ($logicDisplayPage == 'hide_selected_page' ) {
-      if(in_array('home_page', $listDisplayPost) && is_home() || in_array('home_page', $listDisplayPage) && is_front_page()) return $this->applyNotificationFilter(false, $currentPageOrPostID);
-    }
-
-    if ( $this->njt_nofi_is_page()) {
-      if( $logicDisplayPage == 'dis_all_page' ) return $this->applyNotificationFilter(true, $currentPageOrPostID);
-      if( $logicDisplayPage == 'hide_all_page' ) return $this->applyNotificationFilter(false, $currentPageOrPostID) ;
-      if ($logicDisplayPage == 'dis_selected_page' ) {
-        if(!empty($listDisplayPage) && in_array($currentPageOrPostID, $listDisplayPage)) return $this->applyNotificationFilter(true, $currentPageOrPostID);
-        return $this->applyNotificationFilter(false, $currentPageOrPostID);
-      }
-      if ($logicDisplayPage == 'hide_selected_page' ) {
-        if( !empty($listDisplayPage) && in_array($currentPageOrPostID, $listDisplayPage)) return $this->applyNotificationFilter(false, $currentPageOrPostID);
-        return $this->applyNotificationFilter(true, $currentPageOrPostID);
-      }
-    }
-
-    if (is_single()) {
-      if( $logicDisplayPost == 'dis_all_post' ) return $this->applyNotificationFilter(true, $currentPageOrPostID);
-      if( $logicDisplayPost == 'hide_all_post' ) return $this->applyNotificationFilter(false, $currentPageOrPostID);
-      if ($logicDisplayPost == 'dis_selected_post' ) {
-        if(!empty($listDisplayPost) && in_array($currentPageOrPostID, $listDisplayPost)) return $this->applyNotificationFilter(true, $currentPageOrPostID);
-        return $this->applyNotificationFilter(false, $currentPageOrPostID);
-      }
-      if ($logicDisplayPost == 'hide_selected_post' ) {
-        if( !empty($listDisplayPost) && in_array($currentPageOrPostID, $listDisplayPost)) return $this->applyNotificationFilter(false, $currentPageOrPostID);
-        return $this->applyNotificationFilter(true, $currentPageOrPostID);
-      }
-    }
-
-    return $this->applyNotificationFilter(false, $currentPageOrPostID);
-  }
-
-  private function applyNotificationFilter($should_display, $current_page_id) {
-    return apply_filters('njt_nofi_is_display_notification', $should_display, $current_page_id);
-  }
-
-  public function njt_nofi_devicesDisplay() {
-    $isdevicesDisplay = get_theme_mod('njt_nofi_devices_display', $this->valueDefault['devices_display']);
-    if($isdevicesDisplay == 'all_devices') {
-      return true;
-    }
-    if ($isdevicesDisplay == 'desktop' && !wp_is_mobile() ) {
-      return true;
-    }
-    if ($isdevicesDisplay == 'mobile' && wp_is_mobile() ) {
-      return true;
-    }
-    return false;
-  }
+		// Phase 08 WPML bridge hooks here to translate per-bar string fields.
+		$bars = apply_filters( 'njt_nofi_resolve_strings', $bars );
 
 
-  public function njt_nofi_showNotification()
-  {
-    // Display Notification Bar.
-    $isDisplayNotification = $this->njt_nofi_isDisplayNotification();
-    $isEnableNotification = get_theme_mod('njt_nofi_enable_bar', 1) == 1 ? true : false;
-    $isdevicesDisplay = $this->njt_nofi_devicesDisplay();
-  
-    if($isDisplayNotification && $isdevicesDisplay && is_customize_preview()) {
-     add_action( 'wp_footer', array( $this, 'display_notification' ),10);
-    }
+		$context = $this->getRenderContext();
 
-    if($isDisplayNotification && $isEnableNotification && $isdevicesDisplay && !is_customize_preview()) {
-      add_action( 'wp_footer', array( $this, 'display_notification' ),10);
-      add_action( 'wp_footer', array( $this, 'njt_nofi_rederInput' ),10);
-     }
-  }
+		// Server-side pre-filter: skip enqueue entirely if no bar can show.
+		if ( empty( $this->filterBarsServer( $bars ) ) ) {
+			return;
+		}
 
-  public function display_notification()
-  {
-    if (NotiHelper::is_hide_notibar_with_cookie()) {
-      return;
-    }
-    
-    if(wp_get_theme()->get( 'Name' ) == 'Nayma') {
-      $widthStyle = 'auto';
-    } else {
-      $widthStyle = '100%';
-    }
+		$this->should_render  = true;
+		$this->all_bars       = $bars;
+		$this->global_config  = $global;
+		$this->render_context = $context;
 
-    if (wp_is_mobile()) {
-      $contentWidth = $widthStyle;
-    } else {
-      $contentWidth = get_theme_mod('njt_nofi_content_width') != null ? get_theme_mod('njt_nofi_content_width').'px' : $widthStyle;
-    }
-  
-    $isPositionFix = get_theme_mod('njt_nofi_position_type', $this->valueDefault['position_type']) == 'fixed' ? true : false;
-    $bgColorNotification = get_theme_mod('njt_nofi_bg_color', $this->valueDefault['bg_color']);
-    $textColorNotification = get_theme_mod('njt_nofi_text_color', $this->valueDefault['text_color']);
-    $lbColorNotification = get_theme_mod('njt_nofi_lb_color', $this->valueDefault['lb_color']);
-    $notificationFontSize = get_theme_mod('njt_nofi_font_size', $this->valueDefault['font_size']);
+		add_action( 'wp_footer', [ $this, 'renderFooterOutput' ], 5 );
+	}
 
-    if(wp_get_theme()->get( 'Name' ) == 'Nayma') {
-      ?>
-        <style>
-            .njt-nofi-notification-bar .njt-nofi-hide .njt-nofi-close-icon,
-            .njt-nofi-display-toggle .njt-nofi-display-toggle-icon {
-              width: 10px !important;
-              height: 10px !important;
-            }
-        </style>
-      <?php
-    }
+	/**
+	 * Echo slot shell + wire inline JSON at wp_footer priority 5.
+	 *
+	 * @return void
+	 */
+	public function renderFooterOutput(): void {
+		echo '<div id="njt-notibar-slot" role="status" aria-live="polite"></div>' . "\n";
 
-    ?>
-      <style>
-        /* CLS Optimization Styles */
-        .njt-nofi-container-content {
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.3s ease-in-out;
-        }
-        
-        .njt-nofi-container-content.njt-nofi-visible {
-          opacity: 1;
-          visibility: visible;
-        }
-        
-        /* Reserve space for notification bar */
-        body.njt-nofi-reserve-space {
-          padding-top: 60px;
-        }
-        
-        /* Smooth transition for notification bar */
-        .njt-nofi-notification-bar {
-          transform: translateY(-100%);
-          transition: transform 0.3s ease-in-out;
-        }
-        
-        .njt-nofi-container-content.njt-nofi-visible .njt-nofi-notification-bar {
-          transform: translateY(0);
-        }
-        
-        /* Existing styles */
-        .njt-nofi-notification-bar .njt-nofi-hide-button {
-          display: none;
-        }
-        .njt-nofi-notification-bar .njt-nofi-content {
-          font-size : <?php echo esc_html($notificationFontSize.'px') ?>;
-        }
-      </style>
-    <?php
+		wp_add_inline_script(
+			'njt-notibar-frontend',
+			'window.njtNotibarData = ' . wp_json_encode( [
+				'bars'   => $this->all_bars,
+				'global' => $this->global_config,
+				'ctx'    => $this->render_context,
+			] ) . ';',
+			'before'
+		);
+	}
 
-    $viewPath = NJT_NOFI_PLUGIN_PATH . 'views/pages/home/home-notification-bar.php';
-    include_once $viewPath;
-  }
+	// -------------------------------------------------------------------------
+	// Helpers
+	// -------------------------------------------------------------------------
 
-  public function njt_nofi_rederInput() {
-    
-    global $wp_query;
-    $dataDisplay = array(
-      'is_home' => is_home(),
-      'is_page' => is_page(),
-      'is_single' => is_single(),
-      'id_page' => $wp_query->get_queried_object_id()
-    );
+	/**
+	 * Build the render context from the current WP query.
+	 *
+	 * @return array{pageId:int,postId:int,isHome:bool,isSingleProduct:bool,theme:string,serverNow:int,serverWeekday:int,serverHHMM:string,currentCptType:string,currentObjectId:int}
+	 */
+	private function getRenderContext(): array {
+		$object_id = (int) get_queried_object_id();
 
-    ?>
-      <input type="hidden" id="njt_nofi_checkDisplayReview" name="njt_nofi_checkDisplayReview" value='<?php echo (json_encode( $dataDisplay ))?>'>
-    <?php
-  }
+		$page_id = is_singular( 'page' ) ? $object_id : 0;
+
+		// CPT branch context: populated only on single CPT instances (not page,
+		// not post). Powers the "Other post types" display gate in filter-bars.js.
+		// Empty string when not a single CPT instance — filter-bars treats that
+		// as "branch inert" so legacy bars (cptTypes=[]) never enter the branch.
+		$current_cpt_type = '';
+		if ( is_singular() && ! is_singular( 'page' ) && ! is_singular( 'post' ) ) {
+			$pt = get_post_type();
+			if ( is_string( $pt ) && '' !== $pt ) {
+				$current_cpt_type = $pt;
+			}
+		}
+
+		// "Blog" Page assigned as the WP Posts page (Settings → Reading →
+		// "Posts page"). On /blog/ (or whatever URL the assigned Page has)
+		// is_home() is true but is_singular('page') is false because WP
+		// renders the posts loop, not the Page itself. Emit the assigned
+		// Page's real ID so admins can target /blog/ via the regular page
+		// picker. Guarded on `!is_front_page()` to avoid matching twice on
+		// sites where show_on_front=posts (where / is both home and front).
+		if ( 0 === $page_id && is_home() && ! is_front_page() ) {
+			$blog_id = (int) get_option( 'page_for_posts' );
+			if ( $blog_id > 0 ) {
+				$page_id = $blog_id;
+			}
+		}
+
+		// "Shop" picker entry also covers all WC product archive templates
+		// (product category, product tag, product attribute taxonomies) so
+		// admins can target the entire catalog browsing surface with one
+		// picker selection. is_product_taxonomy() covers all of them in one
+		// call (product_cat, product_tag, and custom pa_* attributes).
+		if ( 0 === $page_id
+			&& function_exists( 'wc_get_page_id' )
+			&& (
+				( function_exists( 'is_shop' ) && is_shop() )
+				|| ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() )
+			)
+		) {
+			$shop_id = (int) wc_get_page_id( 'shop' );
+			if ( $shop_id > 0 ) {
+				$page_id = $shop_id;
+			}
+		}
+
+		// Synthetic flag for "Single Product page" picker token. Mirrors
+		// the existing isHome / home_page convention — when admin adds the
+		// 'wc_single_product' token to pageIds, the bar's logic matches
+		// on every single-product permalink.
+		$is_single_product = function_exists( 'is_product' ) && is_product();
+
+		return [
+			'pageId'           => $page_id,
+			'postId'           => is_singular( 'post' ) ? $object_id : 0,
+			'isHome'           => is_home() || is_front_page(),
+			'isSingleProduct'  => $is_single_product,
+			// Match legacy 1:1 — theme-compat fixes are keyed by display Name
+			// ("Divi", "Salient", "Twenty Twenty-Two"), not stylesheet slug.
+			'theme'            => wp_get_theme()->get( 'Name' ),
+			// Server-emitted "now" so JS-side schedule filter agrees with PHP
+			// even on cached pages. Site timezone (current_time honours it).
+			// Kept even when some bars opt into useClientTime — JS branches
+			// per-bar and ignores these fields for client-time bars.
+			'serverNow'        => (int) current_time( 'timestamp' ),
+			'serverWeekday'    => (int) current_time( 'w' ),
+			'serverHHMM'       => current_time( 'H:i' ),
+			'currentCptType'   => $current_cpt_type,
+			'currentObjectId'  => $object_id,
+		];
+	}
+
+
+	/**
+	 * Server-side bar pre-filter (enabled + non-empty devices).
+	 *
+	 * Dismissal is cookie-based (client-only). Page/post 4-state logic is
+	 * handled entirely client-side by filterBars.js. This is purely an
+	 * early-exit optimisation to avoid enqueuing assets when all bars are
+	 * disabled.
+	 *
+	 * @param array $bars All bars decoded from theme_mod.
+	 * @return array Bars that pass the lightweight server check.
+	 */
+	private function filterBarsServer( array $bars ): array {
+		$now      = current_time( 'timestamp' );
+		$weekday  = (int) current_time( 'w' );           // 0 (Sun) .. 6 (Sat)
+		$hhmm_now = current_time( 'H:i' );               // "HH:MM"
+
+		return array_values( array_filter( $bars, function ( $bar ) use ( $now, $weekday, $hhmm_now ) {
+			if ( ! is_array( $bar ) ) {
+				return false;
+			}
+			if ( ! ( $bar['enabled'] ?? false ) ) {
+				return false;
+			}
+			if ( empty( $bar['display']['devices'] ?? [] ) ) {
+				return false;
+			}
+			if ( ! $this->passesSchedule( $bar, $now, $weekday, $hhmm_now ) ) {
+				return false;
+			}
+			return true;
+		} ) );
+	}
+
+	/**
+	 * Schedule filter — date range + day-of-week + daily window.
+	 *
+	 * Mirrors src/shared/filter-bars.js#passesSchedule. Site-TZ branch
+	 * (driven by current_time()) is bypassed when schedule.useClientTime
+	 * is true — the JS filter re-evaluates against visitor browser-local
+	 * time in that case.
+	 *
+	 * @param array  $bar      Bar object.
+	 * @param int    $now      Current unix timestamp (site TZ).
+	 * @param int    $weekday  0..6 (Sun..Sat) — site TZ.
+	 * @param string $hhmm_now "HH:MM" site-local time.
+	 * @return bool true = passes (bar may render).
+	 */
+	private function passesSchedule( array $bar, int $now, int $weekday, string $hhmm_now ): bool {
+		$sched = $bar['schedule'] ?? [];
+		if ( empty( $sched['enabled'] ) ) {
+			return true;
+		}
+
+
+		// Date range — startAt / endAt are "YYYY-MM-DDTHH:MM" site-local.
+		if ( ! empty( $sched['startAt'] ) ) {
+			$start = strtotime( str_replace( 'T', ' ', $sched['startAt'] ) . ':00' );
+			if ( $start && $start > $now ) {
+				return false;
+			}
+		}
+		if ( ! empty( $sched['endAt'] ) ) {
+			$end = strtotime( str_replace( 'T', ' ', $sched['endAt'] ) . ':00' );
+			if ( $end && $end <= $now ) {
+				return false;
+			}
+		}
+
+		// Day-of-week — array of allowed weekday ints. Empty = all days.
+		$dow = $sched['daysOfWeek'] ?? [];
+		if ( is_array( $dow ) && ! empty( $dow ) && ! in_array( $weekday, $dow, true ) ) {
+			return false;
+		}
+
+		// Daily window — "HH:MM" inclusive on start, exclusive on end. Wrapped
+		// windows (e.g. 22:00–02:00) are supported by inverting the test.
+		$dw = $sched['dailyWindow'] ?? [];
+		if ( ! empty( $dw['enabled'] ) ) {
+			$start = $dw['start'] ?? '';
+			$end   = $dw['end'] ?? '';
+			if ( '' !== $start || '' !== $end ) {
+				$in = $this->inDailyWindow( $hhmm_now, $start, $end );
+				if ( ! $in ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Test whether $now ("HH:MM") falls inside [start, end).
+	 * Empty bounds = unbounded on that side. Wrap-around supported
+	 * (e.g. start=22:00 end=02:00 → true at 23:00 and 01:00).
+	 *
+	 * @param string $now   "HH:MM".
+	 * @param string $start "HH:MM" or empty.
+	 * @param string $end   "HH:MM" or empty.
+	 * @return bool
+	 */
+	private function inDailyWindow( string $now, string $start, string $end ): bool {
+		if ( '' === $start && '' === $end ) {
+			return true;
+		}
+		if ( '' === $start ) {
+			return $now < $end;
+		}
+		if ( '' === $end ) {
+			return $now >= $start;
+		}
+		// Lexicographic compare works because HH:MM is zero-padded.
+		if ( $start <= $end ) {
+			return $now >= $start && $now < $end;
+		}
+		// Wrapped window: e.g. 22:00–02:00.
+		return $now >= $start || $now < $end;
+	}
+
+	// -------------------------------------------------------------------------
+	// Compatibility shim — hook exists from v2; now intentionally empty.
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @return void
+	 */
+	public function njt_nofi_homeRegisterEnqueue(): void {
+		// AssetLoader::enqueue_frontend() reads shouldRender() directly.
+	}
 }
