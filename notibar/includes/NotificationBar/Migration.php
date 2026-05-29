@@ -224,9 +224,10 @@ class Migration {
 		</div>
 		<script>
 		(function(){
-			var el=document.getElementById('njt-nofi-migration-notice');
-			if(!el)return;
-			el.querySelector('.notice-dismiss,button')?.addEventListener('click',function(){
+			if ( ! window.jQuery ) {
+				return;
+			}
+			window.jQuery(document).on('click', '#njt-nofi-migration-notice .notice-dismiss', function(){
 				fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
 					body:'action=njt_nofi_dismiss_migration_notice&nonce=<?php echo esc_js( $nonce ); ?>'});
 				el.remove();

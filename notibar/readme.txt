@@ -5,7 +5,7 @@ Tags: notification bar, banner, top bar, announcement, notifications
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 7.0
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -132,6 +132,9 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 2. Edit content and preview it
 
 == Changelog ==
+
+= May 29, 2026 - Version 3.1.1 =
+- Fixed: Migration settings notice dismiss not persisting across page reloads
 
 = May 26, 2026 - Version 3.1.0 =
 - New: Schedule in visitors' local timezones (Pro version only)

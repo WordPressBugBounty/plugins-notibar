@@ -292,6 +292,13 @@ class NotificationBarHandle {
 			return true;
 		}
 
+		// Client-time toggle: defer schedule evaluation to browser JS.
+		// Server gate is intentionally permissive so cached pages can still
+		// surface the bar for visitors whose local clock is inside the window.
+		// Trade-off: bar payload sits in cached HTML before its window opens.
+		if ( ! empty( $sched['useClientTime'] ) ) {
+			return true;
+		}
 
 		// Date range — startAt / endAt are "YYYY-MM-DDTHH:MM" site-local.
 		if ( ! empty( $sched['startAt'] ) ) {
