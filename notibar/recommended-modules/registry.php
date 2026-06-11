@@ -28,7 +28,7 @@ defined('ABSPATH') || exit;
 // so the guard works as expected.
 if (!class_exists(__NAMESPACE__ . '\\Registry', false)) {
 
-    defined('YAY_CROSS_MODULES_REGISTRY_VERSION') || define('YAY_CROSS_MODULES_REGISTRY_VERSION', '1.0.0');
+    defined('YAY_CROSS_MODULES_REGISTRY_VERSION') || define('YAY_CROSS_MODULES_REGISTRY_VERSION', '1.1.0');
 
     class Registry
     {

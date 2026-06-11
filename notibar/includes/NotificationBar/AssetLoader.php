@@ -184,6 +184,18 @@ class AssetLoader {
 			true
 		);
 
+		// NotificationBarHandle::maybeRender() bails inside the preview
+		// (is_customize_preview guard), so window.njtNotibarData is never
+		// inlined here. Emit the minimal ctx the preview JS needs for
+		// theme-compat (registry is keyed by theme display Name).
+		wp_add_inline_script(
+			'njt-notibar-customizer-preview',
+			'window.njtNotibarData = window.njtNotibarData || ' . wp_json_encode(
+				array( 'ctx' => array( 'theme' => wp_get_theme()->get( 'Name' ) ) )
+			) . ';',
+			'before'
+		);
+
 		// Enqueue the same frontend stylesheet inside the preview iframe so
 		// the bar renders identically to the live site. enqueue_frontend()
 		// gates on shouldRender() which can return false in the preview

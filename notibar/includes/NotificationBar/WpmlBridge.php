@@ -84,7 +84,7 @@ class WpmlBridge {
 		$bars = json_decode( $raw, true );
 		$bars = is_array( $bars ) ? $bars : [];
 
-		$newMap = $this->buildStringMap( $bars );
+		$newMap = BarTranslatableStrings::collect( $bars );
 		$oldMap = get_option( self::MAP_OPTION, [] );
 		if ( ! is_array( $oldMap ) ) {
 			$oldMap = [];
@@ -115,107 +115,18 @@ class WpmlBridge {
 			return $bars;
 		}
 
-		foreach ( $bars as &$bar ) {
-			if ( ! is_array( $bar ) || empty( $bar['id'] ) ) {
-				continue;
-			}
-
-			$id = $bar['id'];
-
-			// Main text fields.
-			// Use strict !== '' instead of !empty() so the literal string "0"
-			// (a legitimate user-content value) still gets translated.
-			if ( isset( $bar['content']['text'] ) && '' !== $bar['content']['text'] ) {
-				$bar['content']['text'] = $this->translate(
-					"bar-{$id}-text",
-					$bar['content']['text']
-				);
-			}
-			if ( isset( $bar['content']['textMobile'] ) && '' !== $bar['content']['textMobile'] ) {
-				$bar['content']['textMobile'] = $this->translate(
-					"bar-{$id}-textMobile",
-					$bar['content']['textMobile']
-				);
-			}
-
-			// Desktop button.
-			if ( isset( $bar['content']['button']['text'] ) && '' !== $bar['content']['button']['text'] ) {
-				$bar['content']['button']['text'] = $this->translate(
-					"bar-{$id}-buttonText",
-					$bar['content']['button']['text']
-				);
-			}
-			if ( isset( $bar['content']['button']['url'] ) && '' !== $bar['content']['button']['url'] ) {
-				$bar['content']['button']['url'] = $this->translate(
-					"bar-{$id}-buttonUrl",
-					$bar['content']['button']['url']
-				);
-			}
-
-			// Mobile button.
-			if ( isset( $bar['content']['buttonMobile']['text'] ) && '' !== $bar['content']['buttonMobile']['text'] ) {
-				$bar['content']['buttonMobile']['text'] = $this->translate(
-					"bar-{$id}-buttonTextMobile",
-					$bar['content']['buttonMobile']['text']
-				);
-			}
-			if ( isset( $bar['content']['buttonMobile']['url'] ) && '' !== $bar['content']['buttonMobile']['url'] ) {
-				$bar['content']['buttonMobile']['url'] = $this->translate(
-					"bar-{$id}-buttonUrlMobile",
-					$bar['content']['buttonMobile']['url']
-				);
-			}
-		}
-		unset( $bar ); // break reference from foreach.
-
-		return $bars;
+		// Field schema + walk live in BarTranslatableStrings (shared with
+		// PolylangBridge). translate() falls back to the original when WPML has
+		// no translation for the current locale — safe.
+		return BarTranslatableStrings::apply(
+			$bars,
+			[ $this, 'translate' ]
+		);
 	}
 
 	// -------------------------------------------------------------------------
 	// Private helpers
 	// -------------------------------------------------------------------------
-
-	/**
-	 * Build the canonical string map for a bars array.
-	 *
-	 * Returns an associative array: string_name => string_value.
-	 * Empty values are omitted — no point registering blank strings.
-	 *
-	 * String names follow the pattern:
-	 *   bar-{id}-text | bar-{id}-textMobile | bar-{id}-buttonText |
-	 *   bar-{id}-buttonUrl | bar-{id}-buttonTextMobile | bar-{id}-buttonUrlMobile
-	 *
-	 * @param  array $bars Decoded bars array.
-	 * @return array       Map of name => value for all non-empty translatable fields.
-	 */
-	private function buildStringMap( array $bars ): array {
-		$map = [];
-
-		foreach ( $bars as $bar ) {
-			if ( ! is_array( $bar ) || empty( $bar['id'] ) ) {
-				continue;
-			}
-
-			$id = $bar['id'];
-
-			$candidates = [
-				"bar-{$id}-text"              => $bar['content']['text']                ?? '',
-				"bar-{$id}-textMobile"        => $bar['content']['textMobile']          ?? '',
-				"bar-{$id}-buttonText"        => $bar['content']['button']['text']      ?? '',
-				"bar-{$id}-buttonUrl"         => $bar['content']['button']['url']       ?? '',
-				"bar-{$id}-buttonTextMobile"  => $bar['content']['buttonMobile']['text'] ?? '',
-				"bar-{$id}-buttonUrlMobile"   => $bar['content']['buttonMobile']['url']  ?? '',
-			];
-
-			foreach ( $candidates as $name => $value ) {
-				if ( $value !== '' ) {
-					$map[ $name ] = $value;
-				}
-			}
-		}
-
-		return $map;
-	}
 
 	/**
 	 * Register new / changed strings and unregister removed ones.
@@ -249,11 +160,13 @@ class WpmlBridge {
 	 *
 	 * Falls back to $original if no translation is available.
 	 *
+	 * Public because BarTranslatableStrings::apply() invokes it as a callback.
+	 *
 	 * @param  string $name     WPML string name (e.g. "bar-{id}-text").
 	 * @param  string $original Original (source-language) string value.
 	 * @return string           Translated value, or $original if untranslated.
 	 */
-	private function translate( string $name, string $original ): string {
+	public function translate( string $name, string $original ): string {
 		return (string) apply_filters(
 			'wpml_translate_single_string',
 			$original,

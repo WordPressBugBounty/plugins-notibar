@@ -51,7 +51,9 @@ class WpCustomNotification {
 	 * Private constructor — wires Customizer hooks.
 	 */
 	private function __construct() {
-		add_action( 'customize_register', [ $this, 'register' ], 10 );
+		if ( \NjtNotificationBar\notibar_license_usable() ) {
+			add_action( 'customize_register', [ $this, 'register' ], 10 );
+		}
 	}
 
 	/**
@@ -77,7 +79,7 @@ class WpCustomNotification {
 		// -----------------------------------------------------------------
 		// Settings
 		// -----------------------------------------------------------------
-		// v3.2 — type=option (was theme_mod) so settings persist across theme switches.
+		// v3.1.2 — type=option (was theme_mod) so settings persist across theme switches.
 		// Migration::maybeMigrateThemeModToOption() copies prior theme_mod data on upgrade.
 		$wp_customize->add_setting( 'njt_nofi_bars', [
 			'type'              => 'option',

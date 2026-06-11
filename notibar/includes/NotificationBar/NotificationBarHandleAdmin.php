@@ -85,7 +85,8 @@ trait NotificationBarHandleAdmin {
 		// with the Notibar panel auto-focused. WP follows the entry's index-2
 		// URL when present, so the renderCustomizeStub callback never fires.
 		$url_encode = urlencode( 'autofocus[section]' );
-		$link       = esc_url( admin_url( '/customize.php?' . $url_encode . '=njt_nofi_bars_section' ) );
+
+		$link = \NjtNotificationBar\notibar_license_usable() ? esc_url( admin_url( '/customize.php?' . $url_encode . '=njt_nofi_bars_section' ) ) : esc_url( admin_url( 'admin.php?page=notibar_pro-license' ) );
 
 		if ( isset( $submenu['notibar-customize'] ) ) {
 			foreach ( $submenu['notibar-customize'] as $k => $item ) {
@@ -109,9 +110,9 @@ trait NotificationBarHandleAdmin {
 	 */
 	public function addActionLinks( array $links ): array {
 		$url_encode = urlencode( 'autofocus[section]' );
-		$link_url   = esc_url( admin_url( '/customize.php?' . $url_encode . '=njt_nofi_bars_section' ) );
+		$link_url   = \NjtNotificationBar\notibar_license_usable() ? esc_url( admin_url( '/customize.php?' . $url_encode . '=njt_nofi_bars_section' ) ) : esc_url( admin_url( 'admin.php?page=notibar_pro-license' ) );
 
-		$prepend = [ '<a href="' . $link_url . '">' . __( 'Settings', 'notibar' ) . '</a>' ];
+		$prepend = [ '<a href="' . $link_url . '">' . ( \NjtNotificationBar\notibar_license_usable() ? __( 'Settings', 'notibar' ) : __( 'Enter license key', 'notibar' ) ) . '</a>' ];
 
 		// Lite-only "Go Pro" action link (green). Runtime-gated on the edition
 		// flag — the link ships in both builds but only renders in Lite (Pro

@@ -243,10 +243,9 @@ class GoProPage {
 					<?php esc_html_e( 'Join the website owners using Notibar Pro to put the right message in front of the right visitors, and see exactly what converts.', 'notibar' ); ?>
 				</p>
 				<div class="njt-gopro-author">
-					<img class="njt-gopro-author__avatar" src="<?php echo esc_url( $assets . 'tes-avatar.png' ); ?>" alt="" width="50" height="50" loading="lazy" />
-					<div class="njt-gopro-author__meta">
-						<span class="njt-gopro-author__name">Markus Schmidt<?php echo self::verifiedBadge(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG ?></span>
-						<span class="njt-gopro-author__role"><?php esc_html_e( 'Ecommerce Project Lead, Germany', 'notibar' ); ?></span>
+					<div class="njt-gopro-author__meta" style="align-items: center;">
+						<span class="njt-gopro-author__name">Olaf Ernst<?php echo self::verifiedBadge(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static inline SVG ?></span>
+						<span class="njt-gopro-author__role"><?php esc_html_e( 'Founder & Designer, Australia', 'notibar' ); ?></span>
 					</div>
 				</div>
 			</div>

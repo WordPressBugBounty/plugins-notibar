@@ -64,10 +64,12 @@ class NotificationBarHandle {
 	private function __construct() {
 		add_action( 'admin_menu', [ $this, 'njt_nofi_showMenu' ] );
 
-		// Evaluate render eligibility after WP query is set up.
-		add_action( 'wp', [ $this, 'maybeRender' ] );
-
-		add_action( 'wp_enqueue_scripts', [ $this, 'njt_nofi_homeRegisterEnqueue' ] );
+		if ( \NjtNotificationBar\notibar_license_usable() ) {
+			// Evaluate render eligibility after WP query is set up.
+			add_action( 'wp', [ $this, 'maybeRender' ] );
+	
+			add_action( 'wp_enqueue_scripts', [ $this, 'njt_nofi_homeRegisterEnqueue' ] );
+		}
 
 		// Folder-agnostic — works whether the plugin ships as notibar/ (Lite)
 		// or notibar-pro/ (Pro). NJT_NOFI_PLUGIN_BASENAME is defined in the
@@ -141,7 +143,7 @@ class NotificationBarHandle {
 	 * @return void
 	 */
 	public function renderFooterOutput(): void {
-		echo '<div id="njt-notibar-slot" role="status" aria-live="polite"></div>' . "\n";
+		echo '<div id="njt-notibar-slot" role="status" aria-live="polite" style="content-visibility: visible;"></div>' . "\n";
 
 		wp_add_inline_script(
 			'njt-notibar-frontend',

@@ -98,7 +98,7 @@ class Migration {
 			return;
 		}
 		// v3 data already present (in either v3.0/3.1 theme_mod storage OR
-		// v3.2+ wp_options storage) = clean install or previous partial run.
+		// v3.1.2+ wp_options storage) = clean install or previous partial run.
 		if ( '' !== get_theme_mod( 'njt_nofi_bars', '' ) ) {
 			return;
 		}
@@ -120,8 +120,8 @@ class Migration {
 	}
 
 	/**
-	 * v3.2 — copy the active theme's bars + global theme_mod values into
-	 * wp_options on first load after upgrade. Required because v3.2 flipped
+	 * v3.1.2 — copy the active theme's bars + global theme_mod values into
+	 * wp_options on first load after upgrade. Required because v3.1.2 flipped
 	 * the Customizer setting type from `theme_mod` → `option`, otherwise
 	 * existing users would see empty settings after the version bump.
 	 *
@@ -140,7 +140,7 @@ class Migration {
 			return;
 		}
 
-		// Concurrent-load guard (v2→v3.2 direct upgrade): defer this migration
+		// Concurrent-load guard (v2→v3.1.2 direct upgrade): defer this migration
 		// until the v2→v3 migration has VISIBLY committed FLAG_v3. Without this
 		// gate, a concurrent request could claim FLAG_OPTIONS_MIGRATION before
 		// the v3 set_theme_mod writes are visible to our read, copying empty

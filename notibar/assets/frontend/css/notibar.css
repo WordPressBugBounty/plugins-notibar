@@ -176,20 +176,36 @@
 }
 
 .njt-nofi-button {
-  transition: transform 0.5s;
   min-width: fit-content;
 }
 
-.njt-nofi-button:hover {
-  transform: scale( 1.05 );
+/* shadcn-style CTA: 6px radius, medium weight, color-darken hover/active (no
+   scale), keyboard focus ring in the button's own color. bg + color +
+   font-weight are set via inline style by renderBarHTML(); the inline
+   --njt-btn-bg var feeds the focus outline. */
+.njt-nofi-button-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  /* hover/active darken via filter; bg is set inline and never animates. */
+  transition: filter 0.15s ease;
 }
 
-.njt-nofi-button-text {
-  display: inline-block;
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 3px;
-  /* bg + color + font-weight set via inline style by renderBarHTML(). */
+.njt-nofi-button-text:hover {
+  filter: brightness( 0.92 );
+}
+
+.njt-nofi-button-text:active {
+  filter: brightness( 0.88 );
+}
+
+.njt-nofi-button-text:focus-visible {
+  outline: 2px solid var( --njt-btn-bg, #1919cf );
+  outline-offset: 2px;
 }
 
 /* ==========================================================================
@@ -262,6 +278,12 @@
   }
 }
 
+/* ≤600px: WP core switches #wpadminbar to position:absolute, so it scrolls
+   away with the page while a fixed bar stays pinned at top:46px behind a
+   dead gap. The static 46px above is kept as the correct PRE-SCROLL state;
+   mobile-admin-bar-offset.js clamps the fixed bar's inline top to
+   max(0, adminBarHeight - scrollY) as the user scrolls. */
+
 /* Bottom placement ignores the admin-bar top offset — it pins to the bottom
    edge. Declared after the rules above so it wins at equal specificity. */
 .admin-bar .njt-nofi-container[data-placement='bottom'] {
@@ -323,7 +345,7 @@
 @media (prefers-reduced-motion: reduce) {
   .njt-nofi-close,
   .njt-nofi-toggle,
-  .njt-nofi-button {
+  .njt-nofi-button-text {
     transition: none !important;
   }
 

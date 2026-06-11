@@ -206,7 +206,7 @@ class Schema {
 			'enabled'    => true,
 			'text'       => 'Learn more',
 			'url'        => '',
-			'fontWeight' => 400,
+			'fontWeight' => 500,
 			'newWindow'  => true,
 		];
 	}

@@ -36,7 +36,11 @@ if ( ! class_exists( 'YayReviewMain' ) ) {
 					self::update_time_display($plugin['option_name'], $plugin['display_time']);
 					continue;
 				}
-				if ( ( isset( $_GET['display-reviews'] ) ) || ( time() >= intval( $option ) && '0' !== $option ) ) {
+				// Cast to string: update_option( $option, 0 ) stores an int, and a
+				// persistent object cache can return it as int 0 on later loads.
+				// A strict `'0' !== 0` would be true and wrongly re-show the notice,
+				// so normalise to string before the "never show again" check.
+				if ( ( isset( $_GET['display-reviews'] ) ) || ( time() >= intval( $option ) && '0' !== (string) $option ) ) {
 					$this->list_review_plugins[] = $plugin;
 				}
             }
@@ -84,7 +88,9 @@ if ( ! class_exists( 'YayReviewMain' ) ) {
 
         public static function update_time_display( $option_name, $display_time ) {
             $option = get_option( $option_name, false );
-            if ( '0' !== $option ) {
+            // (string) cast for the same int-0-from-cache reason as do_hooks();
+            // a "never" value must never be rescheduled back into display.
+            if ( '0' !== (string) $option ) {
                 update_option( $option_name, time() + $display_time * 60 * 60 * 24 ); // Re display after X days
             }
         }

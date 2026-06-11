@@ -1,11 +1,11 @@
 === Notibar - Notification Bar for WordPress===
 Contributors: ninjateam
-Donate link: https://codecanyon.net/item/media-folders-manager-for-wordpress/21715379
-Tags: notification bar, banner, top bar, announcement, notifications
+Donate link: https://ninjateam.org/notibar-wordpress-notification-bar/?utm_source=wp-org&utm_medium=notibar
+Tags: notification bar, banner, top bar, announcement, cta
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 7.0
-Stable tag: 3.1.1
+Stable tag: 3.1.4
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -18,9 +18,11 @@ The **Dismiss** button supports three modes: close permanently, collapse/toggle,
 
 **Per-bar page/post rules** let you show bars on all pages, no pages, or a specific include/exclude list.
 
+🔔 Check out **[Notibar Pro - Notification Bar for WordPress](https://ninjateam.org/notibar-wordpress-notification-bar/?utm_source=wp-org&utm_medium=notibar)**
+
 Notibar seamlessly integrates with your existing WordPress theme, ensuring a cohesive look and feel. It has integrated clear and compelling call-to-action buttons to drive user engagement and conversions.
 
-🔔 Check out **[Notibar Pro - Notification Bar for WordPress](https://ninjateam.org/notibar-wordpress-notification-bar/?utm_source=wp-org&utm_medium=notibar)**
+📌 **[Documentation](https://ninjateam.gitbook.io/notibar/how-it-works/customize-section/display-settings)**
 
 ###⚡️ FEATURES
 
@@ -132,6 +134,19 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 2. Edit content and preview it
 
 == Changelog ==
+
+= Jun 11, 2026 - Version 3.1.4 =
+- Improved: Compatible with Divi 5
+- Improved: Compatible with Brandy (WooCommerce theme)
+- Improved: Compatible with lazyload
+- Improved: Compatible with object cache
+
+= Jun 4, 2026 - Version 3.1.3 =
+- Added: Tracking by date, guests/logged-in (Pro version only)
+- Added: Analytics charts, Trend over time & Per-bar comparison (Pro version only)
+- Added: License tab in the Pro version
+- Updated: Admin UI
+- Updated: Bar CTA button styles
 
 = May 29, 2026 - Version 3.1.1 =
 - Fixed: Migration settings notice dismiss not persisting across page reloads
