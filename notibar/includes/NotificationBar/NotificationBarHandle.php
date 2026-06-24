@@ -114,6 +114,11 @@ class NotificationBarHandle {
 		$bars   = is_array( $bars )   ? $bars   : [];
 		$global = is_array( $global ) ? $global : [];
 
+		// Append 3rd-party declared bars (additive-only; native bars cannot be
+		// removed or altered). Done before the empty-check so a site with zero
+		// native bars but a registered bar still renders + enqueues the bundle.
+		$bars = BarRegistry::merge_external( $bars );
+
 		if ( empty( $bars ) ) {
 			return;
 		}

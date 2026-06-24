@@ -5,7 +5,7 @@ Tags: notification bar, banner, top bar, announcement, cta
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 7.0
-Stable tag: 3.1.4
+Stable tag: 3.1.5
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -135,6 +135,10 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 
 == Changelog ==
 
+= Jun 24, 2026 - Version 3.1.5 =
+- Added: Settings to allow showing navigation arrows (Pro version only)
+- Added: Hooks and integrations for 3rd parties
+
 = Jun 11, 2026 - Version 3.1.4 =
 - Improved: Compatible with Divi 5
 - Improved: Compatible with Brandy (WooCommerce theme)
@@ -158,7 +162,7 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 - New: Hide/Display bars on WooCommerce products or Custom Post Types (Pro version only)
 - Updated: Compatible with WordPress 7.0
 
-= Feb 25, 2025 - Version 3.0.0 =
+= Feb 25, 2026 - Version 3.0.0 =
 - Added: Admin menu
 - Added: Multiple Bars support (display different content across different pages)
 - Added: Rotation option for alternating bar display (Pro version only)

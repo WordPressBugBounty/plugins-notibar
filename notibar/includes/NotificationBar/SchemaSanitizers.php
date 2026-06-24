@@ -386,6 +386,9 @@ trait SchemaSanitizers {
 				? (bool) $g['rotationPauseOnHover']
 				: $default['rotationPauseOnHover'],
 			'rotationOrder'           => $rotation_order,
+			'rotationShowArrows'      => isset( $g['rotationShowArrows'] )
+				? (bool) $g['rotationShowArrows']
+				: $default['rotationShowArrows'],
 		];
 	}
 

@@ -263,6 +263,158 @@
 }
 
 /* ==========================================================================
+   Navigation arrows — manual prev/next (Pro rotation)
+   ----------------------------------------------------------------------------
+   Injected by the rotation controller into .njt-nofi-notification-bar, which is
+   position:relative. Arrows are absolute full-height zones pinned to the bar's
+   left/right edges, with a chevron that follows the bar text color via
+   currentColor. The .njt-nofi-has-nav marker (added only when arrows render)
+   reserves content gutter space and nudges the close/toggle button inboard so
+   nothing overlaps.
+   ========================================================================== */
+
+/* Unobtrusive full-height edge zones (lightbox / gallery-slider style): each
+   arrow is a tall transparent click area pinned to the bar's far left/right
+   edge — no visible button, border, or fill. Only the chevron shows, dim by
+   default and brightening on hover, with a faint edge wash to hint clickability. */
+.njt-nofi-nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent !important;
+  color: inherit !important;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  z-index: 2;
+}
+
+.njt-nofi-nav-prev {
+  left: 0;
+}
+
+.njt-nofi-nav-next {
+  right: 0;
+}
+
+.njt-nofi-nav:hover,
+.njt-nofi-nav:focus-visible {
+  opacity: 1;
+}
+
+/* Faint directional wash on hover — hints the zone without a visible button. */
+.njt-nofi-nav-prev:hover {
+  background: linear-gradient( to right, rgba( 127, 127, 127, 0.16 ), transparent );
+}
+
+.njt-nofi-nav-next:hover {
+  background: linear-gradient( to left, rgba( 127, 127, 127, 0.16 ), transparent );
+}
+
+.njt-nofi-nav:focus-visible {
+  /* Inset ring — the zone hugs the bar edge, so an outset ring would sit
+     outside the bar (and be clipped during the carousel slide). */
+  outline: 2px solid #4a90e2;
+  outline-offset: -3px;
+}
+
+.njt-nofi-nav:focus {
+  outline: none;
+}
+
+.njt-nofi-nav-icon {
+  pointer-events: none;
+  width: 22px;
+  height: 22px;
+}
+
+/* Gutters so text/buttons never sit under the edge zones. */
+.njt-nofi-has-nav .njt-nofi-content {
+  padding-left: 52px;
+  padding-right: 52px;
+}
+
+/* Keep the close/toggle button clear of the right-hand edge zone (48px wide).
+   When the close button is disabled this matches nothing — harmless. */
+.njt-nofi-has-nav .njt-nofi-close,
+.njt-nofi-has-nav .njt-nofi-toggle {
+  margin-right: 52px;
+}
+
+/* --------------------------------------------------------------------------
+   Horizontal carousel slide on MANUAL prev/next (not auto-rotate, which keeps
+   its vertical slide-down). The whole bar slides — so bars with different
+   background colors transition cleanly. .njt-nofi-container clips the off-
+   screen bar (gated by the direction class) so no horizontal scrollbar appears;
+   initial/auto renders carry no direction class, so the vertical entrance is
+   untouched. animation-name override uses !important to beat the base + bottom-
+   placement slide rules regardless of selector specificity.
+   -------------------------------------------------------------------------- */
+.njt-nofi-nav-slide-next .njt-nofi-container,
+.njt-nofi-nav-slide-prev .njt-nofi-container {
+  overflow: hidden;
+}
+
+@keyframes njt-nofi-bar-in-right {
+  from {
+    opacity: 0;
+    transform: translateX( 100% );
+  }
+  to {
+    opacity: 1;
+    transform: translateX( 0 );
+  }
+}
+
+@keyframes njt-nofi-bar-in-left {
+  from {
+    opacity: 0;
+    transform: translateX( -100% );
+  }
+  to {
+    opacity: 1;
+    transform: translateX( 0 );
+  }
+}
+
+.njt-nofi-container-content.njt-nofi-visible.njt-nofi-nav-slide-next
+  .njt-nofi-notification-bar {
+  animation-name: njt-nofi-bar-in-right !important;
+}
+
+.njt-nofi-container-content.njt-nofi-visible.njt-nofi-nav-slide-prev
+  .njt-nofi-notification-bar {
+  animation-name: njt-nofi-bar-in-left !important;
+}
+
+@media only screen and (max-width: 480px) {
+  .njt-nofi-nav {
+    width: 40px;
+  }
+
+  .njt-nofi-nav-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .njt-nofi-has-nav .njt-nofi-content {
+    padding-left: 44px;
+    padding-right: 44px;
+  }
+
+  .njt-nofi-has-nav .njt-nofi-close,
+  .njt-nofi-has-nav .njt-nofi-toggle {
+    margin-right: 44px;
+  }
+}
+
+/* ==========================================================================
    WP admin bar offset
    ========================================================================== */
 
@@ -345,12 +497,19 @@
 @media (prefers-reduced-motion: reduce) {
   .njt-nofi-close,
   .njt-nofi-toggle,
-  .njt-nofi-button-text {
+  .njt-nofi-button-text,
+  .njt-nofi-nav {
     transition: none !important;
   }
 
-  /* Skip slide-down — bar appears in final state immediately. */
-  .njt-nofi-notification-bar {
+  /* Skip slide-down AND the manual-nav horizontal slide — bar appears in its
+     final state immediately. The nav-slide selectors are listed at full
+     specificity so they beat the !important animation-name override above. */
+  .njt-nofi-notification-bar,
+  .njt-nofi-container-content.njt-nofi-visible.njt-nofi-nav-slide-next
+    .njt-nofi-notification-bar,
+  .njt-nofi-container-content.njt-nofi-visible.njt-nofi-nav-slide-prev
+    .njt-nofi-notification-bar {
     transform: none !important;
     animation: none !important;
   }

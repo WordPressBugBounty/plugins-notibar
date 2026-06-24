@@ -141,6 +141,7 @@ class Schema {
 			'rotationIntervalSeconds' => 5,
 			'rotationPauseOnHover'    => true,
 			'rotationOrder'           => 'sequential',
+			'rotationShowArrows'      => true,
 		];
 	}
 
@@ -190,6 +191,34 @@ class Schema {
 		}
 
 		return wp_json_encode( self::sanitizeGlobalFields( $decoded ) );
+	}
+
+	/**
+	 * Sanitize a bar declared by a 3rd party (njt_nofi_register_bar / the
+	 * njt_nofi_register_bars filter).
+	 *
+	 * Runs the same per-field validation as native bars (fills defaults from
+	 * defaultBar(), validates enums, sanitizes colors, wp_kses_post on text) so
+	 * injected bars obey identical Lite/Pro field handling downstream. The one
+	 * difference: the integrator's stable `id` is PRESERVED — sanitizeBar()
+	 * regenerates any non-UUID id, which would break dismissal/tracking for a
+	 * declared bar. The id is restricted to [A-Za-z0-9_-] because it lands in
+	 * the data-bar-id attribute and the dismissal cookie key.
+	 *
+	 * Single source of truth for external-id handling: when the caller's id is
+	 * missing or sanitizes to empty, the returned `id` is an empty string —
+	 * BarRegistry::normalize() treats that as the drop signal.
+	 *
+	 * @param  array $bar Raw external bar (may be partial).
+	 * @return array      Sanitized bar; `id` is the cleaned caller id, or '' when invalid.
+	 */
+	public static function sanitizeExternalBar( array $bar ): array {
+		$clean       = self::sanitizeBar( $bar );
+		$clean['id'] = isset( $bar['id'] )
+			? preg_replace( '/[^A-Za-z0-9_\-]/', '', (string) $bar['id'] )
+			: '';
+
+		return $clean;
 	}
 
 	// ------------------------------------------------------------------
