@@ -35,15 +35,36 @@ class Schema {
 	// Enum allowed values (referenced by SchemaSanitizers trait too)
 	// ------------------------------------------------------------------
 
-	const ALLOWED_ALIGNMENT = [ 'center', 'left', 'right', 'space-around' ];
+	const ALLOWED_LAYOUT    = [ 'centered', 'text-left', 'three-zone', 'hero', 'split', 'content-left', 'content-right' ];
+
+	// Maps the removed `alignment` enum to its closest `layout` so bars saved
+	// before the layout picker keep their original look on first re-sanitize.
+	const LEGACY_ALIGNMENT_LAYOUT = [
+		'center'       => 'centered',
+		'left'         => 'content-left',
+		'right'        => 'content-right',
+		'space-around' => 'three-zone',
+	];
 	const ALLOWED_POSITION  = [ 'fixed', 'absolute' ];
 	const ALLOWED_PLACEMENT = [ 'top', 'bottom' ];
 	const ALLOWED_DEVICES   = [ 'desktop', 'mobile' ];
 	const ALLOWED_LOGIC     = [ 'all', 'none', 'include', 'exclude' ];
 	const ALLOWED_CLOSE_BTN = [ 'close', 'toggle', 'disable' ];
-	const ALLOWED_DISP_MODE     = [ 'single', 'rotation' ];
+	const ALLOWED_DISP_MODE     = [ 'single', 'rotation', 'stack' ];
 	const ALLOWED_ROTATION_ORDER = [ 'sequential', 'random' ];
 	const ALLOWED_AUDIENCE      = [ 'all', 'loggedin', 'loggedout', 'roles', 'users' ];
+	const ALLOWED_COUNTRY_LOGIC = [ 'all', 'include', 'exclude' ];
+	// CTA button animation presets (Pro). Token == CSS class suffix == UI value.
+	const ALLOWED_BTN_ATTENTION = [ 'none', 'wobble', 'shake', 'bounce', 'pulse', 'swing', 'jello', 'tada', 'rubber-band', 'heartbeat', 'flash', 'blink', 'vibrate', 'pop', 'bounce-in' ];
+	const ALLOWED_BTN_HOVER     = [ 'none', 'grow', 'shrink', 'lift', 'glow', 'press', 'shadow', 'color-shift', 'slide-fill' ];
+	// Display trigger types (Pro). Defers bar reveal until a runtime condition fires.
+	// none = show immediately; scroll = after N% scrolled; time = after N seconds; click = after N document clicks.
+	const ALLOWED_TRIGGER_TYPE  = [ 'none', 'scroll', 'time', 'click' ];
+	// Countdown timer (Pro). type: date = count to a fixed instant; evergreen = per-visitor duration window.
+	// ui = visual style; unit = which time units the timer displays. Tokens == CSS suffixes == UI values.
+	const ALLOWED_CD_TYPE = [ 'date', 'evergreen', 'schedule' ];
+	const ALLOWED_CD_UI   = [ 'boxes', 'flip', 'circular', 'text' ];
+	const ALLOWED_CD_UNIT = [ 'days', 'hours', 'minutes', 'seconds' ];
 
 	// ------------------------------------------------------------------
 	// Default values
@@ -73,10 +94,17 @@ class Schema {
 				'btnBgColor'   => '#1919cf',
 				'btnTextColor' => '#ffffff',
 				'fontSize'     => 15,
-				'alignment'    => 'center',
+				'layout'       => 'centered',
 				'contentWidth' => 900,
 				'positionType' => 'fixed',
 				'placement'    => 'top',
+				// Overall bar opacity, percent (10–100). Fades the whole bar via CSS
+				// opacity on the un-animated container. MIRROR: defaults.js style.opacity.
+				'opacity'      => 100,
+				// Snapshot of the colour preset the user last applied to this
+				// bar, or null. Drives the "reset to preset" behaviour of the
+				// per-colour Reset buttons. Shape: { bg, text, btnBg, btnText, name? }.
+				'activePreset' => null,
 			],
 			'display' => [
 				'devices'   => [ 'desktop', 'mobile' ],
@@ -90,12 +118,53 @@ class Schema {
 				'audience'  => 'all',
 				'roles'     => [],
 				'userIds'   => [],
+				// Country targeting (Pro). countryLogic: all|include|exclude.
+				// countries: ISO 3166-1 alpha-2 codes. Default = no restriction.
+				'countryLogic' => 'all',
+				'countries'    => [],
 			],
 			'behavior' => [
 				'hideCloseButton' => 'close',
 				'reopenAfterDays' => 1,
+				// Display trigger (Pro). Defers reveal until a runtime condition
+				// fires. value meaning per type: scroll=% (1–100), time=seconds
+				// (0–3600), click=count (1–100); none ignores value.
+				'trigger'         => [ 'type' => 'none', 'value' => 0 ],
 			],
 			'schedule' => self::defaultSchedule(),
+			// Countdown timer (Pro). Disabled by default; render + ticker are
+			// Pro-only. MIRROR: defaults.js DEFAULT_BAR.countdown.
+			'countdown' => self::defaultCountdown(),
+		];
+	}
+
+	/**
+	 * Return the default per-bar countdown timer config (Pro).
+	 *
+	 * type:     'date' counts down to a fixed instant (endAt, resolved in site TZ
+	 *           to an absolute epoch at render); 'evergreen' counts down a
+	 *           per-visitor duration window persisted client-side.
+	 * endAt:    "YYYY-MM-DDTHH:MM" datetime-local (type = date). Empty = inert.
+	 * duration: total seconds for the evergreen window (type = evergreen).
+	 * ui:       visual style — boxes | flip | circular.
+	 * units:    which time units to display, canonical order days..seconds.
+	 *
+	 * @return array
+	 */
+	public static function defaultCountdown(): array {
+		return [
+			'enabled'    => false,
+			'type'       => 'date',
+			'endAt'      => '',
+			'duration'   => 0,
+			'ui'         => 'boxes',
+			'units'      => [ 'days', 'hours', 'minutes', 'seconds' ],
+			// When false (default), leading units that are zero at display time
+			// are hidden (e.g. "00 days"). When true, all selected units show.
+			'showAllUnits' => false,
+			// Bumped by the "Reset visitors' timers" admin action; a change
+			// re-seeds every visitor's evergreen window on their next view.
+			'resetToken' => 0,
 		];
 	}
 
@@ -142,6 +211,7 @@ class Schema {
 			'rotationPauseOnHover'    => true,
 			'rotationOrder'           => 'sequential',
 			'rotationShowArrows'      => true,
+			'stackPositionType'       => 'fixed',
 		];
 	}
 
@@ -228,6 +298,13 @@ class Schema {
 	/**
 	 * Return a default button definition.
 	 *
+	 * action: 'link' (open url) | 'close' (dismiss the bar). 'link' keeps the
+	 * historical behaviour and is the backward-compatible default for data that
+	 * predates this field.
+	 *
+	 * attention / hover: Pro CTA animation presets, both default 'none' so bars
+	 * predating these fields render unchanged.
+	 *
 	 * @return array
 	 */
 	private static function defaultButton(): array {
@@ -237,6 +314,13 @@ class Schema {
 			'url'        => '',
 			'fontWeight' => 500,
 			'newWindow'  => true,
+			'action'     => 'link',
+			'attention'  => 'none',
+			'hover'      => 'none',
+			// Reopen-after-days for a button whose action is 'close' — its own
+			// dismissal cookie TTL, independent of behavior.reopenAfterDays (which
+			// governs the × close control). 0 = never auto-reopen.
+			'reopenAfterDays' => 1,
 		];
 	}
 

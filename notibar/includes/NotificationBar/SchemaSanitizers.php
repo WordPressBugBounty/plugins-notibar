@@ -64,6 +64,10 @@ trait SchemaSanitizers {
 				isset( $bar['schedule'] ) && is_array( $bar['schedule'] ) ? $bar['schedule'] : [],
 				$default['schedule']
 			),
+			'countdown' => self::sanitizeCountdown(
+				isset( $bar['countdown'] ) && is_array( $bar['countdown'] ) ? $bar['countdown'] : [],
+				$default['countdown']
+			),
 		];
 	}
 
@@ -204,6 +208,28 @@ trait SchemaSanitizers {
 			? mb_substr( $text_norm, 0, 200 )
 			: substr( $text_norm, 0, 200 );
 
+		// action: only 'link' or 'close'. Unknown/missing falls back to the
+		// default ('link'), keeping pre-existing data backward-compatible.
+		$action = ( isset( $b['action'] ) && in_array( $b['action'], [ 'link', 'close' ], true ) )
+			? $b['action']
+			: $default['action'];
+
+		// attention / hover: Pro animation presets, validated against the
+		// whitelist; unknown/missing coerces to the default ('none'). Stored in
+		// both editions (harmless); the Pro gate lives in render + UI.
+		$attention = ( isset( $b['attention'] ) && in_array( $b['attention'], self::ALLOWED_BTN_ATTENTION, true ) )
+			? $b['attention']
+			: $default['attention'];
+		$hover = ( isset( $b['hover'] ) && in_array( $b['hover'], self::ALLOWED_BTN_HOVER, true ) )
+			? $b['hover']
+			: $default['hover'];
+
+		// Per-button reopen-after-days (used when action is 'close'). Clamped
+		// 0–365 to mirror behavior.reopenAfterDays.
+		$reopen = max( 0, min( 365,
+			isset( $b['reopenAfterDays'] ) ? intval( $b['reopenAfterDays'] ) : $default['reopenAfterDays']
+		) );
+
 		return [
 			'enabled'    => isset( $b['enabled'] ) ? (bool) $b['enabled'] : $default['enabled'],
 			'text'       => $text,
@@ -212,6 +238,10 @@ trait SchemaSanitizers {
 				: $default['url'],
 			'fontWeight' => $fw,
 			'newWindow'  => isset( $b['newWindow'] ) ? (bool) $b['newWindow'] : $default['newWindow'],
+			'action'     => $action,
+			'attention'  => $attention,
+			'hover'      => $hover,
+			'reopenAfterDays' => $reopen,
 		];
 	}
 
@@ -225,9 +255,17 @@ trait SchemaSanitizers {
 	 * @return array
 	 */
 	private static function sanitizeStyle( array $s, array $default ): array {
-		$alignment = isset( $s['alignment'] ) && in_array( $s['alignment'], self::ALLOWED_ALIGNMENT, true )
-			? $s['alignment']
-			: $default['alignment'];
+		// Layout replaces the old `alignment` field. A valid `layout` wins; when
+		// it is absent (a bar saved before this change) the legacy `alignment`
+		// value is mapped to its closest layout, so old bars keep their look with
+		// no separate migration step. Anything unrecognised falls to the default.
+		if ( isset( $s['layout'] ) && in_array( $s['layout'], self::ALLOWED_LAYOUT, true ) ) {
+			$layout = $s['layout'];
+		} elseif ( isset( $s['alignment'] ) && isset( self::LEGACY_ALIGNMENT_LAYOUT[ $s['alignment'] ] ) ) {
+			$layout = self::LEGACY_ALIGNMENT_LAYOUT[ $s['alignment'] ];
+		} else {
+			$layout = $default['layout'];
+		}
 
 		$position = isset( $s['positionType'] ) && in_array( $s['positionType'], self::ALLOWED_POSITION, true )
 			? $s['positionType']
@@ -244,24 +282,96 @@ trait SchemaSanitizers {
 		) );
 
 		return [
-			'bgColor'      => isset( $s['bgColor'] )
-				? ( sanitize_hex_color( $s['bgColor'] ) ?: $default['bgColor'] )
-				: $default['bgColor'],
+			// Background fills accept an alpha channel (8-digit hex) so the
+			// alpha-enabled colour picker can make them semi-transparent.
+			'bgColor'      => self::sanitizeHexColorMaybeAlpha(
+				$s['bgColor'] ?? null,
+				$default['bgColor']
+			),
 			'textColor'    => isset( $s['textColor'] )
 				? ( sanitize_hex_color( $s['textColor'] ) ?: $default['textColor'] )
 				: $default['textColor'],
-			'btnBgColor'   => isset( $s['btnBgColor'] )
-				? ( sanitize_hex_color( $s['btnBgColor'] ) ?: $default['btnBgColor'] )
-				: $default['btnBgColor'],
+			'btnBgColor'   => self::sanitizeHexColorMaybeAlpha(
+				$s['btnBgColor'] ?? null,
+				$default['btnBgColor']
+			),
 			'btnTextColor' => isset( $s['btnTextColor'] )
 				? ( sanitize_hex_color( $s['btnTextColor'] ) ?: $default['btnTextColor'] )
 				: $default['btnTextColor'],
 			'fontSize'     => $font_size,
-			'alignment'    => $alignment,
+			'layout'       => $layout,
 			'contentWidth' => $content_width,
 			'positionType' => $position,
 			'placement'    => $placement,
+			// Overall bar opacity, percent. Clamped 10–100 (floor of 10 keeps the
+			// bar visible/clickable). MIRROR: defaults.js DEFAULT_BAR.style.opacity.
+			'opacity'      => max( 10, min( 100,
+				isset( $s['opacity'] ) ? intval( $s['opacity'] ) : $default['opacity']
+			) ),
+			'activePreset' => self::sanitizeActivePreset(
+				isset( $s['activePreset'] ) ? $s['activePreset'] : null
+			),
 		];
+	}
+
+	/**
+	 * Sanitize a hex colour that MAY carry an alpha channel.
+	 *
+	 * Accepts 3-, 6-, or 8-digit hex (#rgb, #rrggbb, #rrggbbaa). The alpha-enabled
+	 * colour picker emits 8-digit hex (#rrggbbaa) for transparent fills and
+	 * collapses to 6-digit when fully opaque (colord .toHex()). Unlike core
+	 * sanitize_hex_color() — which rejects the 8-digit form — this keeps the alpha
+	 * byte. The anchored pattern is the security boundary: the value lands in an
+	 * inline style attribute, so only a strict #hex shape is allowed (escapeAttr
+	 * at render is a second layer). Anything else falls back to the default.
+	 *
+	 * @param  mixed  $value    Raw colour value.
+	 * @param  string $fallback Default to use when invalid.
+	 * @return string           Validated #hex string or the fallback.
+	 */
+	private static function sanitizeHexColorMaybeAlpha( $value, string $fallback ): string {
+		if ( is_string( $value ) ) {
+			$trimmed = trim( $value );
+			if ( preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $trimmed ) ) {
+				return $trimmed;
+			}
+		}
+		return $fallback;
+	}
+
+	/**
+	 * Sanitize the active colour-preset snapshot.
+	 *
+	 * Returns a clean { bg, text, btnBg, btnText, name? } array when the four
+	 * colour channels are all present and valid hex; otherwise null (no preset).
+	 * An incomplete or malformed snapshot collapses to null so the per-colour
+	 * Reset buttons safely fall back to the global defaults.
+	 *
+	 * @param  mixed $raw Raw activePreset value.
+	 * @return array|null
+	 */
+	private static function sanitizeActivePreset( $raw ) {
+		if ( ! is_array( $raw ) ) {
+			return null;
+		}
+
+		$out = [];
+		foreach ( [ 'bg', 'text', 'btnBg', 'btnText' ] as $channel ) {
+			if ( ! isset( $raw[ $channel ] ) ) {
+				return null;
+			}
+			$hex = sanitize_hex_color( $raw[ $channel ] );
+			if ( ! $hex ) {
+				return null;
+			}
+			$out[ $channel ] = $hex;
+		}
+
+		if ( isset( $raw['name'] ) ) {
+			$out['name'] = sanitize_text_field( $raw['name'] );
+		}
+
+		return $out;
 	}
 
 	/**
@@ -318,6 +428,22 @@ trait SchemaSanitizers {
 			fn( $v ) => '' !== $v
 		) ) );
 
+		// Country targeting (Pro). countryLogic enum like pageLogic but with its
+		// own allowed set (no 'none'). Codes normalised to uppercase ISO 3166-1
+		// alpha-2; anything not matching ^[A-Z]{2}$ is dropped. List deduped.
+		$country_logic = isset( $d['countryLogic'] ) && in_array( $d['countryLogic'], self::ALLOWED_COUNTRY_LOGIC, true )
+			? $d['countryLogic']
+			: $default['countryLogic'];
+
+		$raw_countries = isset( $d['countries'] ) && is_array( $d['countries'] ) ? $d['countries'] : $default['countries'];
+		$countries     = array_values( array_unique( array_filter(
+			array_map(
+				fn( $v ) => is_string( $v ) ? strtoupper( preg_replace( '/[^A-Za-z]/', '', $v ) ) : '',
+				$raw_countries
+			),
+			fn( $v ) => 1 === preg_match( '/^[A-Z]{2}$/', $v )
+		) ) );
+
 		return [
 			'devices'   => $devices,
 			'pageLogic' => $page_logic,
@@ -330,6 +456,8 @@ trait SchemaSanitizers {
 			'audience'  => $audience,
 			'roles'     => $roles,
 			'userIds'   => self::sanitizeIdList( $d['userIds'] ?? $default['userIds'] ),
+			'countryLogic' => $country_logic,
+			'countries'    => $countries,
 		];
 	}
 
@@ -338,6 +466,9 @@ trait SchemaSanitizers {
 	 *
 	 * hideCloseButton is a 3-state enum: "close" | "toggle" | "disable".
 	 * reopenAfterDays clamped 0–365.
+	 * trigger is { type, value } (Pro display trigger): type whitelisted via
+	 * ALLOWED_TRIGGER_TYPE; value clamped per type (scroll 1–100, time 0–3600,
+	 * click 1–100; none → 0). Missing/invalid → default { none, 0 }.
 	 *
 	 * @param  array $b       Raw behavior data.
 	 * @param  array $default Default behavior values.
@@ -352,9 +483,74 @@ trait SchemaSanitizers {
 			isset( $b['reopenAfterDays'] ) ? intval( $b['reopenAfterDays'] ) : $default['reopenAfterDays']
 		) );
 
+		$rawTrigger = isset( $b['trigger'] ) && is_array( $b['trigger'] ) ? $b['trigger'] : [];
+		$defTrigger = isset( $default['trigger'] ) && is_array( $default['trigger'] )
+			? $default['trigger'] : [ 'type' => 'none', 'value' => 0 ];
+
+		$tType = ( isset( $rawTrigger['type'] ) && in_array( $rawTrigger['type'], self::ALLOWED_TRIGGER_TYPE, true ) )
+			? $rawTrigger['type'] : $defTrigger['type'];
+
+		$tVal = isset( $rawTrigger['value'] ) ? intval( $rawTrigger['value'] ) : 0;
+		switch ( $tType ) {
+			case 'scroll': $tVal = max( 1, min( 100, $tVal ) ); break;   // %
+			case 'time':   $tVal = max( 0, min( 3600, $tVal ) ); break;  // seconds
+			case 'click':  $tVal = max( 1, min( 100, $tVal ) ); break;   // clicks
+			default:       $tVal = 0;                                    // none
+		}
+
 		return [
 			'hideCloseButton' => $hcb,
 			'reopenAfterDays' => $reopen,
+			'trigger'         => [ 'type' => $tType, 'value' => $tVal ],
+		];
+	}
+
+	/**
+	 * Sanitize the countdown timer sub-object (Pro).
+	 *
+	 * Runs in both editions (harmless in Lite, which never renders it). Enum
+	 * fields fall back to defaults; units are whitelisted, de-duped and forced
+	 * into canonical order, never empty; duration clamps to 0..30 days.
+	 *
+	 * MIRROR: src/customizer-app/utils/defaults.js DEFAULT_BAR.countdown.
+	 *
+	 * @param  array $c       Raw countdown data.
+	 * @param  array $default Default countdown values.
+	 * @return array
+	 */
+	private static function sanitizeCountdown( array $c, array $default ): array {
+		$type = ( isset( $c['type'] ) && in_array( $c['type'], Schema::ALLOWED_CD_TYPE, true ) )
+			? $c['type'] : $default['type'];
+
+		$ui = ( isset( $c['ui'] ) && in_array( $c['ui'], Schema::ALLOWED_CD_UI, true ) )
+			? $c['ui'] : $default['ui'];
+
+		// Whitelist units, drop dupes, re-order to the canonical days..seconds order.
+		$raw_units = isset( $c['units'] ) && is_array( $c['units'] ) ? $c['units'] : [];
+		$units     = array_values( array_filter(
+			Schema::ALLOWED_CD_UNIT,
+			static function ( $u ) use ( $raw_units ) {
+				return in_array( $u, $raw_units, true );
+			}
+		) );
+		if ( empty( $units ) ) {
+			$units = $default['units'];
+		}
+
+		// 0..2_592_000 seconds (30 days).
+		$duration = max( 0, min( 2592000,
+			isset( $c['duration'] ) ? intval( $c['duration'] ) : $default['duration']
+		) );
+
+		return [
+			'enabled'    => isset( $c['enabled'] ) ? (bool) $c['enabled'] : $default['enabled'],
+			'type'       => $type,
+			'endAt'      => self::sanitizeDateTimeLocal( isset( $c['endAt'] ) ? $c['endAt'] : '' ),
+			'duration'   => $duration,
+			'ui'         => $ui,
+			'units'      => $units,
+			'showAllUnits' => isset( $c['showAllUnits'] ) ? (bool) $c['showAllUnits'] : $default['showAllUnits'],
+			'resetToken' => max( 0, isset( $c['resetToken'] ) ? intval( $c['resetToken'] ) : $default['resetToken'] ),
 		];
 	}
 
@@ -379,6 +575,10 @@ trait SchemaSanitizers {
 			? $g['rotationOrder']
 			: $default['rotationOrder'];
 
+		$stack_position = isset( $g['stackPositionType'] ) && in_array( $g['stackPositionType'], self::ALLOWED_POSITION, true )
+			? $g['stackPositionType']
+			: $default['stackPositionType'];
+
 		return [
 			'displayMode'             => $display_mode,
 			'rotationIntervalSeconds' => $interval,
@@ -389,6 +589,7 @@ trait SchemaSanitizers {
 			'rotationShowArrows'      => isset( $g['rotationShowArrows'] )
 				? (bool) $g['rotationShowArrows']
 				: $default['rotationShowArrows'],
+			'stackPositionType'       => $stack_position,
 		];
 	}
 

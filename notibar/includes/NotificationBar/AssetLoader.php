@@ -121,7 +121,9 @@ class AssetLoader {
 	 * Build the SPA boot data array localized before the bundle.
 	 *
 	 * colorPresets: ported from legacy WpCustomControlColorPreset data-value attributes.
-	 * Format per entry: { bg, btnBg, text, btnText } — same order as legacy arrColor[0..3].
+	 * Format per entry: { bg, btnBg, text, btnText, name? } — same order as legacy
+	 * arrColor[0..3]. The optional `name` is shown as the swatch tooltip; legacy
+	 * presets without one fall back to a numbered "Preset N" label in the UI.
 	 *
 	 * @return array
 	 */
@@ -153,6 +155,39 @@ class AssetLoader {
 				[ 'bg' => '#2962ff', 'btnBg' => '#ffffff', 'text' => '#ffffff', 'btnText' => '#0288D1' ],
 				[ 'bg' => '#18ffff', 'btnBg' => '#ffffff', 'text' => '#1919cf', 'btnText' => '#1976D2' ],
 				[ 'bg' => '#78909c', 'btnBg' => '#ff5722', 'text' => '#ffffff', 'btnText' => '#ffffff' ],
+				// Curated tone palette (fashion, cosmetics, footwear, jewelry, tech).
+				[ 'bg' => '#EFE7DD', 'btnBg' => '#6F5846', 'text' => '#4A3B2F', 'btnText' => '#F6F0E8', 'name' => 'Coffee' ],
+				[ 'bg' => '#F3E4DA', 'btnBg' => '#C16E4E', 'text' => '#6B3A2A', 'btnText' => '#FBF2EC', 'name' => 'Terracotta' ],
+				[ 'bg' => '#E3D5C8', 'btnBg' => '#8B6F58', 'text' => '#3E2F25', 'btnText' => '#F4EDE4', 'name' => 'Mocha' ],
+				[ 'bg' => '#F4ECDD', 'btnBg' => '#C2A66A', 'text' => '#5A4A2E', 'btnText' => '#3A2E18', 'name' => 'Champagne' ],
+				[ 'bg' => '#F7E9E7', 'btnBg' => '#D9A7A2', 'text' => '#6E4A4A', 'btnText' => '#4A2E2E', 'name' => 'Blush' ],
+				[ 'bg' => '#E6E8DD', 'btnBg' => '#8A9275', 'text' => '#43483A', 'btnText' => '#F2F3EC', 'name' => 'Sage' ],
+				[ 'bg' => '#EFE3E4', 'btnBg' => '#B08A9A', 'text' => '#5A4450', 'btnText' => '#F5EEF0', 'name' => 'Rosé' ],
+				[ 'bg' => '#EDE3D3', 'btnBg' => '#B79B76', 'text' => '#5C4A33', 'btnText' => '#F4EDE0', 'name' => 'Nude Sand' ],
+				[ 'bg' => '#E4E9EC', 'btnBg' => '#93AAB5', 'text' => '#3C4A52', 'btnText' => '#F1F5F6', 'name' => 'Powder Blue' ],
+				[ 'bg' => '#F0E2D0', 'btnBg' => '#B97E47', 'text' => '#5E3D22', 'btnText' => '#FBF1E6', 'name' => 'Caramel' ],
+				[ 'bg' => '#EAE6F0', 'btnBg' => '#A498BE', 'text' => '#4A4256', 'btnText' => '#F4F1F8', 'name' => 'Lavender' ],
+				[ 'bg' => '#E8E3D6', 'btnBg' => '#7E7A5F', 'text' => '#4A4636', 'btnText' => '#F3F1E8', 'name' => 'Olive Taupe' ],
+				[ 'bg' => '#F0E4E2', 'btnBg' => '#7A2E3A', 'text' => '#5A2230', 'btnText' => '#F6EAEA', 'name' => 'Burgundy' ],
+				[ 'bg' => '#E3EAE5', 'btnBg' => '#2F6B52', 'text' => '#1F3A2E', 'btnText' => '#EFF5F1', 'name' => 'Emerald' ],
+				[ 'bg' => '#E9E0D6', 'btnBg' => '#4A3422', 'text' => '#2E2017', 'btnText' => '#F2EBE2', 'name' => 'Espresso' ],
+				[ 'bg' => '#ECEAE6', 'btnBg' => '#232220', 'text' => '#1C1C1A', 'btnText' => '#F3F1EC', 'name' => 'Onyx' ],
+				[ 'bg' => '#E6E6E8', 'btnBg' => '#3C3C42', 'text' => '#2A2A2E', 'btnText' => '#F0F0F2', 'name' => 'Graphite' ],
+				[ 'bg' => '#E5E8EE', 'btnBg' => '#2B3A57', 'text' => '#232B3A', 'btnText' => '#EEF1F6', 'name' => 'Midnight' ],
+				[ 'bg' => '#E8EAEC', 'btnBg' => '#4A535C', 'text' => '#2C3137', 'btnText' => '#F1F3F4', 'name' => 'Slate' ],
+				[ 'bg' => '#E2ECF2', 'btnBg' => '#3E84A8', 'text' => '#234454', 'btnText' => '#EFF6FA', 'name' => 'Tech Blue' ],
+				[ 'bg' => '#FBE8E2', 'btnBg' => '#E07856', 'text' => '#7A3B2C', 'btnText' => '#FFF3EE', 'name' => 'Coral' ],
+				[ 'bg' => '#FCE7EE', 'btnBg' => '#D96E97', 'text' => '#7A3252', 'btnText' => '#FFF0F5', 'name' => 'Peony' ],
+				[ 'bg' => '#E1EFE9', 'btnBg' => '#4FA089', 'text' => '#1F4A3C', 'btnText' => '#EFF8F4', 'name' => 'Mint' ],
+				[ 'bg' => '#EBE3EC', 'btnBg' => '#7C4E86', 'text' => '#4A2E52', 'btnText' => '#F5EEF6', 'name' => 'Plum' ],
+				[ 'bg' => '#FCE3F0', 'btnBg' => '#E5267E', 'text' => '#9E1458', 'btnText' => '#FFFFFF', 'name' => 'Fuchsia' ],
+				[ 'bg' => '#FFE9D6', 'btnBg' => '#FF6D1F', 'text' => '#9A3D00', 'btnText' => '#FFFFFF', 'name' => 'Tangerine' ],
+				[ 'bg' => '#E2E9FF', 'btnBg' => '#2A4BE0', 'text' => '#1A2C8A', 'btnText' => '#FFFFFF', 'name' => 'Cobalt' ],
+				[ 'bg' => '#EEF6D4', 'btnBg' => '#7FB800', 'text' => '#3F5400', 'btnText' => '#1E2A00', 'name' => 'Lime' ],
+				[ 'bg' => '#FFE3E1', 'btnBg' => '#E5252B', 'text' => '#9E1414', 'btnText' => '#FFFFFF', 'name' => 'Cherry' ],
+				[ 'bg' => '#EEE4FF', 'btnBg' => '#7B2FF0', 'text' => '#4A1C9E', 'btnText' => '#FFFFFF', 'name' => 'Violet Pop' ],
+				[ 'bg' => '#D8F3EE', 'btnBg' => '#10A99A', 'text' => '#0B5A4F', 'btnText' => '#FFFFFF', 'name' => 'Turquoise' ],
+				[ 'bg' => '#FFF3CF', 'btnBg' => '#FFC21F', 'text' => '#7A5400', 'btnText' => '#3A2700', 'name' => 'Sunshine' ],
 			],
 		];
 	}
@@ -187,12 +222,15 @@ class AssetLoader {
 		// NotificationBarHandle::maybeRender() bails inside the preview
 		// (is_customize_preview guard), so window.njtNotibarData is never
 		// inlined here. Emit the minimal ctx the preview JS needs for
-		// theme-compat (registry is keyed by theme display Name).
+		// theme-compat (registry is keyed by theme display Name), plus the
+		// localized countdown labels (Pro) so the preview matches the live site.
+		$preview_data = array( 'ctx' => array( 'theme' => wp_get_theme()->get( 'Name' ) ) );
+		if ( defined( 'NJT_NOFI_IS_PRO' ) && NJT_NOFI_IS_PRO ) {
+			$preview_data['i18n'] = CountdownResolver::labels();
+		}
 		wp_add_inline_script(
 			'njt-notibar-customizer-preview',
-			'window.njtNotibarData = window.njtNotibarData || ' . wp_json_encode(
-				array( 'ctx' => array( 'theme' => wp_get_theme()->get( 'Name' ) ) )
-			) . ';',
+			'window.njtNotibarData = window.njtNotibarData || ' . wp_json_encode( $preview_data ) . ';',
 			'before'
 		);
 

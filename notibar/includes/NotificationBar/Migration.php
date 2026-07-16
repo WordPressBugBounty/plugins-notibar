@@ -35,10 +35,11 @@ class Migration {
 	// Constants
 	// ------------------------------------------------------------------
 
-	const FLAG                   = 'njt_nofi_migrated_to_v3';
-	const FLAG_OPTIONS_MIGRATION = 'njt_nofi_migrated_to_options';
-	const BACKUP_OPTION          = 'njt_nofi_v2_backup';
-	const PRUNE_HOOK             = 'njt_nofi_prune_v2_backup';
+	const FLAG                    = 'njt_nofi_migrated_to_v3';
+	const FLAG_OPTIONS_MIGRATION  = 'njt_nofi_migrated_to_options';
+	const FLAG_CPT_LOGIC_BACKFILL = 'njt_nofi_cpt_logic_backfilled';
+	const BACKUP_OPTION           = 'njt_nofi_v2_backup';
+	const PRUNE_HOOK              = 'njt_nofi_prune_v2_backup';
 
 	/** All legacy theme_mod keys owned by v2.1.9. */
 	const LEGACY_KEYS = [
@@ -166,6 +167,95 @@ class Migration {
 		if ( '' !== $global && false === get_option( 'njt_nofi_global', false ) ) {
 			add_option( 'njt_nofi_global', $global, '', true );
 		}
+	}
+
+	/**
+	 * v3.2 — backfill cptLogic on bars saved before v3.1.0 introduced CPT
+	 * targeting. Those bars have no 'cptLogic' key at all; without this,
+	 * filter-bars.js's `display.cptLogic || 'none'` fallback silently hides
+	 * them on every custom-post-type single page after upgrading.
+	 *
+	 * Mirrors MigrationMapper's pageLogic → cptLogic rule (all→all, none→none;
+	 * include/exclude left untouched — no CPT-level equivalent to infer).
+	 *
+	 * Checks both storage locations directly rather than gating on
+	 * FLAG_OPTIONS_MIGRATION: that migration only runs for sites that came
+	 * through the v2→v3 legacy path, so a native v3.0.0–v3.1.1 install (no
+	 * v2 history) may still have its bars sitting in theme_mod only.
+	 *
+	 * Idempotent + concurrent-safe via the same add_option() atomic-add lock
+	 * pattern as the migration steps above.
+	 *
+	 * @return void
+	 */
+	public function maybeBackfillCptLogic(): void {
+		if ( get_option( self::FLAG_CPT_LOGIC_BACKFILL ) ) {
+			return;
+		}
+		if ( ! add_option( self::FLAG_CPT_LOGIC_BACKFILL, 1, '', false ) ) {
+			return;
+		}
+
+		$this->backfillCptLogicInOption();
+		$this->backfillCptLogicInThemeMod();
+	}
+
+	/** Backfill cptLogic on bars stored in the njt_nofi_bars OPTION. */
+	private function backfillCptLogicInOption(): void {
+		$raw = get_option( 'njt_nofi_bars', false );
+		if ( false === $raw ) {
+			return;
+		}
+		$bars = json_decode( (string) $raw, true );
+		if ( ! is_array( $bars ) ) {
+			return;
+		}
+		if ( $this->backfillCptLogicInBars( $bars ) ) {
+			update_option( 'njt_nofi_bars', wp_json_encode( $bars ) );
+		}
+	}
+
+	/** Backfill cptLogic on bars stored in the njt_nofi_bars THEME_MOD. */
+	private function backfillCptLogicInThemeMod(): void {
+		$raw = get_theme_mod( 'njt_nofi_bars', '' );
+		if ( '' === $raw ) {
+			return;
+		}
+		$bars = json_decode( (string) $raw, true );
+		if ( ! is_array( $bars ) ) {
+			return;
+		}
+		if ( $this->backfillCptLogicInBars( $bars ) ) {
+			set_theme_mod( 'njt_nofi_bars', wp_json_encode( $bars ) );
+		}
+	}
+
+	/**
+	 * Mutate $bars in place, seeding cptLogic on any bar missing the key.
+	 *
+	 * @param  array $bars Bars array, mutated by reference.
+	 * @return bool        True if at least one bar changed.
+	 */
+	private function backfillCptLogicInBars( array &$bars ): bool {
+		$changed = false;
+		foreach ( $bars as &$bar ) {
+			if ( ! is_array( $bar ) || ! isset( $bar['display'] ) || ! is_array( $bar['display'] ) ) {
+				continue;
+			}
+			if ( array_key_exists( 'cptLogic', $bar['display'] ) ) {
+				continue;
+			}
+			$page_logic = $bar['display']['pageLogic'] ?? 'all';
+			if ( 'all' === $page_logic ) {
+				$bar['display']['cptLogic'] = 'all';
+				$changed = true;
+			} elseif ( 'none' === $page_logic ) {
+				$bar['display']['cptLogic'] = 'none';
+				$changed = true;
+			}
+		}
+		unset( $bar );
+		return $changed;
 	}
 
 	/** Cron callback — deletes the backup option after 30 days. */

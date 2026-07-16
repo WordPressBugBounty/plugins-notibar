@@ -48,6 +48,67 @@
 }
 
 /* ==========================================================================
+   Stack mode (Pro) — show all matching bars at once.
+   ----------------------------------------------------------------------------
+   Each bar keeps its own full-width markup from renderBarHTML(); the wrapper
+   owns the positioning and the inner .njt-nofi-container pin is neutralized so
+   bars fall into normal flow and stack vertically (one per row). One position
+   type (data-position) applies to the whole stack; placement splits bars into
+   a top wrapper and a bottom wrapper. The bottom wrapper grows from the
+   viewport bottom upward (column-reverse) while DOM order stays list order.
+   ========================================================================== */
+
+.njt-nofi-stack {
+  z-index: 10000;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.njt-nofi-stack[data-position='fixed'] {
+  position: fixed;
+}
+
+.njt-nofi-stack[data-position='absolute'] {
+  position: absolute;
+}
+
+.njt-nofi-stack[data-placement='top'] {
+  top: 0;
+}
+
+.njt-nofi-stack[data-placement='bottom'] {
+  bottom: 0;
+  flex-direction: column-reverse;
+}
+
+/* Neutralize each bar's own fixed/absolute pin so they flow inside the wrapper
+   instead of all stacking at top:0 on top of each other. */
+.njt-nofi-stack .njt-nofi-container {
+  position: static;
+  top: auto;
+  bottom: auto;
+}
+
+/* Hairline divider between adjacent stacked bars (one per gap). The
+   adjacent-sibling combinator follows DOM order, so the divider must sit on the
+   edge that faces the previous bar in each wrapper's VISUAL order: top wrapper
+   flows normally (border-top), bottom wrapper is column-reverse (border-bottom).
+   Splitting the rule keeps exactly one hairline per gap in both directions. */
+.njt-nofi-stack[data-placement='top']
+  > .njt-nofi-container-content
+  + .njt-nofi-container-content {
+  border-top: 1px solid rgba( 0, 0, 0, 0.12 );
+}
+
+.njt-nofi-stack[data-placement='bottom']
+  > .njt-nofi-container-content
+  + .njt-nofi-container-content {
+  border-bottom: 1px solid rgba( 0, 0, 0, 0.12 );
+}
+
+/* ==========================================================================
    Container content — hidden until JS adds .njt-nofi-visible
    ----------------------------------------------------------------------------
    Switched from CSS transitions to a @keyframes animation. Transitions
@@ -143,7 +204,82 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
-  /* display set per variant below; justify-content set via inline style by renderBarHTML(). */
+  /* display set per variant below; arrangement set per layout via the
+     [data-layout] rules below (renderBarHTML emits the attribute). */
+}
+
+/* ============================================================================
+   Content layouts — driven by [data-layout] on .njt-nofi-content. Children are,
+   in DOM order: .njt-nofi-text → .njt-nofi-countdown → .njt-nofi-button.
+   margin:auto sits on text/button (never the countdown) so each layout still
+   holds when a bar has no timer. Replaces the former alignment field.
+   ========================================================================== */
+
+/* Centered — whole content group centered. */
+.njt-nofi-content[data-layout="centered"] {
+  justify-content: center;
+}
+.njt-nofi-content[data-layout="centered"] .njt-nofi-text {
+  text-align: center;
+}
+
+/* Text left — text pinned left; countdown + button cluster to the right. */
+.njt-nofi-content[data-layout="text-left"] {
+  justify-content: flex-start;
+}
+.njt-nofi-content[data-layout="text-left"] .njt-nofi-text {
+  margin-right: auto;
+  text-align: left;
+}
+
+/* Three-zone — text · countdown · button spread across the row. */
+.njt-nofi-content[data-layout="three-zone"] {
+  justify-content: space-between;
+}
+.njt-nofi-content[data-layout="three-zone"] .njt-nofi-text {
+  text-align: left;
+}
+
+/* Split — text + countdown stay left; button pushed to the right edge. */
+.njt-nofi-content[data-layout="split"] {
+  justify-content: flex-start;
+}
+.njt-nofi-content[data-layout="split"] .njt-nofi-text {
+  text-align: left;
+}
+.njt-nofi-content[data-layout="split"] .njt-nofi-button {
+  margin-left: auto;
+}
+
+/* Content left — whole group (text + countdown + button) clustered at the left. */
+.njt-nofi-content[data-layout="content-left"] {
+  justify-content: flex-start;
+}
+.njt-nofi-content[data-layout="content-left"] .njt-nofi-text {
+  text-align: left;
+}
+
+/* Content right — whole group clustered at the right edge. */
+.njt-nofi-content[data-layout="content-right"] {
+  justify-content: flex-end;
+}
+.njt-nofi-content[data-layout="content-right"] .njt-nofi-text {
+  text-align: right;
+}
+
+/* Hero — vertical stack, centered, with an emphasised (larger) countdown. */
+.njt-nofi-content[data-layout="hero"] {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.njt-nofi-content[data-layout="hero"] .njt-nofi-text {
+  text-align: center;
+}
+.njt-nofi-content[data-layout="hero"] .njt-nofi-countdown {
+  transform: scale(1.3);
+  transform-origin: center;
+  margin: 8px 0;
 }
 
 .njt-nofi-content-desktop {
@@ -182,7 +318,9 @@
 /* shadcn-style CTA: 6px radius, medium weight, color-darken hover/active (no
    scale), keyboard focus ring in the button's own color. bg + color +
    font-weight are set via inline style by renderBarHTML(); the inline
-   --njt-btn-bg var feeds the focus outline. */
+   --njt-btn-bg var feeds the focus outline.
+   Shared by both the link (<a>) and the close-action (<button>) variants; the
+   reset block below makes a native <button> render identically to the anchor. */
 .njt-nofi-button-text {
   display: inline-flex;
   align-items: center;
@@ -191,8 +329,17 @@
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 500;
-  /* hover/active darken via filter; bg is set inline and never animates. */
-  transition: filter 0.15s ease;
+  /* Reset native <button> chrome so the close-action button matches the <a>. */
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  /* hover/active darken via filter; bg is set inline and never animates.
+     transform/box-shadow added so the Pro hover effects below can transition. */
+  transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .njt-nofi-button-text:hover {
@@ -206,6 +353,220 @@
 .njt-nofi-button-text:focus-visible {
   outline: 2px solid var( --njt-btn-bg, #1919cf );
   outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Pro CTA animations — Attention (looping) + Hover effects.
+   ----------------------------------------------------------------------------
+   Classes are emitted on .njt-nofi-button-text by render-bar.js (Pro only;
+   stripped from the Lite build). Token in the class == schema enum value == UI value.
+   Periodic loop trick: CSS animation-delay only delays the FIRST run, so the
+   inter-cycle rest is baked into the keyframe — motion lives in 0%–~20%, then
+   the element holds its identity transform 20%–100% over a 4s infinite loop.
+   ========================================================================== */
+
+.njt-nofi-button-text[class*='njt-nofi-anim-'] {
+  animation-duration: 4s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.njt-nofi-anim-wobble {
+  animation-name: njt-nofi-anim-wobble;
+}
+.njt-nofi-anim-shake {
+  animation-name: njt-nofi-anim-shake;
+}
+.njt-nofi-anim-bounce {
+  animation-name: njt-nofi-anim-bounce;
+}
+.njt-nofi-anim-pulse {
+  animation-name: njt-nofi-anim-pulse;
+}
+.njt-nofi-anim-swing {
+  animation-name: njt-nofi-anim-swing;
+  transform-origin: top center;
+}
+.njt-nofi-anim-jello {
+  animation-name: njt-nofi-anim-jello;
+}
+.njt-nofi-anim-tada {
+  animation-name: njt-nofi-anim-tada;
+}
+.njt-nofi-anim-rubber-band {
+  animation-name: njt-nofi-anim-rubber-band;
+}
+.njt-nofi-anim-heartbeat {
+  animation-name: njt-nofi-anim-heartbeat;
+}
+.njt-nofi-anim-flash {
+  animation-name: njt-nofi-anim-flash;
+}
+.njt-nofi-anim-blink {
+  animation-name: njt-nofi-anim-blink;
+}
+.njt-nofi-anim-vibrate {
+  animation-name: njt-nofi-anim-vibrate;
+}
+.njt-nofi-anim-pop {
+  animation-name: njt-nofi-anim-pop;
+}
+.njt-nofi-anim-bounce-in {
+  animation-name: njt-nofi-anim-bounce-in;
+}
+
+@keyframes njt-nofi-anim-wobble {
+  0%, 20%, 100% { transform: none; }
+  3% { transform: translateX( -12px ) rotate( -5deg ); }
+  6% { transform: translateX( 9px ) rotate( 3deg ); }
+  9% { transform: translateX( -7px ) rotate( -3deg ); }
+  12% { transform: translateX( 5px ) rotate( 2deg ); }
+  15% { transform: translateX( -3px ) rotate( -1deg ); }
+}
+
+@keyframes njt-nofi-anim-shake {
+  0%, 20%, 100% { transform: translateX( 0 ); }
+  3%, 9%, 15% { transform: translateX( -8px ); }
+  6%, 12% { transform: translateX( 8px ); }
+}
+
+@keyframes njt-nofi-anim-bounce {
+  0%, 20%, 100% { transform: translateY( 0 ); }
+  4% { transform: translateY( -12px ); }
+  8% { transform: translateY( 0 ); }
+  12% { transform: translateY( -6px ); }
+  16% { transform: translateY( 0 ); }
+}
+
+@keyframes njt-nofi-anim-pulse {
+  0%, 20%, 100% { transform: scale( 1 ); }
+  10% { transform: scale( 1.08 ); }
+}
+
+@keyframes njt-nofi-anim-swing {
+  0%, 20%, 100% { transform: rotate( 0 ); }
+  4% { transform: rotate( 8deg ); }
+  8% { transform: rotate( -6deg ); }
+  12% { transform: rotate( 4deg ); }
+  16% { transform: rotate( -2deg ); }
+}
+
+@keyframes njt-nofi-anim-jello {
+  0%, 20%, 100% { transform: none; }
+  3% { transform: skewX( -10deg ) skewY( -10deg ); }
+  6% { transform: skewX( 8deg ) skewY( 8deg ); }
+  9% { transform: skewX( -5deg ) skewY( -5deg ); }
+  12% { transform: skewX( 3deg ) skewY( 3deg ); }
+  15% { transform: skewX( -1deg ) skewY( -1deg ); }
+}
+
+@keyframes njt-nofi-anim-tada {
+  0%, 20%, 100% { transform: scale( 1 ) rotate( 0 ); }
+  2%, 4% { transform: scale( 0.95 ) rotate( -3deg ); }
+  6%, 10%, 14% { transform: scale( 1.1 ) rotate( 3deg ); }
+  8%, 12% { transform: scale( 1.1 ) rotate( -3deg ); }
+}
+
+@keyframes njt-nofi-anim-rubber-band {
+  0%, 20%, 100% { transform: scale3d( 1, 1, 1 ); }
+  3% { transform: scale3d( 1.25, 0.75, 1 ); }
+  6% { transform: scale3d( 0.75, 1.25, 1 ); }
+  9% { transform: scale3d( 1.15, 0.85, 1 ); }
+  12% { transform: scale3d( 0.95, 1.05, 1 ); }
+  15% { transform: scale3d( 1.05, 0.95, 1 ); }
+  18% { transform: scale3d( 1, 1, 1 ); }
+}
+
+@keyframes njt-nofi-anim-heartbeat {
+  0%, 20%, 100% { transform: scale( 1 ); }
+  3% { transform: scale( 1.15 ); }
+  6% { transform: scale( 1 ); }
+  9% { transform: scale( 1.15 ); }
+  12% { transform: scale( 1 ); }
+}
+
+/* opacity-based; reduced-motion still kills it via animation:none. */
+@keyframes njt-nofi-anim-flash {
+  0%, 20%, 100% { opacity: 1; }
+  5%, 15% { opacity: 0; }
+  10% { opacity: 1; }
+}
+
+@keyframes njt-nofi-anim-blink {
+  0%, 3%, 9%, 15%, 20%, 100% { opacity: 1; }
+  6%, 12%, 18% { opacity: 0; }
+}
+
+@keyframes njt-nofi-anim-vibrate {
+  0%, 20%, 100% { transform: translate( 0 ); }
+  2%, 6%, 10%, 14% { transform: translate( -2px, 2px ); }
+  4%, 8%, 12%, 16% { transform: translate( 2px, -2px ); }
+}
+
+@keyframes njt-nofi-anim-pop {
+  0%, 20%, 100% { transform: scale( 1 ); }
+  5% { transform: scale( 0.92 ); }
+  10% { transform: scale( 1.12 ); }
+  15% { transform: scale( 1 ); }
+}
+
+@keyframes njt-nofi-anim-bounce-in {
+  0%, 20%, 100% { transform: scale( 1 ); opacity: 1; }
+  2% { transform: scale( 0.3 ); opacity: 0; }
+  8% { transform: scale( 1.1 ); opacity: 1; }
+  12% { transform: scale( 0.9 ); }
+  16% { transform: scale( 1.03 ); }
+  18% { transform: scale( 1 ); }
+}
+
+/* Hover effects — no second color needed; --njt-btn-bg is the solid button
+   color set inline by render-bar.js. */
+.njt-nofi-hover-grow:hover {
+  transform: scale( 1.05 );
+}
+.njt-nofi-hover-shrink:hover {
+  transform: scale( 0.95 );
+}
+.njt-nofi-hover-lift:hover {
+  transform: translateY( -3px );
+  box-shadow: 0 6px 16px rgba( 0, 0, 0, 0.18 );
+}
+.njt-nofi-hover-glow:hover {
+  filter: brightness( 1.05 ) drop-shadow( 0 0 8px var( --njt-btn-bg, #1919cf ) );
+}
+.njt-nofi-hover-press:hover {
+  transform: translateY( 1px );
+}
+.njt-nofi-hover-press:active {
+  transform: translateY( 2px ) scale( 0.98 );
+}
+.njt-nofi-hover-shadow:hover {
+  box-shadow: 0 8px 20px rgba( 0, 0, 0, 0.22 );
+}
+.njt-nofi-hover-color-shift:hover {
+  filter: hue-rotate( 25deg ) brightness( 1.05 );
+}
+
+/* slide-fill: translucent overlay sweep on top (pointer-events:none so clicks
+   pass through; text stays readable through the light wash — no markup change).
+   overflow:hidden does NOT clip the :focus-visible outline (outlines are never
+   clipped by overflow), so the focus ring stays intact. */
+.njt-nofi-hover-slide-fill {
+  position: relative;
+  overflow: hidden;
+}
+.njt-nofi-hover-slide-fill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba( 255, 255, 255, 0.2 );
+  transform: translateX( -101% );
+  transition: transform 0.35s ease;
+}
+.njt-nofi-hover-slide-fill:hover::before {
+  transform: translateX( 0 );
 }
 
 /* ==========================================================================
@@ -443,6 +804,20 @@
   bottom: 0;
 }
 
+/* Stack mode (Pro): the top wrapper sits below the admin bar exactly like a
+   single top bar (both fixed and absolute, pre-scroll); the ≤600px scroll
+   clamp is handled by mobile-admin-bar-offset.js for the fixed case. The bottom
+   wrapper keeps bottom:0 from its base rule — no admin-bar offset needed. */
+.admin-bar .njt-nofi-stack[data-placement='top'] {
+  top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+  .admin-bar .njt-nofi-stack[data-placement='top'] {
+    top: 46px;
+  }
+}
+
 /* ==========================================================================
    Mobile responsive — ≤480px
    ========================================================================== */
@@ -512,5 +887,186 @@
     .njt-nofi-notification-bar {
     transform: none !important;
     animation: none !important;
+  }
+
+  /* Pro CTA animations — kill the attention loop and any hover transform/sweep. */
+  .njt-nofi-button-text[class*='njt-nofi-anim-'] {
+    animation: none !important;
+  }
+  .njt-nofi-button-text[class*='njt-nofi-hover-'] {
+    transition: none !important;
+  }
+  .njt-nofi-button-text[class*='njt-nofi-hover-']:hover,
+  .njt-nofi-button-text[class*='njt-nofi-hover-']:active {
+    transform: none !important;
+  }
+  .njt-nofi-hover-slide-fill::before {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   Countdown timer (Pro) — boxes / flip / circular.
+   ----------------------------------------------------------------------------
+   Markup emitted by render-bar.js renderCountdown() (stripped from the Lite
+   build), hydrated each second by src/shared/countdown.js. Inherits the bar
+   text color via currentColor; no dedicated countdown color fields in v1.
+   ========================================================================== */
+.njt-nofi-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px;
+  color: inherit;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Expired → hidden (the ticker adds .is-expired at zero). */
+.njt-nofi-countdown.is-expired {
+  display: none;
+}
+
+.njt-nofi-cd-unit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
+
+.njt-nofi-cd-num {
+  font-weight: 700;
+  font-size: 1.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.njt-nofi-cd-label {
+  font-size: 0.62em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+/* Boxes — bordered cell with a faint fill derived from the text color. */
+.njt-nofi-countdown--boxes .njt-nofi-cd-unit {
+  min-width: 2.4em;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: color-mix( in srgb, currentColor 12%, transparent );
+}
+
+/* Flip — filled card; digit change animates via the .is-flipping class the
+   ticker toggles (skipped under reduced-motion). */
+.njt-nofi-countdown--flip .njt-nofi-cd-unit {
+  min-width: 2.4em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: color-mix( in srgb, currentColor 16%, transparent );
+}
+.njt-nofi-countdown--flip .njt-nofi-cd-num {
+  display: inline-block;
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+.njt-nofi-countdown--flip .njt-nofi-cd-num.is-flipping {
+  animation: njt-nofi-cd-flip 0.4s ease;
+}
+@keyframes njt-nofi-cd-flip {
+  0% {
+    transform: rotateX( 0deg );
+  }
+  50% {
+    transform: rotateX( -90deg );
+    opacity: 0.4;
+  }
+  100% {
+    transform: rotateX( 0deg );
+  }
+}
+
+/* Circular — an SVG ring per unit; the number is overlaid at the ring centre.
+   The ticker sets --cd-progress (0..1) per unit; the fill arc depletes as it
+   drops. Ring viewBox 0 0 36 36, r=16 → circumference ≈ 100.53. */
+.njt-nofi-countdown--circular .njt-nofi-cd-ring {
+  width: 44px;
+  height: 44px;
+  transform: rotate( -90deg );
+}
+.njt-nofi-countdown--circular .njt-nofi-cd-ring-track {
+  stroke: currentColor;
+  stroke-width: 3;
+  opacity: 0.25;
+}
+.njt-nofi-countdown--circular .njt-nofi-cd-ring-fill {
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 100.53;
+  stroke-dashoffset: calc( 100.53 * ( 1 - var( --cd-progress, 1 ) ) );
+  transition: stroke-dashoffset 0.3s linear;
+}
+.njt-nofi-countdown--circular .njt-nofi-cd-num {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85em;
+}
+.njt-nofi-countdown--circular .njt-nofi-cd-label {
+  margin-top: 2px;
+}
+
+/* Text — compact inline "2 days 3 hrs 15 mins 30 secs", no boxes/rings; words
+   stay readable, inherits bar text. */
+.njt-nofi-countdown--text {
+  gap: 7px;
+}
+.njt-nofi-countdown--text .njt-nofi-cd-unit {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 3px;
+}
+.njt-nofi-countdown--text .njt-nofi-cd-num {
+  font-size: 1em;
+  font-weight: 700;
+}
+.njt-nofi-countdown--text .njt-nofi-cd-label {
+  font-size: 0.95em;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.9;
+}
+
+/* Countdown — reduced motion: no flip, no ring tween (instant value swaps). */
+@media (prefers-reduced-motion: reduce) {
+  .njt-nofi-countdown--flip .njt-nofi-cd-num.is-flipping {
+    animation: none !important;
+  }
+  .njt-nofi-countdown--circular .njt-nofi-cd-ring-fill {
+    transition: none !important;
+  }
+}
+
+/* Countdown — mobile: tighten so the timer fits a narrow bar. */
+@media only screen and (max-width: 480px) {
+  .njt-nofi-countdown {
+    gap: 5px;
+  }
+  .njt-nofi-countdown--boxes .njt-nofi-cd-unit,
+  .njt-nofi-countdown--flip .njt-nofi-cd-unit {
+    min-width: 2em;
+    padding: 3px 5px;
+  }
+  .njt-nofi-countdown--circular .njt-nofi-cd-ring,
+  .njt-nofi-countdown--circular .njt-nofi-cd-num {
+    width: 36px;
+    height: 36px;
   }
 }

@@ -3,7 +3,7 @@
  * Plugin Name: Notibar - WordPress Notification Bar
  * Plugin URI: https://ninjateam.org/notibar-wordpress-notification-bar
  * Description: Multiple notification bars with React-powered Customizer editor, live preview, rotation mode, and per-bar display rules.
- * Version: 3.1.5
+ * Version: 3.2.1
  * Author: Ninja Team
  * Author URI: https://ninjateam.org
  * Text Domain: notibar
@@ -17,7 +17,7 @@ namespace NjtNotificationBar;
 defined('ABSPATH') || exit;
 
 define('NJT_NOFI_PREFIX', 'njt_nofi');
-define('NJT_NOFI_VERSION', '3.1.5');
+define('NJT_NOFI_VERSION', '3.2.1');
 
 define('NJT_NOFI_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('NJT_NOFI_PLUGIN_PATH', plugin_dir_path(__FILE__));
@@ -132,11 +132,14 @@ add_action( 'rest_api_init', function () {
 // Migrations — runs at priority 5, BEFORE the main init at priority 10.
 // ORDER MATTERS: maybeRun() (v2→v3 legacy) must execute BEFORE
 // maybeMigrateThemeModToOption() (v3.1→v3.1.2 storage flip) so v2 data lands
-// in theme_mod first and is then copied into wp_options.
+// in theme_mod first and is then copied into wp_options. maybeBackfillCptLogic()
+// (v3.0→v3.1 CPT field backfill) runs last so it sees settled storage, though
+// it independently checks both theme_mod and options either way.
 add_action('plugins_loaded', function () {
   $migration = NotificationBar\Migration::getInstance();
   $migration->maybeRun();
   $migration->maybeMigrateThemeModToOption();
+  $migration->maybeBackfillCptLogic();
 }, 5);
 
 register_activation_hook(__FILE__, array('NjtNotificationBar\\Plugin', 'activate'));

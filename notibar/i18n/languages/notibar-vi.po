@@ -1,63 +1,382 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Notibar\n"
-"POT-Creation-Date: 2022-05-09 14:25+0700\n"
-"PO-Revision-Date: 2022-05-09 14:57+0700\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/Notibar\n"
+"POT-Creation-Date: 2026-07-07T04:10:16+00:00\n"
+"PO-Revision-Date: 2026-07-08 00:00+0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: vi_VN\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.0.1\n"
-"X-Poedit-Basepath: ../..\n"
-"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
-"X-Poedit-WPHeader: njt-notification-bar.php\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
-"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: *.min.js\n"
+"X-Domain: notibar\n"
+"X-Generator: Notibar i18n script\n"
 
-#: includes/NotificationBar/NotificationBarHandle.php:51
-msgid "Notification Bar"
-msgstr "Thanh Thông báo"
+#. Plugin Name of the plugin
+msgid "Notibar - WordPress Notification Bar"
+msgstr "Notibar - Thanh thông báo WordPress"
 
-#: includes/NotificationBar/NotificationBarHandle.php:52
-#: includes/NotificationBar/WpCustomNotification.php:140
+#. Plugin URI of the plugin
+msgid "https://ninjateam.org/notibar-wordpress-notification-bar"
+msgstr "https://ninjateam.org/notibar-wordpress-notification-bar"
+
+#. Description of the plugin
+msgid ""
+"Multiple notification bars with React-powered Customizer editor, live "
+"preview, rotation mode, and per-bar display rules."
+msgstr ""
+"Nhiều thanh thông báo với trình chỉnh sửa Customizer chạy trên React, xem "
+"trước trực tiếp, chế độ xoay vòng và quy tắc hiển thị riêng cho từng thanh."
+
+#. Author of the plugin
+msgid "Ninja Team"
+msgstr "Ninja Team"
+
+#. Author URI of the plugin
+msgid "https://ninjateam.org"
+msgstr "https://ninjateam.org"
+
+#: includes/NotificationBar/CountdownResolver.php:264
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:43
+msgid "Days"
+msgstr "Ngày"
+
+#: includes/NotificationBar/CountdownResolver.php:265
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:44
+msgid "Hours"
+msgstr "Giờ"
+
+#: includes/NotificationBar/CountdownResolver.php:266
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:45
+msgid "Minutes"
+msgstr "Phút"
+
+#: includes/NotificationBar/CountdownResolver.php:267
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:46
+msgid "Seconds"
+msgstr "Giây"
+
+#: includes/NotificationBar/CountdownResolver.php:270
+msgid "days"
+msgstr "ngày"
+
+#: includes/NotificationBar/CountdownResolver.php:271
+msgid "hrs"
+msgstr "giờ"
+
+#: includes/NotificationBar/CountdownResolver.php:272
+msgid "mins"
+msgstr "phút"
+
+#: includes/NotificationBar/CountdownResolver.php:273
+msgid "secs"
+msgstr "giây"
+
+#: includes/NotificationBar/CountdownResolver.php:275
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:118
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:123
+msgid "Countdown timer"
+msgstr "Đồng hồ đếm ngược"
+
+#: includes/NotificationBar/GoProPage.php:30
+msgid "Multiple bars / messages"
+msgstr "Nhiều thanh / thông báo"
+
+#: includes/NotificationBar/GoProPage.php:31
+msgid "Scheduling start & end date/time"
+msgstr "Lên lịch ngày/giờ bắt đầu & kết thúc"
+
+#: includes/NotificationBar/GoProPage.php:32
+msgid "Re-display after a specified period"
+msgstr "Hiển thị lại sau một khoảng thời gian nhất định"
+
+#: includes/NotificationBar/GoProPage.php:33
+msgid "Absolute & fixed display"
+msgstr "Hiển thị tuyệt đối & cố định"
+
+#: includes/NotificationBar/GoProPage.php:34
+msgid "Different content for mobile"
+msgstr "Nội dung khác cho di động"
+
+#: includes/NotificationBar/GoProPage.php:35
+msgid "Hide or show on specific pages/posts"
+msgstr "Ẩn hoặc hiện trên các trang/bài viết cụ thể"
+
+#: includes/NotificationBar/GoProPage.php:36
+msgid "Auto ON/OFF daily schedule"
+msgstr "Tự động bật/tắt theo lịch hàng ngày"
+
+#: includes/NotificationBar/GoProPage.php:37
+msgid "One-click to duplicate"
+msgstr "Nhân bản chỉ với một cú nhấp"
+
+#: includes/NotificationBar/GoProPage.php:38
+msgid "Drag and drop to reorder bars"
+msgstr "Kéo thả để sắp xếp lại các thanh"
+
+#: includes/NotificationBar/GoProPage.php:39
+msgid "Compatible with cache & lazyload"
+msgstr "Tương thích với cache & lazyload"
+
+#: includes/NotificationBar/GoProPage.php:40
+msgid "100% mobile-responsive"
+msgstr "100% tương thích di động"
+
+#: includes/NotificationBar/GoProPage.php:41
+msgid "Import / Export set of bars"
+msgstr "Nhập / Xuất bộ thanh thông báo"
+
+#: includes/NotificationBar/GoProPage.php:42
+msgid "HTML & CSS supported"
+msgstr "Hỗ trợ HTML & CSS"
+
+#: includes/NotificationBar/GoProPage.php:44
+msgid "Hide/show on WooCommerce products & custom post types"
+msgstr "Ẩn/hiện trên sản phẩm WooCommerce & loại bài viết tùy chỉnh"
+
+#: includes/NotificationBar/GoProPage.php:45
+msgid "A/B testing (Rotation mode)"
+msgstr "Kiểm tra A/B (Chế độ xoay vòng)"
+
+#: includes/NotificationBar/GoProPage.php:46
+msgid "Rotation interval in seconds"
+msgstr "Khoảng thời gian xoay vòng (giây)"
+
+#: includes/NotificationBar/GoProPage.php:47
+#: src/customizer-app/components/GlobalSettingsPane.jsx:114
+msgid "Pause rotation on hover"
+msgstr "Tạm dừng xoay vòng khi di chuột qua"
+
+#: includes/NotificationBar/GoProPage.php:48
+msgid "Rotate bars by sequence or random"
+msgstr "Xoay vòng các thanh theo thứ tự hoặc ngẫu nhiên"
+
+#: includes/NotificationBar/GoProPage.php:49
+msgid "Advanced reports (Click tracking)"
+msgstr "Báo cáo nâng cao (Theo dõi lượt nhấp)"
+
+#: includes/NotificationBar/GoProPage.php:50
+#: src/customizer-app/components/tabs/StyleTab.jsx:192
+msgid "Display bar at bottom"
+msgstr "Hiển thị thanh ở phía dưới"
+
+#: includes/NotificationBar/GoProPage.php:51
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:59
+msgid "Conditional display by role or user"
+msgstr "Hiển thị có điều kiện theo vai trò hoặc người dùng"
+
+#: includes/NotificationBar/GoProPage.php:53
+msgid "Multilingual support"
+msgstr "Hỗ trợ đa ngôn ngữ"
+
+#: includes/NotificationBar/GoProPage.php:150
+msgid "Coming soon"
+msgstr "Sắp ra mắt"
+
+#: includes/NotificationBar/GoProPage.php:153
+msgid "Included"
+msgstr "Đã bao gồm"
+
+#: includes/NotificationBar/GoProPage.php:155
+msgid "Not included"
+msgstr "Không bao gồm"
+
+#: includes/NotificationBar/GoProPage.php:169
+msgid "Get Notibar Pro"
+msgstr "Nhận Notibar Pro"
+
+#: includes/NotificationBar/GoProPage.php:178
+msgid "Unlock Notibar Pro"
+msgstr "Mở khóa Notibar Pro"
+
+#: includes/NotificationBar/GoProPage.php:180
+msgid ""
+"Upgrade to Notibar Pro to rotate and A/B test bars, target by audience and "
+"product, and measure clicks, everything you need to turn announcements into "
+"conversions."
+msgstr ""
+"Nâng cấp lên Notibar Pro để xoay vòng và kiểm tra A/B các thanh, nhắm mục "
+"tiêu theo đối tượng và sản phẩm, đo lường lượt nhấp — mọi thứ bạn cần để "
+"biến thông báo thành chuyển đổi."
+
+#: includes/NotificationBar/GoProPage.php:187
+#: includes/NotificationBar/GoProPage.php:216
+msgid "Notibar Pro"
+msgstr "Notibar Pro"
+
+#: includes/NotificationBar/GoProPage.php:191
+msgid "Get all features when you upgrade to Notibar Pro."
+msgstr "Nhận tất cả tính năng khi bạn nâng cấp lên Notibar Pro."
+
+#: includes/NotificationBar/GoProPage.php:198
+msgid "Fast updates"
+msgstr "Cập nhật nhanh chóng"
+
+#: includes/NotificationBar/GoProPage.php:199
+msgid "1-1 Live Chat VIP support"
+msgstr "Hỗ trợ VIP qua Live Chat 1-1"
+
+#: includes/NotificationBar/GoProPage.php:206
+msgid "Compare Plans and Features"
+msgstr "So sánh các gói và tính năng"
+
+#: includes/NotificationBar/GoProPage.php:208
+msgid "Check the comparison table to see what each plan offers."
+msgstr "Xem bảng so sánh để biết mỗi gói cung cấp những gì."
+
+#: includes/NotificationBar/GoProPage.php:214
+msgid "Features"
+msgstr "Tính năng"
+
+#: includes/NotificationBar/GoProPage.php:215
+msgid "Notibar Free"
+msgstr "Notibar Free"
+
+#: includes/NotificationBar/GoProPage.php:229
+msgid "Your current plan"
+msgstr "Gói hiện tại của bạn"
+
+#: includes/NotificationBar/GoProPage.php:243
+msgid ""
+"Join the website owners using Notibar Pro to put the right message in front "
+"of the right visitors, and see exactly what converts."
+msgstr ""
+"Tham gia cùng các chủ sở hữu trang web đang sử dụng Notibar Pro để đưa đúng "
+"thông điệp đến đúng khách truy cập, và xem chính xác điều gì tạo ra chuyển "
+"đổi."
+
+#: includes/NotificationBar/GoProPage.php:248
+msgid "Founder & Designer, Australia"
+msgstr "Nhà sáng lập & Nhà thiết kế, Úc"
+
+#: includes/NotificationBar/GoProPage.php:257
+msgid "30-day Money Back Guarantee"
+msgstr "Bảo đảm hoàn tiền trong 30 ngày"
+
+#: includes/NotificationBar/GoProPage.php:268
+msgid "Need help?"
+msgstr "Cần trợ giúp?"
+
+#: includes/NotificationBar/GoProPage.php:270
+msgid "Chat now"
+msgstr "Trò chuyện ngay"
+
+#. translators: %s: wp_options key name
+#: includes/NotificationBar/Migration.php:220
+msgid ""
+"<strong>Notibar v3</strong> migrated your settings. A backup is kept for 30 "
+"days (option: <code>%s</code>)."
+msgstr ""
+"<strong>Notibar v3</strong> đã chuyển đổi cài đặt của bạn. Bản sao lưu được "
+"giữ trong 30 ngày (tùy chọn: <code>%s</code>)."
+
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:42
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:43
+#: includes/NotificationBar/WpCustomNotification.php:75
 msgid "Notibar"
 msgstr "Notibar"
 
-#: includes/NotificationBar/NotificationBarHandle.php:109
-msgid "Give Notibar a review"
-msgstr "Cung cấp cho Notibar đánh giá"
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:53
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:54
+msgid "Customize"
+msgstr "Tùy chỉnh"
 
-#: includes/NotificationBar/NotificationBarHandle.php:111
-msgid ""
-"Thank you for choosing Notibar. We hope you love it. Could you take a couple "
-"of seconds posting a nice review to share your happy experience?"
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:62
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:63
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:115
+msgid "Settings"
+msgstr "Cài đặt"
+
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:75
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:76
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:123
+msgid "Go Pro"
+msgstr "Nâng cấp Pro"
+
+#: includes/NotificationBar/NotificationBarHandleAdmin.php:115
+msgid "Enter license key"
+msgstr "Nhập mã bản quyền"
+
+#: includes/NotificationBar/RestPostsController.php:163
+#: includes/NotificationBar/RestPostsController.php:284
+#: src/customizer-app/components/fields/AsyncPostPicker.jsx:21
+msgid "Front Page"
+msgstr "Trang chủ"
+
+#: includes/NotificationBar/RestPostsController.php:182
+#: includes/NotificationBar/RestPostsController.php:276
+#: src/customizer-app/components/fields/AsyncPostPicker.jsx:30
+msgid "Single Product page"
+msgstr "Trang sản phẩm đơn"
+
+#. translators: %s: page template display name.
+#: includes/NotificationBar/RestPostsController.php:206
+#: includes/NotificationBar/RestPostsController.php:266
+msgid "Template: %s"
+msgstr "Mẫu: %s"
+
+#: includes/NotificationBar/RestSettingsController.php:124
+msgid "Import file exceeds 10 MB limit."
+msgstr "Tệp nhập vượt quá giới hạn 10 MB."
+
+#: includes/NotificationBar/RestSettingsController.php:134
+msgid "Request body is not valid JSON."
+msgstr "Nội dung yêu cầu không phải là JSON hợp lệ."
+
+#. translators: %d: highest supported export version
+#: includes/NotificationBar/RestSettingsController.php:148
+msgid "Unsupported export version. This plugin supports up to version %d."
 msgstr ""
-"Cảm ơn bạn đã chọn Notibar. Chúng tôi hy vọng bạn yêu thích nó. Bạn có thể "
-"dành một vài giây đăng một bài đánh giá tốt đẹp để chia sẻ kinh nghiệm hạnh "
-"phúc của bạn?"
+"Phiên bản xuất không được hỗ trợ. Plugin này hỗ trợ tối đa phiên bản %d."
 
-#: includes/NotificationBar/NotificationBarHandle.php:114
-msgid "We will be forever grateful. Thank you in advance ;)"
-msgstr "Chúng ta sẽ mãi mãi biết ơn. Cảm ơn trước ;)"
+#: includes/NotificationBar/RestSettingsController.php:163
+msgid "Failed to encode bars payload (invalid UTF-8?)."
+msgstr "Không thể mã hóa dữ liệu thanh (UTF-8 không hợp lệ?)."
 
-#: includes/NotificationBar/NotificationBarHandle.php:117
-msgid "Rate now"
-msgstr "Tỷ lệ ngay bây giờ"
+#: includes/NotificationBar/RestSettingsController.php:176
+msgid "Failed to encode global payload (invalid UTF-8?)."
+msgstr "Không thể mã hóa dữ liệu cài đặt chung (UTF-8 không hợp lệ?)."
 
-#: includes/NotificationBar/NotificationBarHandle.php:118
-msgid "Later"
-msgstr "Để sau"
+#: includes/NotificationBar/RestSettingsController.php:205
+msgid "Failed to encode tracking payload."
+msgstr "Không thể mã hóa dữ liệu theo dõi."
 
-#: includes/NotificationBar/NotificationBarHandle.php:119
-msgid "Already did"
-msgstr "Đã làm"
+#: includes/NotificationBar/TrackingRestController.php:126
+#: includes/NotificationBar/TrackingRestController.php:234
+msgid "Invalid bar_id."
+msgstr "bar_id không hợp lệ."
+
+#: includes/NotificationBar/TrackingRestController.php:134
+msgid "Invalid event."
+msgstr "Sự kiện không hợp lệ."
+
+#: includes/NotificationBar/TrackingRestController.php:142
+msgid "Unknown bar."
+msgstr "Không tìm thấy thanh."
+
+#: includes/NotificationBar/TrackingRestController.php:152
+msgid "Counter increment failed."
+msgstr "Tăng bộ đếm thất bại."
+
+#: includes/NotificationBar/TrackingRestController.php:220
+msgid "Only interval=day is supported."
+msgstr "Chỉ hỗ trợ interval=day."
+
+#: includes/NotificationBar/TrackingRestController.php:303
+#: includes/NotificationBar/TrackingRestController.php:316
+msgid "from/to must be valid YYYY-MM-DD dates."
+msgstr "from/to phải là ngày hợp lệ theo định dạng YYYY-MM-DD."
+
+#: includes/NotificationBar/TrackingRestController.php:323
+msgid "`from` must not be after `to`."
+msgstr "`from` không được sau `to`."
+
+#: includes/NotificationBar/TrackingRestController.php:330
+msgid "Date range must not exceed 366 days."
+msgstr "Khoảng thời gian không được vượt quá 366 ngày."
 
 #: includes/NotificationBar/WpCustomControlColorBg.php:16
 #: includes/NotificationBar/WpCustomControlColorLb.php:16
@@ -73,186 +392,1336 @@ msgstr "Chọn màu"
 msgid "Default"
 msgstr "Mặc định"
 
-#: includes/NotificationBar/WpCustomNotification.php:141
-msgid "This is panel WordPress Notification Bar"
-msgstr "Đây là bảng điều khiển Thanh thông báo WordPress"
+#: njt-notification-bar.php:69
+msgid "Notibar Lite was deactivated — Notibar Pro replaces it."
+msgstr "Notibar Lite đã bị vô hiệu hóa — Notibar Pro sẽ thay thế nó."
 
-#: includes/NotificationBar/WpCustomNotification.php:147
-msgid "General Options"
-msgstr "Tùy chọn chung"
+#: src/customizer-app/App.jsx:139 src/customizer-app/components/BarList.jsx:80
+#: src/customizer-app/components/BarListItem.jsx:70
+msgid "Untitled bar"
+msgstr "Thanh chưa đặt tên"
 
-#: includes/NotificationBar/WpCustomNotification.php:161
-msgid "Enable/Disable Notibar"
-msgstr "Bật/Tắt Notibar"
+#: src/customizer-app/App.jsx:148
+msgid "Back to bars"
+msgstr "Quay lại danh sách thanh"
 
-#: includes/NotificationBar/WpCustomNotification.php:175
-msgid "Alignment Option"
-msgstr "Tùy chọn Căn chỉnh"
+#: src/customizer-app/App.jsx:170
+msgid "Display Settings"
+msgstr "Cài đặt hiển thị"
 
-#: includes/NotificationBar/WpCustomNotification.php:180
-msgid "Center"
-msgstr "Giữa"
+#: src/customizer-app/App.jsx:180 src/settings-app/tabs/ExportImportTab.jsx:31
+msgid "Bars"
+msgstr "Các thanh"
 
-#: includes/NotificationBar/WpCustomNotification.php:181
-msgid "Left"
-msgstr "Trái"
+#: src/customizer-app/components/BarEditor.jsx:30
+msgid "Content"
+msgstr "Nội dung"
 
-#: includes/NotificationBar/WpCustomNotification.php:182
-msgid "Right"
-msgstr "Phải"
+#: src/customizer-app/components/BarEditor.jsx:35
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:251
+msgid "Style"
+msgstr "Kiểu dáng"
 
-#: includes/NotificationBar/WpCustomNotification.php:183
-msgid "Space around"
-msgstr "Không gian xung quanh"
+#: src/customizer-app/components/BarEditor.jsx:40
+msgid "Display"
+msgstr "Hiển thị"
 
-#: includes/NotificationBar/WpCustomNotification.php:195
-msgid "Hide/Close Button"
-msgstr "Nút Ẩn/Đóng"
+#: src/customizer-app/components/BarEditor.jsx:45
+msgid "Behavior"
+msgstr "Hành vi"
 
-#: includes/NotificationBar/WpCustomNotification.php:200
-msgid "No button"
-msgstr "Không có nút"
+#: src/customizer-app/components/BarList.jsx:80
+msgid "copy"
+msgstr "bản sao"
 
-#: includes/NotificationBar/WpCustomNotification.php:201
-msgid "Toggle button"
-msgstr "Nút Chuyển đổi"
+#: src/customizer-app/components/BarList.jsx:101
+msgid "No bars yet — add one to get started."
+msgstr "Chưa có thanh nào — thêm một thanh để bắt đầu."
 
-#: includes/NotificationBar/WpCustomNotification.php:202
-msgid "Close button"
-msgstr "Hiện nút đóng"
+#: src/customizer-app/components/BarList.jsx:136
+msgid "+ Add bar"
+msgstr "+ Thêm thanh"
 
-#: includes/NotificationBar/WpCustomNotification.php:214
-msgid "Content Width (px)"
-msgstr "Chiều rộng Nội dung (px)"
+#. translators: %s is the bar name.
+#: src/customizer-app/components/BarListItem.jsx:74
+msgid "Delete bar \"%s\"? This cannot be undone."
+msgstr "Xóa thanh \"%s\"? Hành động này không thể hoàn tác."
 
-#: includes/NotificationBar/WpCustomNotification.php:230
-msgid "Position Type"
-msgstr "Loại chức vụ"
+#: src/customizer-app/components/BarListItem.jsx:97
+#: src/customizer-app/components/BarListItem.jsx:98
+msgid "Drag to reorder"
+msgstr "Kéo để sắp xếp lại"
 
-#: includes/NotificationBar/WpCustomNotification.php:238
-msgid "Content Options"
-msgstr "Tùy chọn Nội dung"
+#: src/customizer-app/components/BarListItem.jsx:108
+msgid "Click to edit"
+msgstr "Nhấp để chỉnh sửa"
 
-#: includes/NotificationBar/WpCustomNotification.php:259
-#: includes/NotificationBar/WpCustomNotification.php:353
+#: src/customizer-app/components/BarListItem.jsx:123
+msgid "Bar actions"
+msgstr "Thao tác thanh"
+
+#: src/customizer-app/components/BarListItem.jsx:135
+msgid "Edit"
+msgstr "Chỉnh sửa"
+
+#: src/customizer-app/components/BarListItem.jsx:143
+msgid "Duplicate"
+msgstr "Nhân bản"
+
+#: src/customizer-app/components/BarListItem.jsx:152
+msgid "Delete"
+msgstr "Xóa"
+
+#: src/customizer-app/components/EmptyState.jsx:15
+msgid "No notification bar selected. Add your first bar to get started."
+msgstr ""
+"Chưa chọn thanh thông báo nào. Thêm thanh đầu tiên của bạn để bắt đầu."
+
+#: src/customizer-app/components/EmptyState.jsx:21
+msgid "Add your first bar"
+msgstr "Thêm thanh đầu tiên của bạn"
+
+#: src/customizer-app/components/fields/AsyncPostPicker.jsx:184
+#: src/customizer-app/components/fields/AsyncUserPicker.jsx:128
+#: src/customizer-app/components/fields/CountryMultiSelect.jsx:59
+#: src/customizer-app/components/fields/CptMultiSelect.jsx:90
+msgid "Remove"
+msgstr "Xóa bỏ"
+
+#: src/customizer-app/components/fields/AsyncPostPicker.jsx:198
+msgid "Search and add…"
+msgstr "Tìm kiếm và thêm…"
+
+#: src/customizer-app/components/fields/AsyncUserPicker.jsx:146
+msgid "Search users…"
+msgstr "Tìm kiếm người dùng…"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:33
+msgid "Open link"
+msgstr "Mở liên kết"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:34
+msgid "Close bar"
+msgstr "Đóng thanh"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:39
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:57
+msgid "None"
+msgstr "Không có"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:40
+msgid "Wobble"
+msgstr "Lắc lư"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:41
+msgid "Shake"
+msgstr "Rung lắc"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:42
+msgid "Bounce"
+msgstr "Nảy"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:43
+msgid "Pulse"
+msgstr "Nhấp nháy"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:44
+msgid "Swing"
+msgstr "Đung đưa"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:45
+msgid "Jello"
+msgstr "Rung thạch"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:46
+msgid "Tada"
+msgstr "Tada"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:47
+msgid "Rubber Band"
+msgstr "Dây thun"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:48
+msgid "Heartbeat"
+msgstr "Nhịp tim"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:49
+msgid "Flash"
+msgstr "Nhấp nháy sáng"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:50
+msgid "Blink"
+msgstr "Nháy mắt"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:51
+msgid "Vibrate"
+msgstr "Rung"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:52
+msgid "Pop"
+msgstr "Bật lên"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:53
+msgid "Bounce In"
+msgstr "Nảy vào"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:58
+msgid "Grow"
+msgstr "Phóng to"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:59
+msgid "Shrink"
+msgstr "Thu nhỏ"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:60
+msgid "Lift"
+msgstr "Nâng lên"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:61
+msgid "Glow"
+msgstr "Phát sáng"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:62
+msgid "Press"
+msgstr "Nhấn xuống"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:63
+msgid "Shadow"
+msgstr "Đổ bóng"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:64
+msgid "Color Shift"
+msgstr "Đổi màu"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:65
+msgid "Slide Fill"
+msgstr "Trượt lấp đầy"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:121
+msgid "Action"
+msgstr "Hành động"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:128
+msgid "Clicking this button dismisses the bar."
+msgstr "Nhấp vào nút này sẽ đóng thanh."
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:137
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:112
+msgid "Reopen after (days)"
+msgstr "Mở lại sau (ngày)"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:138
+msgid ""
+"0 = never auto-reopen. Applies to this button only; the × control uses its "
+"own setting in Behavior."
+msgstr ""
+"0 = không bao giờ tự động mở lại. Chỉ áp dụng cho nút này; nút điều khiển × "
+"sử dụng cài đặt riêng trong tab Hành vi."
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:176
+msgid "Button text"
+msgstr "Văn bản nút"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:183
+msgid "URL"
+msgstr "URL"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:189
+msgid "Please enter a valid URL."
+msgstr "Vui lòng nhập một URL hợp lệ."
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:202
+msgid "Font weight"
+msgstr "Độ đậm chữ"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:212
+msgid "Button animations"
+msgstr "Hiệu ứng động cho nút"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:216
+msgid "Attention animation"
+msgstr "Hiệu ứng thu hút chú ý"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:223
+msgid "Hover effect"
+msgstr "Hiệu ứng khi di chuột qua"
+
+#: src/customizer-app/components/fields/ButtonSubForm.jsx:232
+msgid "Open in new tab"
+msgstr "Mở trong tab mới"
+
+#: src/customizer-app/components/fields/ColorFieldWithReset.jsx:55
+msgid "Reset"
+msgstr "Đặt lại"
+
+#: src/customizer-app/components/fields/ColorPresetSwatches.jsx:59
+msgid "Color presets"
+msgstr "Màu cài đặt sẵn"
+
+#: src/customizer-app/components/fields/ColorPresetSwatches.jsx:67
+msgid "Preset"
+msgstr "Cài đặt sẵn"
+
+#: src/customizer-app/components/fields/ColorPresetSwatches.jsx:84
+msgid "Apply color preset"
+msgstr "Áp dụng màu cài đặt sẵn"
+
+#. translators: 1: contrast ratio value, 2: colour pair label
+#: src/customizer-app/components/fields/ContrastWarning.jsx:30
+msgid ""
+"Contrast %1$s:1 below WCAG AA (4.5:1) (%2$s) — text may be hard to read."
+msgstr ""
+"Độ tương phản %1$s:1 thấp hơn chuẩn WCAG AA (4.5:1) (%2$s) — văn bản có thể "
+"khó đọc."
+
+#. translators: 1: contrast ratio value
+#: src/customizer-app/components/fields/ContrastWarning.jsx:39
+msgid "Contrast %1$s:1 below WCAG AA (4.5:1) — text may be hard to read."
+msgstr ""
+"Độ tương phản %1$s:1 thấp hơn chuẩn WCAG AA (4.5:1) — văn bản có thể khó "
+"đọc."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:28
+msgid "Fixed date & time"
+msgstr "Ngày & giờ cố định"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:29
+msgid "Evergreen (per visitor)"
+msgstr "Vĩnh viễn (theo từng khách)"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:30
+msgid "When the schedule ends"
+msgstr "Khi lịch trình kết thúc"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:34
+msgid "Boxes"
+msgstr "Hộp số"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:35
+msgid "Flip clock"
+msgstr "Đồng hồ lật"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:36
+msgid "Circular"
+msgstr "Hình tròn"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:37
+msgid "Text (with labels)"
+msgstr "Văn bản (có nhãn)"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:127
+msgid "Show a live countdown in the bar."
+msgstr "Hiển thị đồng hồ đếm ngược trực tiếp trong thanh."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:134
+msgid "Countdown to"
+msgstr "Đếm ngược đến"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:141
+msgid "Each visitor gets their own window that continues across reloads."
+msgstr ""
+"Mỗi khách truy cập có khoảng thời gian riêng, vẫn tiếp tục dù tải lại trang."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:147
+msgid ""
+"Counts to the soonest time this bar’s schedule closes it — its End date or "
+"daily-window end (set in the Behavior tab)."
+msgstr ""
+"Đếm ngược đến thời điểm gần nhất mà lịch trình của thanh này đóng lại — ngày"
+" kết thúc hoặc thời điểm kết thúc khung giờ hàng ngày (thiết lập trong tab "
+"Hành vi)."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:152
+msgid ""
+"Counts to a fixed moment in the site timezone — the same for every visitor."
+msgstr ""
+"Đếm ngược đến một thời điểm cố định theo múi giờ của trang web — giống nhau "
+"cho mọi khách truy cập."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:165
+msgid ""
+"No schedule close time set. In the Behavior tab, enable Schedule and set an "
+"End date or a daily-window end."
+msgstr ""
+"Chưa thiết lập thời gian đóng theo lịch trình. Trong tab Hành vi, bật Lịch "
+"trình và thiết lập ngày kết thúc hoặc thời điểm kết thúc khung giờ hàng "
+"ngày."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:174
+msgid "End date & time"
+msgstr "Ngày & giờ kết thúc"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:193
+msgid "Duration"
+msgstr "Thời lượng"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:195
+msgid "Window length per visitor (max 30 days)."
+msgstr "Độ dài khoảng thời gian cho mỗi khách truy cập (tối đa 30 ngày)."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:228
+msgid ""
+"Restarts every visitor’s timer from the full duration on their next visit "
+"(applies after you publish)."
+msgstr ""
+"Khởi động lại bộ đếm giờ của mỗi khách truy cập từ đầu vào lần truy cập tiếp"
+" theo (áp dụng sau khi bạn xuất bản)."
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:241
+msgid "Reset visitors’ timers"
+msgstr "Đặt lại bộ đếm giờ của khách truy cập"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:263
+msgid "Show units"
+msgstr "Hiển thị đơn vị"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:282
+msgid "Always show all selected units"
+msgstr "Luôn hiển thị tất cả đơn vị đã chọn"
+
+#: src/customizer-app/components/fields/CountdownSubForm.jsx:289
+msgid ""
+"Off: hides leading units that are zero at load (e.g. “00 days”). On: always "
+"shows every selected unit."
+msgstr ""
+"Tắt: ẩn các đơn vị đầu bằng 0 khi tải trang (ví dụ: “00 ngày”). Bật: luôn "
+"hiển thị mọi đơn vị đã chọn."
+
+#: src/customizer-app/components/fields/CountryMultiSelect.jsx:73
+msgid "Select countries…"
+msgstr "Chọn quốc gia…"
+
+#: src/customizer-app/components/fields/CptMultiSelect.jsx:104
+msgid "Select post types…"
+msgstr "Chọn loại bài viết…"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:18
+msgid "Visitor"
+msgstr "Khách truy cập"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:23
+msgid "First name"
+msgstr "Tên"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:25
+msgid "Last name"
+msgstr "Họ"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:28
+msgid "Display name"
+msgstr "Tên hiển thị"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:30
+msgid "Role"
+msgstr "Vai trò"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:31
+#: src/customizer-app/components/tabs/DisplayTabCountryBlock.jsx:47
+msgid "Country"
+msgstr "Quốc gia"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:35
+msgid "Date & time"
+msgstr "Ngày & giờ"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:37
+msgid "Date"
+msgstr "Ngày"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:38
+msgid "Time"
+msgstr "Giờ"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:39
+msgid "Weekday"
+msgstr "Thứ trong tuần"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:40
+msgid "Month"
+msgstr "Tháng"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:41
+msgid "Year"
+msgstr "Năm"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:45
+msgid "Site"
+msgstr "Trang web"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:47
+msgid "Site name"
+msgstr "Tên trang web"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:48
+msgid "Tagline"
+msgstr "Khẩu hiệu"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:49
+msgid "Users count"
+msgstr "Số lượng người dùng"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:50
+msgid "Posts count"
+msgstr "Số lượng bài viết"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:54
+msgid "Current post"
+msgstr "Bài viết hiện tại"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:56
+msgid "Title"
+msgstr "Tiêu đề"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:57
+msgid "Author"
+msgstr "Tác giả"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:58
+msgid "Category"
+msgstr "Danh mục"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:59
+msgid "Published date"
+msgstr "Ngày xuất bản"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:63
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:68
+msgid "Recently viewed product"
+msgstr "Sản phẩm đã xem gần đây"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:88
+msgid "Dynamic content tags"
+msgstr "Thẻ nội dung động"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:104
+msgid "Insert variable"
+msgstr "Chèn biến"
+
+#. translators: %s: token group name.
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:119
+msgid "%s (per visitor)"
+msgstr "%s (theo từng khách)"
+
+#: src/customizer-app/components/fields/DynamicTagPicker.jsx:146
+msgid ""
+"Insert a variable to show live values. Add a fallback with a pipe, e.g. "
+"{user_first_name|there}. Per-visitor variables should not be used on fully "
+"cached pages."
+msgstr ""
+"Chèn một biến để hiển thị giá trị trực tiếp. Thêm giá trị dự phòng bằng dấu "
+"gạch đứng, ví dụ: {user_first_name|there}. Không nên dùng biến theo từng "
+"khách trên các trang được cache toàn bộ."
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:164
+msgid "Centered"
+msgstr "Căn giữa"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:165
+msgid "Text left"
+msgstr "Văn bản bên trái"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:166
+msgid "Three zones"
+msgstr "Ba vùng"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:167
+msgid "Hero"
+msgstr "Hero"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:168
+msgid "Split"
+msgstr "Chia đôi"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:169
+msgid "All left"
+msgstr "Tất cả bên trái"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:170
+msgid "All right"
+msgstr "Tất cả bên phải"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:186
+msgid "Layout"
+msgstr "Bố cục"
+
+#: src/customizer-app/components/fields/LayoutPicker.jsx:191
+msgid "Content layout"
+msgstr "Bố cục nội dung"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:18
+msgid "Single bar"
+msgstr "Một thanh duy nhất"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:19
+msgid "Rotation"
+msgstr "Xoay vòng"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:20
+msgid "Show all bars"
+msgstr "Hiển thị tất cả các thanh"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:24
+msgid "Sequential (list order)"
+msgstr "Tuần tự (theo thứ tự danh sách)"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:25
+msgid "Random"
+msgstr "Ngẫu nhiên"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:31
+msgid "Fixed (stays on scroll)"
+msgstr "Cố định (giữ nguyên khi cuộn)"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:32
+msgid "Scroll away with page"
+msgstr "Cuộn theo trang"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:52
+msgid "Bars rotate one at a time on a timer."
+msgstr "Các thanh xoay vòng lần lượt theo hẹn giờ."
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:57
+msgid "All matching bars show at once, stacked vertically."
+msgstr "Tất cả các thanh phù hợp hiển thị cùng lúc, xếp chồng theo chiều dọc."
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:62
+msgid "Show one bar at a time, picked by order."
+msgstr "Hiển thị từng thanh một, chọn theo thứ tự."
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:72
+msgid "Rotation mode & A/B testing"
+msgstr "Chế độ xoay vòng & kiểm tra A/B"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:77
+msgid "Display mode"
+msgstr "Chế độ hiển thị"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:86
+msgid "Stack position"
+msgstr "Vị trí xếp chồng"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:87
+msgid "Applies to the whole stack; individual bar position is ignored."
+msgstr ""
+"Áp dụng cho toàn bộ ngăn xếp; vị trí của từng thanh riêng lẻ sẽ bị bỏ qua."
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:100
+msgid "Rotation interval (seconds)"
+msgstr "Khoảng thời gian xoay vòng (giây)"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:122
+msgid "Show navigation arrows"
+msgstr "Hiển thị mũi tên điều hướng"
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:123
+msgid "Let visitors step between bars with prev/next arrows."
+msgstr "Cho phép khách truy cập chuyển giữa các thanh bằng mũi tên trước/sau."
+
+#: src/customizer-app/components/GlobalSettingsPane.jsx:134
+msgid "Rotation order"
+msgstr "Thứ tự xoay vòng"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:23
+msgid "× Close button"
+msgstr "Nút đóng ×"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:24
+msgid "Collapse / expand arrow"
+msgstr "Mũi tên thu gọn / mở rộng"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:25
+msgid "No dismissal control"
+msgstr "Không có điều khiển đóng"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:32
+msgid "Show immediately"
+msgstr "Hiển thị ngay lập tức"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:33
+msgid "Show on scroll (% of page)"
+msgstr "Hiển thị khi cuộn (% trang)"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:34
+msgid "Show after time (seconds)"
+msgstr "Hiển thị sau thời gian (giây)"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:35
+msgid "Show after clicks on the page"
+msgstr "Hiển thị sau số lần nhấp trên trang"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:41
+msgid "Scroll percentage (%)"
+msgstr "Phần trăm cuộn (%)"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:45
+msgid "Delay (seconds)"
+msgstr "Độ trễ (giây)"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:46
+msgid "Number of clicks"
+msgstr "Số lần nhấp"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:51
+msgid "Sun"
+msgstr "CN"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:52
+msgid "Mon"
+msgstr "T2"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:53
+msgid "Tue"
+msgstr "T3"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:54
+msgid "Wed"
+msgstr "T4"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:55
+msgid "Thu"
+msgstr "T5"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:56
+msgid "Fri"
+msgstr "T6"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:57
+msgid "Sat"
+msgstr "T7"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:101
+msgid "Dismissal control"
+msgstr "Điều khiển đóng"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:102
+msgid "Determines what control, if any, visitors can use to dismiss the bar."
+msgstr ""
+"Xác định điều khiển nào (nếu có) mà khách truy cập có thể dùng để đóng "
+"thanh."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:115
+msgid "Not applicable when dismissal disabled."
+msgstr "Không áp dụng khi đã tắt tùy chọn đóng."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:119
+msgid "0 = never auto-reopen (cookie persists indefinitely)."
+msgstr "0 = không bao giờ tự động mở lại (cookie tồn tại vĩnh viễn)."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:142
+msgid "Schedule this bar"
+msgstr "Lên lịch cho thanh này"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:145
+msgid ""
+"Times use each visitor's local device clock. Best for time-of-day content; "
+"not recommended for flash sales (Start/End dates become a rolling window "
+"across timezones)."
+msgstr ""
+"Thời gian sử dụng đồng hồ thiết bị cục bộ của từng khách truy cập. Phù hợp "
+"nhất cho nội dung theo thời điểm trong ngày; không khuyến nghị cho các đợt "
+"flash sale (ngày bắt đầu/kết thúc sẽ trở thành khung giờ trôi theo từng múi "
+"giờ)."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:149
+msgid "Times use the WordPress site timezone (Settings → General)."
+msgstr "Thời gian sử dụng múi giờ của trang WordPress (Cài đặt → Chung)."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:162
+msgid "Use visitor's local time"
+msgstr "Sử dụng thời gian cục bộ của khách truy cập"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:166
+msgid ""
+"When on, the bar shows when the visitor's device clock is inside the "
+"schedule window. Absolute Start/End dates become a rolling window across "
+"timezones."
+msgstr ""
+"Khi bật, thanh sẽ hiển thị khi đồng hồ thiết bị của khách truy cập nằm trong"
+" khung giờ đã lên lịch. Ngày bắt đầu/kết thúc tuyệt đối sẽ trở thành khung "
+"giờ trôi theo từng múi giờ."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:178
+msgid "Starts on"
+msgstr "Bắt đầu vào"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:179
+msgid "Leave empty to publish immediately."
+msgstr "Để trống để xuất bản ngay lập tức."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:197
+msgid "Ends on"
+msgstr "Kết thúc vào"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:198
+msgid "Leave empty for no expiry."
+msgstr "Để trống để không có ngày hết hạn."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:217
+msgid "Show on days"
+msgstr "Hiển thị vào các ngày"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:218
+msgid "Bar only renders on selected weekdays."
+msgstr "Thanh chỉ hiển thị vào các ngày trong tuần đã chọn."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:242
+msgid "Limit to a daily window"
+msgstr "Giới hạn trong khung giờ hàng ngày"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:243
+msgid ""
+"Show the bar only between these times each day. Wraps midnight if end < "
+"start (e.g. 22:00 – 02:00)."
+msgstr ""
+"Chỉ hiển thị thanh trong khoảng thời gian này mỗi ngày. Sẽ vắt qua nửa đêm "
+"nếu giờ kết thúc < giờ bắt đầu (ví dụ: 22:00 – 02:00)."
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:256
+msgid "Start time"
+msgstr "Giờ bắt đầu"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:273
+msgid "End time"
+msgstr "Giờ kết thúc"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:299
+msgid "Display trigger"
+msgstr "Điều kiện kích hoạt hiển thị"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:303
+msgid "Trigger"
+msgstr "Kích hoạt"
+
+#: src/customizer-app/components/tabs/BehaviorTab.jsx:304
+msgid "Show the bar after a visitor action, once display conditions are met."
+msgstr ""
+"Hiển thị thanh sau một hành động của khách truy cập, khi các điều kiện hiển "
+"thị được đáp ứng."
+
+#: src/customizer-app/components/tabs/ContentTab.jsx:41
+msgid "Bar name"
+msgstr "Tên thanh"
+
+#: src/customizer-app/components/tabs/ContentTab.jsx:44
+msgid "Internal label — not shown to visitors."
+msgstr "Nhãn nội bộ — không hiển thị cho khách truy cập."
+
+#: src/customizer-app/components/tabs/ContentTab.jsx:53
 msgid "Text"
 msgstr "Văn bản"
 
-#: includes/NotificationBar/WpCustomNotification.php:274
-#: includes/NotificationBar/WpCustomNotification.php:368
-msgid "On/Off Button"
-msgstr "Nút Bật/Tắt"
+#: src/customizer-app/components/tabs/ContentTab.jsx:56
+#: src/customizer-app/components/tabs/ContentTab.jsx:127
+msgid "HTML and shortcodes accepted."
+msgstr "Chấp nhận HTML và shortcode."
 
-#: includes/NotificationBar/WpCustomNotification.php:288
-#: includes/NotificationBar/WpCustomNotification.php:382
-msgid "Button Text"
-msgstr "Nút văn bản"
+#: src/customizer-app/components/tabs/ContentTab.jsx:66
+msgid "Text is empty — bar will render empty."
+msgstr "Văn bản trống — thanh sẽ hiển thị trống."
 
-#: includes/NotificationBar/WpCustomNotification.php:302
-#: includes/NotificationBar/WpCustomNotification.php:396
-msgid "Button URL"
-msgstr "Đường dẫn nút bấm"
+#: src/customizer-app/components/tabs/ContentTab.jsx:83
+msgid "Desktop button"
+msgstr "Nút trên máy tính"
 
-#: includes/NotificationBar/WpCustomNotification.php:316
-#: includes/NotificationBar/WpCustomNotification.php:410
-msgid "Open in new window"
-msgstr "Mở  cửa sổ mới"
+#: src/customizer-app/components/tabs/ContentTab.jsx:84
+msgid "Show button"
+msgstr "Hiện nút"
 
-#: includes/NotificationBar/WpCustomNotification.php:331
-msgid "You want different content for mobile?"
-msgstr "Bạn muốn nội dung khác nhau cho điện thoại di động?"
+#: src/customizer-app/components/tabs/ContentTab.jsx:102
+#: src/customizer-app/components/tabs/ContentTab.jsx:105
+#: src/customizer-app/components/tabs/DisplayTab.jsx:92
+msgid "Mobile"
+msgstr "Di động"
 
-#: includes/NotificationBar/WpCustomNotification.php:418
-msgid "Style Options"
-msgstr "Các tùy chọn kiểu"
+#: src/customizer-app/components/tabs/ContentTab.jsx:112
+msgid "Different content on mobile"
+msgstr "Nội dung khác trên di động"
 
-#: includes/NotificationBar/WpCustomNotification.php:433
-msgid "Preset Color"
-msgstr "Màu cài đặt sẵn"
+#: src/customizer-app/components/tabs/ContentTab.jsx:115
+msgid "When on, mobile visitors see separate text and button."
+msgstr "Khi bật, khách truy cập trên di động sẽ thấy văn bản và nút riêng."
 
-#: includes/NotificationBar/WpCustomNotification.php:451
-msgid "Background Color"
+#: src/customizer-app/components/tabs/ContentTab.jsx:124
+msgid "Mobile text"
+msgstr "Văn bản trên di động"
+
+#: src/customizer-app/components/tabs/ContentTab.jsx:142
+msgid "Mobile button"
+msgstr "Nút trên di động"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:23
+msgid "Show on all pages"
+msgstr "Hiển thị trên tất cả các trang"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:27
+msgid "Hide on all pages"
+msgstr "Ẩn trên tất cả các trang"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:31
+msgid "Show only on selected pages"
+msgstr "Chỉ hiển thị trên các trang đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:35
+msgid "Hide only on selected pages"
+msgstr "Chỉ ẩn trên các trang đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:42
+msgid "Show on all posts"
+msgstr "Hiển thị trên tất cả bài viết"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:46
+msgid "Hide on all posts"
+msgstr "Ẩn trên tất cả bài viết"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:50
+msgid "Show only on selected posts"
+msgstr "Chỉ hiển thị trên các bài viết đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:54
+msgid "Hide only on selected posts"
+msgstr "Chỉ ẩn trên các bài viết đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:84
+msgid "Show on devices"
+msgstr "Hiển thị trên thiết bị"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:87
+msgid "Desktop"
+msgstr "Máy tính"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:100
+msgid "Page logic"
+msgstr "Quy tắc trang"
+
+#: src/customizer-app/components/tabs/DisplayTab.jsx:116
+msgid "Post logic"
+msgstr "Quy tắc bài viết"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:19
+msgid "Everyone"
+msgstr "Tất cả mọi người"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:20
+msgid "Logged-in users"
+msgstr "Người dùng đã đăng nhập"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:21
+msgid "Logged-out visitors"
+msgstr "Khách chưa đăng nhập"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:22
+msgid "Specific roles"
+msgstr "Vai trò cụ thể"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:23
+msgid "Specific users"
+msgstr "Người dùng cụ thể"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:54
+#: src/shared/charts/chart-filters.jsx:110
+#: src/shared/charts/chart-filters.jsx:113
+msgid "Audience"
+msgstr "Đối tượng"
+
+#: src/customizer-app/components/tabs/DisplayTabAudienceBlock.jsx:68
+msgid "Show this bar to"
+msgstr "Hiển thị thanh này cho"
+
+#: src/customizer-app/components/tabs/DisplayTabCountryBlock.jsx:20
+msgid "All countries"
+msgstr "Tất cả quốc gia"
+
+#: src/customizer-app/components/tabs/DisplayTabCountryBlock.jsx:23
+msgid "Show only in selected countries"
+msgstr "Chỉ hiển thị ở các quốc gia đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTabCountryBlock.jsx:25
+msgid "Hide in selected countries"
+msgstr "Ẩn ở các quốc gia đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTabCountryBlock.jsx:52
+msgid "Conditional display by country"
+msgstr "Hiển thị có điều kiện theo quốc gia"
+
+#: src/customizer-app/components/tabs/DisplayTabCountryBlock.jsx:61
+msgid "Show this bar in"
+msgstr "Hiển thị thanh này ở"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:25
+msgid "Show on all post types"
+msgstr "Hiển thị trên tất cả loại bài viết"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:29
+msgid "Hide on all post types"
+msgstr "Ẩn trên tất cả loại bài viết"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:33
+msgid "Show on selected post types"
+msgstr "Hiển thị trên loại bài viết đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:37
+msgid "Hide on selected post types"
+msgstr "Ẩn trên loại bài viết đã chọn"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:60
+msgid "Other post types"
+msgstr "Loại bài viết khác"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:65
+msgid "Targeting by custom post type (incl. WooCommerce products)"
+msgstr ""
+"Nhắm mục tiêu theo loại bài viết tùy chỉnh (bao gồm sản phẩm WooCommerce)"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:77
+msgid "CPT logic"
+msgstr "Quy tắc loại bài viết"
+
+#: src/customizer-app/components/tabs/DisplayTabCptBlock.jsx:92
+msgid ""
+"Note: when Product is selected here, this rule overrides the page-logic "
+"\"Single Product page\" token for single product pages."
+msgstr ""
+"Lưu ý: khi chọn Sản phẩm ở đây, quy tắc này sẽ ghi đè lên tùy chọn \"Trang "
+"sản phẩm đơn\" trong quy tắc trang đối với các trang sản phẩm đơn."
+
+#: src/customizer-app/components/tabs/StyleTab.jsx:20
+msgid "Fixed"
+msgstr "Cố định"
+
+#: src/customizer-app/components/tabs/StyleTab.jsx:21
+msgid "Absolute"
+msgstr "Tuyệt đối"
+
+#: src/customizer-app/components/tabs/StyleTab.jsx:25
+msgid "Top"
+msgstr "Trên cùng"
+
+#: src/customizer-app/components/tabs/StyleTab.jsx:26
+msgid "Bottom"
+msgstr "Dưới cùng"
+
+#: src/customizer-app/components/tabs/StyleTab.jsx:83
+msgid "Background colour"
 msgstr "Màu nền"
 
-#: includes/NotificationBar/WpCustomNotification.php:469
-msgid "Text Color"
+#: src/customizer-app/components/tabs/StyleTab.jsx:90
+msgid "Text colour"
 msgstr "Màu chữ"
 
-#: includes/NotificationBar/WpCustomNotification.php:485
-msgid "Button Color"
-msgstr "Màu nút"
+#: src/customizer-app/components/tabs/StyleTab.jsx:99
+msgid "bar bg vs text"
+msgstr "nền thanh và văn bản"
 
-#: includes/NotificationBar/WpCustomNotification.php:501
-msgid "Button Text Color"
+#: src/customizer-app/components/tabs/StyleTab.jsx:105
+msgid "Button background"
+msgstr "Màu nền nút"
+
+#: src/customizer-app/components/tabs/StyleTab.jsx:112
+msgid "Button text colour"
 msgstr "Màu văn bản nút"
 
-#: includes/NotificationBar/WpCustomNotification.php:515
-msgid "Font Size (px)"
-msgstr "Font Size (px)"
+#: src/customizer-app/components/tabs/StyleTab.jsx:121
+msgid "button bg vs button text"
+msgstr "nền nút và văn bản nút"
 
-#: includes/NotificationBar/WpCustomNotification.php:523
-msgid "Display Options"
-msgstr "Tùy chọn hiển thị"
+#: src/customizer-app/components/tabs/StyleTab.jsx:126
+msgid "Opacity (%)"
+msgstr "Độ mờ đục (%)"
 
-#: includes/NotificationBar/WpCustomNotification.php:536
-msgid "Select devices want to display"
-msgstr "Chọn thiết bị muốn hiển thị"
+#: src/customizer-app/components/tabs/StyleTab.jsx:136
+msgid "Font size (px)"
+msgstr "Cỡ chữ (px)"
 
-#: includes/NotificationBar/WpCustomNotification.php:541
-msgid "All devices"
-msgstr "Tất cả thiết bị"
+#: src/customizer-app/components/tabs/StyleTab.jsx:152
+msgid "Content width (px)"
+msgstr "Chiều rộng nội dung (px)"
 
-#: includes/NotificationBar/WpCustomNotification.php:542
-msgid "Only desktop"
-msgstr "Chỉ có màn hình nền"
+#: src/customizer-app/components/tabs/StyleTab.jsx:163
+msgid "Position"
+msgstr "Vị trí"
 
-#: includes/NotificationBar/WpCustomNotification.php:543
-msgid "Only mobile"
-msgstr "Chỉ có điện thoại di động"
+#: src/customizer-app/components/tabs/StyleTab.jsx:188
+msgid "Placement"
+msgstr "Vị trí đặt"
 
-#: includes/NotificationBar/WpCustomNotification.php:555
-msgid "Homepage"
-msgstr "Trang chủ"
+#: src/settings-app/App.jsx:13
+msgid "Tracking"
+msgstr "Theo dõi"
 
-#: includes/NotificationBar/WpCustomNotification.php:569
-msgid "Pages"
-msgstr "Trang"
+#: src/settings-app/App.jsx:14
+msgid "Export / Import"
+msgstr "Xuất / Nhập"
 
-#: includes/NotificationBar/WpCustomNotification.php:583
-msgid "Posts"
-msgstr "Bài viết"
+#: src/settings-app/App.jsx:32
+msgid "Notibar Settings"
+msgstr "Cài đặt Notibar"
 
-#: includes/NotificationBar/WpCustomNotification.php:599
-msgid "By Pages/Posts ID"
-msgstr "THEO TRANG/ID Bài đăng"
+#: src/settings-app/App.jsx:37
+msgid "Settings tabs"
+msgstr "Các tab cài đặt"
 
-#: includes/NotificationBar/WpCustomNotification.php:603
-msgid "Enter the Pages or Posts ID, Ex: 1,2"
-msgstr "Nhập ID Trang hoặc Bài đăng, Ví dụ: 1,2"
+#: src/settings-app/tabs/ExportImportTab.jsx:32
+msgid "Global settings"
+msgstr "Cài đặt chung"
 
-#: includes/cross.php:125
-msgid "Recommend"
-msgstr "Gợi ý"
+#: src/settings-app/tabs/ExportImportTab.jsx:34
+msgid "Tracking counters"
+msgstr "Bộ đếm theo dõi"
 
-#. Plugin Name of the plugin/theme
-msgid "Notibar - WordPress Notification Bar"
-msgstr "Notibar - Thanh thông báo WordPress"
+#: src/settings-app/tabs/ExportImportTab.jsx:108
+msgid "Export failed. Check the browser console."
+msgstr "Xuất thất bại. Kiểm tra console trình duyệt."
 
-#. Plugin URI of the plugin/theme
-msgid "https://ninjateam.org/notibar-wordpress-notification-bar"
-msgstr "https://ninjateam.org/notibar-wordpress-notification-bar"
+#: src/settings-app/tabs/ExportImportTab.jsx:127
+msgid "File exceeds 10 MB. Refusing to load."
+msgstr "Tệp vượt quá 10 MB. Từ chối tải."
 
-#. Description of the plugin/theme
+#: src/settings-app/tabs/ExportImportTab.jsx:153
+msgid "File is not a valid Notibar export."
+msgstr "Tệp không phải là tệp xuất Notibar hợp lệ."
+
+#. translators: %1$d bars imported, %2$s global yes/no
+#: src/settings-app/tabs/ExportImportTab.jsx:192
+msgid "Imported %1$d bar(s), global=%2$s. Reload to see changes."
+msgstr "Đã nhập %1$d thanh, global=%2$s. Tải lại trang để xem thay đổi."
+
+#: src/settings-app/tabs/ExportImportTab.jsx:205
+msgid "Import failed."
+msgstr "Nhập thất bại."
+
+#: src/settings-app/tabs/ExportImportTab.jsx:226
+msgid "Export"
+msgstr "Xuất"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:228
+msgid "Pick which sections to include, then download the JSON file."
+msgstr "Chọn các phần muốn bao gồm, sau đó tải xuống tệp JSON."
+
+#: src/settings-app/tabs/ExportImportTab.jsx:249
+msgid "Download"
+msgstr "Tải xuống"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:257
+msgid "Tip: download a full backup before importing."
+msgstr "Mẹo: tải xuống bản sao lưu đầy đủ trước khi nhập."
+
+#: src/settings-app/tabs/ExportImportTab.jsx:274
+msgid "Download backup"
+msgstr "Tải xuống bản sao lưu"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:280
+msgid "Import"
+msgstr "Nhập"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:282
 msgid ""
-"Custom notification bar for alert, promo code, marketing campaign, top banner"
+"Imports REPLACE the current data for any selected section. This cannot be "
+"undone."
 msgstr ""
-"Thanh thông báo tùy chỉnh để cảnh báo, mã khuyến mãi, chiến dịch tiếp thị, "
-"biểu ngữ hàng đầu"
+"Nhập sẽ THAY THẾ dữ liệu hiện tại của bất kỳ phần nào được chọn. Hành động "
+"này không thể hoàn tác."
 
-#. Author of the plugin/theme
-msgid "Ninja Team"
-msgstr "Ninja Team"
+#. translators: %s: ISO timestamp from the export file
+#: src/settings-app/tabs/ExportImportTab.jsx:297
+msgid "Exported at: %s"
+msgstr "Đã xuất lúc: %s"
 
-#. Author URI of the plugin/theme
-msgid "https://ninjateam.org"
-msgstr "https://ninjateam.org"
+#: src/settings-app/tabs/ExportImportTab.jsx:325
+msgid "Replace selected sections"
+msgstr "Thay thế các phần đã chọn"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:333
+msgid "Confirm import"
+msgstr "Xác nhận nhập"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:337
+msgid "The selected sections will be REPLACED. Continue?"
+msgstr "Các phần đã chọn sẽ bị THAY THẾ. Tiếp tục?"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:347
+msgid "Cancel"
+msgstr "Hủy"
+
+#: src/settings-app/tabs/ExportImportTab.jsx:355
+msgid "Yes, replace"
+msgstr "Có, thay thế"
+
+#: src/settings-app/tabs/TrackingTab.jsx:31
+msgid "Loading charts…"
+msgstr "Đang tải biểu đồ…"
+
+#: src/settings-app/tabs/TrackingTab.jsx:50
+msgid "Per-bar totals"
+msgstr "Tổng theo từng thanh"
+
+#: src/settings-app/tabs/TrackingTab.jsx:53
+msgid "All time"
+msgstr "Toàn thời gian"
+
+#: src/settings-app/tabs/TrackingTab.jsx:57
+msgid "Lifetime totals across all bars, independent of the filters above."
+msgstr ""
+"Tổng cộng trọn đời trên tất cả các thanh, không phụ thuộc vào bộ lọc phía "
+"trên."
+
+#: src/settings-app/tabs/TrackingTab.jsx:78
+msgid "Advanced reports — per-bar click & dismiss tracking"
+msgstr "Báo cáo nâng cao — theo dõi lượt nhấp & đóng theo từng thanh"
+
+#: src/settings-app/tabs/TrackingTab.jsx:84
+msgid "Preview with sample data — upgrade to Pro to track your own bars."
+msgstr ""
+"Xem trước với dữ liệu mẫu — nâng cấp lên Pro để theo dõi các thanh của riêng"
+" bạn."
+
+#: src/shared/charts/bar-comparison-chart.jsx:46
+#: src/shared/charts/chart-filters.jsx:60 src/shared/TrackingPane.jsx:135
+msgid "(Untitled)"
+msgstr "(Chưa đặt tên)"
+
+#: src/shared/charts/bar-comparison-chart.jsx:57
+#: src/shared/charts/chart-filters.jsx:41
+#: src/shared/charts/event-breakdown-chart.jsx:19
+#: src/shared/charts/trend-chart.jsx:11
+msgid "Clicks"
+msgstr "Lượt nhấp"
+
+#: src/shared/charts/bar-comparison-chart.jsx:62
+#: src/shared/charts/chart-filters.jsx:43
+#: src/shared/charts/event-breakdown-chart.jsx:20
+#: src/shared/charts/trend-chart.jsx:12 src/shared/TrackingPane.jsx:118
+msgid "Dismissals"
+msgstr "Lượt đóng"
+
+#: src/shared/charts/bar-comparison-chart.jsx:67
+#: src/shared/charts/chart-filters.jsx:45
+#: src/shared/charts/event-breakdown-chart.jsx:21
+#: src/shared/charts/trend-chart.jsx:13 src/shared/TrackingPane.jsx:112
+msgid "Engagements"
+msgstr "Tương tác"
+
+#: src/shared/charts/bar-comparison-chart.jsx:79
+msgid "Per-bar event comparison chart"
+msgstr "Biểu đồ so sánh sự kiện theo từng thanh"
+
+#: src/shared/charts/chart-filters.jsx:19
+msgid "Today vs Yesterday"
+msgstr "Hôm nay so với Hôm qua"
+
+#. translators: %d: number of days.
+#: src/shared/charts/chart-filters.jsx:22
+msgid "%d days"
+msgstr "%d ngày"
+
+#: src/shared/charts/chart-filters.jsx:30
+msgid "Guests"
+msgstr "Khách"
+
+#: src/shared/charts/chart-filters.jsx:32
+msgid "Logged-in"
+msgstr "Đã đăng nhập"
+
+#: src/shared/charts/chart-filters.jsx:34
+msgid "All visitors"
+msgstr "Tất cả khách truy cập"
+
+#: src/shared/charts/chart-filters.jsx:55
+msgid "All bars"
+msgstr "Tất cả các thanh"
+
+#: src/shared/charts/chart-filters.jsx:80
+msgid "Date range"
+msgstr "Khoảng thời gian"
+
+#: src/shared/charts/chart-filters.jsx:83
+msgid "Range"
+msgstr "Phạm vi"
+
+#: src/shared/charts/chart-filters.jsx:99 src/shared/TrackingPane.jsx:110
+msgid "Bar"
+msgstr "Thanh"
+
+#: src/shared/charts/chart-filters.jsx:130
+msgid "Event types"
+msgstr "Loại sự kiện"
+
+#: src/shared/charts/chart-filters.jsx:133
+msgid "Events"
+msgstr "Sự kiện"
+
+#: src/shared/charts/event-breakdown-chart.jsx:46
+msgid "Event type breakdown chart"
+msgstr "Biểu đồ phân tích loại sự kiện"
+
+#: src/shared/charts/tracking-charts.jsx:78
+msgid "No events match these filters."
+msgstr "Không có sự kiện nào khớp với các bộ lọc này."
+
+#: src/shared/charts/tracking-charts.jsx:202
+msgid "Chart data unavailable."
+msgstr "Không có dữ liệu biểu đồ."
+
+#: src/shared/charts/tracking-charts.jsx:205
+msgid "Trend over time"
+msgstr "Xu hướng theo thời gian"
+
+#: src/shared/charts/tracking-charts.jsx:215
+msgid "Event breakdown"
+msgstr "Phân tích sự kiện"
+
+#: src/shared/charts/tracking-charts.jsx:226
+msgid "Per-bar comparison"
+msgstr "So sánh theo từng thanh"
+
+#: src/shared/charts/tracking-charts.jsx:227
+msgid "All bars, for the selected range and audience."
+msgstr "Tất cả các thanh, cho phạm vi và đối tượng đã chọn."
+
+#: src/shared/charts/tracking-charts.jsx:235 src/shared/TrackingPane.jsx:90
+msgid "Stats unavailable."
+msgstr "Không có số liệu thống kê."
+
+#: src/shared/charts/trend-chart.jsx:74
+msgid "Daily event trend chart"
+msgstr "Biểu đồ xu hướng sự kiện hàng ngày"
+
+#: src/shared/pro-ui.jsx:46
+msgid "PRO"
+msgstr "PRO"
+
+#: src/shared/pro-ui.jsx:67
+msgid "Upgrade to Pro →"
+msgstr "Nâng cấp lên Pro →"
+
+#: src/shared/TrackingPane.jsx:78
+msgid "Loading stats…"
+msgstr "Đang tải số liệu thống kê…"
+
+#: src/shared/TrackingPane.jsx:98
+msgid "No notification bars configured yet."
+msgstr "Chưa có thanh thông báo nào được cấu hình."
+
+#: src/shared/TrackingPane.jsx:115
+msgid "Button Clicks"
+msgstr "Lượt nhấp nút"
+
+#: src/shared/TrackingPane.jsx:121
+msgid "Total"
+msgstr "Tổng cộng"
+
+#: src/shared/TrackingPane.jsx:158
+msgid ""
+"Engagements = clicks or text copies inside the bar that are NOT on the CTA "
+"button or the close button (background clicks, text clicks, embedded link "
+"clicks, copying coupon codes, etc.)."
+msgstr ""
+"Tương tác = lượt nhấp hoặc sao chép văn bản bên trong thanh mà KHÔNG nằm "
+"trên nút CTA hoặc nút đóng (nhấp vào nền, nhấp vào văn bản, nhấp vào liên "
+"kết nhúng, sao chép mã giảm giá, v.v.)."
+
+#: src/shared/TrackingPane.jsx:164
+msgid "Counts since plugin activation; reload to refresh."
+msgstr "Đếm từ khi kích hoạt plugin; tải lại để làm mới."

@@ -129,6 +129,18 @@ class NotificationBarHandle {
 
 		$context = $this->getRenderContext();
 
+		// Resolve dynamic content tokens ({user_first_name}, {current_date}, …)
+		// in bar text now — after WPML translation, before the bars are inlined.
+		// Pro fills values; Lite resolves each token to its fallback/empty so a
+		// raw "{token}" never reaches a visitor. Cache caveat: per-visitor tokens
+		// are baked into the page HTML — personalized pages must bypass the page
+		// cache (same requirement as the audience/country gates above).
+		$bars = DynamicContent::apply( $bars, $context );
+
+		// Resolve fixed-date countdown targets to absolute epochs (site TZ) so
+		// every visitor counts to the same instant. Pro-only; no-op in Lite.
+		$bars = CountdownResolver::apply( $bars );
+
 		// Server-side pre-filter: skip enqueue entirely if no bar can show.
 		if ( empty( $this->filterBarsServer( $bars ) ) ) {
 			return;
@@ -150,13 +162,21 @@ class NotificationBarHandle {
 	public function renderFooterOutput(): void {
 		echo '<div id="njt-notibar-slot" role="status" aria-live="polite" style="content-visibility: visible;"></div>' . "\n";
 
+		$payload = [
+			'bars'   => $this->all_bars,
+			'global' => $this->global_config,
+			'ctx'    => $this->render_context,
+		];
+
+		// Localized countdown labels (Pro only — the ticker/render are stripped
+		// in Lite). The client renderer has no i18n, so it reads these.
+		if ( defined( 'NJT_NOFI_IS_PRO' ) && NJT_NOFI_IS_PRO ) {
+			$payload['i18n'] = CountdownResolver::labels();
+		}
+
 		wp_add_inline_script(
 			'njt-notibar-frontend',
-			'window.njtNotibarData = ' . wp_json_encode( [
-				'bars'   => $this->all_bars,
-				'global' => $this->global_config,
-				'ctx'    => $this->render_context,
-			] ) . ';',
+			'window.njtNotibarData = ' . wp_json_encode( $payload ) . ';',
 			'before'
 		);
 	}
@@ -244,6 +264,7 @@ class NotificationBarHandle {
 			'currentObjectId'  => $object_id,
 		];
 	}
+
 
 
 	/**

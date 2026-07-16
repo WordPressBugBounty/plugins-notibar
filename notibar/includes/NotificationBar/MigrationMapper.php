@@ -206,10 +206,11 @@ trait MigrationMapper {
 		}
 
 		if ( false !== $l['njt_nofi_alignment'] ) {
-			// Legacy used 'space_around'; v3 normalises to 'space-around'.
+			// Legacy used 'space_around'; normalise, then map the old alignment
+			// to its closest layout (the field that replaced alignment in v3).
 			$al = $l['njt_nofi_alignment'] === 'space_around' ? 'space-around' : $l['njt_nofi_alignment'];
-			if ( in_array( $al, Schema::ALLOWED_ALIGNMENT, true ) ) {
-				$bar['style']['alignment'] = $al;
+			if ( isset( Schema::LEGACY_ALIGNMENT_LAYOUT[ $al ] ) ) {
+				$bar['style']['layout'] = Schema::LEGACY_ALIGNMENT_LAYOUT[ $al ];
 			}
 		}
 
@@ -253,6 +254,16 @@ trait MigrationMapper {
 		$bar['display']['pageIds']   = $this->parseIdList(
 			false !== $l['njt_nofi_list_display_page'] ? $l['njt_nofi_list_display_page'] : ''
 		);
+
+		// CPT logic — legacy v2.1.9 predates CPT targeting entirely, so seed
+		// it from the migrated pageLogic rather than leaving the schema's
+		// static 'none' default: a bar set to show/hide on all pages should
+		// carry that same intent onto CPT singles after upgrading.
+		if ( 'all' === $bar['display']['pageLogic'] ) {
+			$bar['display']['cptLogic'] = 'all';
+		} elseif ( 'none' === $bar['display']['pageLogic'] ) {
+			$bar['display']['cptLogic'] = 'none';
+		}
 
 		// Post logic + IDs
 		$post_raw = false !== $l['njt_nofi_logic_display_post'] ? $l['njt_nofi_logic_display_post'] : 'dis_all_post';

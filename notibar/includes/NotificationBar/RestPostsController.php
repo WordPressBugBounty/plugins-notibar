@@ -166,25 +166,6 @@ class RestPostsController {
 			}
 		}
 
-		// Synthetic "Single Product page" token — only offered when WC is
-		// active and the search query is empty or matches "product"/"single".
-		if (
-			$is_page_only
-			&& 1 === $paged
-			&& function_exists( 'is_product' )
-		) {
-			$show_sp = '' === $q
-				|| false !== stripos( $q, 'product' )
-				|| false !== stripos( $q, 'single' );
-			if ( $show_sp ) {
-				$items[] = [
-					'id'    => 'wc_single_product',
-					'title' => __( 'Single Product page', 'notibar' ),
-					'type'  => 'page',
-				];
-			}
-		}
-
 		// Theme page templates — fetched alongside pages so a single search
 		// response covers both individual pages and the template categories
 		// they belong to. Token format: "tpl:<filename>" (matches the
@@ -198,6 +179,9 @@ class RestPostsController {
 						&& false === stripos( $name, $q )
 						&& false === stripos( $file, $q )
 					) {
+						continue;
+					}
+					if ( 'single-product' === $file ) {
 						continue;
 					}
 					$items[] = [

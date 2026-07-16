@@ -32,7 +32,7 @@ class GoProPage {
 			[ __( 'Re-display after a specified period', 'notibar' ), true, true ],
 			[ __( 'Absolute & fixed display', 'notibar' ), true, true ],
 			[ __( 'Different content for mobile', 'notibar' ), true, true ],
-			[ __( 'Hide or display on specific pages/posts', 'notibar' ), true, true ],
+			[ __( 'Hide or show on specific pages/posts', 'notibar' ), true, true ],
 			[ __( 'Auto ON/OFF daily schedule', 'notibar' ), true, true ],
 			[ __( 'One-click to duplicate', 'notibar' ), true, true ],
 			[ __( 'Drag and drop to reorder bars', 'notibar' ), true, true ],
@@ -40,8 +40,8 @@ class GoProPage {
 			[ __( '100% mobile-responsive', 'notibar' ), true, true ],
 			[ __( 'Import / Export set of bars', 'notibar' ), true, true ],
 			[ __( 'HTML & CSS supported', 'notibar' ), true, true ],
+			[ __( 'Hide/show on WooCommerce products & custom post types', 'notibar' ), true, true ],
 			// Pro-only.
-			[ __( 'Hide/display on WooCommerce products & custom post types', 'notibar' ), false, true ],
 			[ __( 'A/B testing (Rotation mode)', 'notibar' ), false, true ],
 			[ __( 'Rotation interval in seconds', 'notibar' ), false, true ],
 			[ __( 'Pause rotation on hover', 'notibar' ), false, true ],

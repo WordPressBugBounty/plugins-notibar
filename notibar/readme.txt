@@ -5,7 +5,7 @@ Tags: notification bar, banner, top bar, announcement, cta
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 7.0
-Stable tag: 3.1.5
+Stable tag: 3.2.1
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -134,6 +134,21 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 2. Edit content and preview it
 
 == Changelog ==
+
+= Jul 16, 2026 - Version 3.2.1 =
+- Improved: Notification bars for custom post types
+- Improved: License key box in the Pro version
+
+= Jun 26, 2026 - Version 3.2.0 =
+- Added: Countdown timers for bars (Pro)
+- Added: Country-based display condition (Pro)
+- Added: Dynamic content merge tags, insert variables (e.g. post title, date, site name) directly into bar text (Pro)
+- Added: Display trigger, reveal a bar only after a scroll percentage, time delay, or number of clicks (Pro)
+- Added: Button animations - per-button attention and hover effects (Pro)
+- Added: Stack display mode - show multiple bars at the same time (Pro)
+- Added: Layout picker - replaces Alignment with 7 content layouts; existing bars are mapped automatically
+- Added: Button click action - each button can open a link or close the bar, with its own reopen-after-days for close buttons
+- Added: Bar opacity control, alpha-enabled color pickers, and custom CSS
 
 = Jun 24, 2026 - Version 3.1.5 =
 - Added: Settings to allow showing navigation arrows (Pro version only)
