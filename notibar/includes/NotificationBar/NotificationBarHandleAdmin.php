@@ -110,14 +110,17 @@ trait NotificationBarHandleAdmin {
 	 */
 	public function addActionLinks( array $links ): array {
 		$url_encode = urlencode( 'autofocus[section]' );
-		$link_url   = \NjtNotificationBar\notibar_license_usable() ? esc_url( admin_url( '/customize.php?' . $url_encode . '=njt_nofi_bars_section' ) ) : esc_url( admin_url( 'admin.php?page=notibar_pro-license' ) );
 
-		$prepend = [ '<a href="' . $link_url . '">' . ( \NjtNotificationBar\notibar_license_usable() ? __( 'Settings', 'notibar' ) : __( 'Enter license key', 'notibar' ) ) . '</a>' ];
+		$is_pro = defined( 'NJT_NOFI_IS_PRO' ) && NJT_NOFI_IS_PRO;
+
+		$link_url   = ( \NjtNotificationBar\notibar_license_usable() || ! $is_pro ) ? esc_url( admin_url( '/customize.php?' . $url_encode . '=njt_nofi_bars_section' ) ) : esc_url( admin_url( 'admin.php?page=notibar_pro-license' ) );
+
+		$prepend = [ '<a href="' . $link_url . '">' . ( ( \NjtNotificationBar\notibar_license_usable() || ! $is_pro ) ? __( 'Customize', 'notibar' ) : __( 'Enter license key', 'notibar' ) ) . '</a>' ];
 
 		// Lite-only "Go Pro" action link (green). Runtime-gated on the edition
 		// flag — the link ships in both builds but only renders in Lite (Pro
 		// users have no upsell).
-		if ( ! ( defined( 'NJT_NOFI_IS_PRO' ) && NJT_NOFI_IS_PRO ) ) {
+		if ( ! $is_pro ) {
 			$upgrade   = defined( 'NJT_NOFI_UPGRADE_URL' ) ? NJT_NOFI_UPGRADE_URL : '';
 			$prepend[] = '<a href="' . esc_url( $upgrade ) . '" target="_blank" rel="noopener noreferrer" style="color:#46b450;font-weight:700;">'
 				. __( 'Go Pro', 'notibar' ) . '</a>';

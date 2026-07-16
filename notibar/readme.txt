@@ -5,7 +5,7 @@ Tags: notification bar, banner, top bar, announcement, cta
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 7.0
-Stable tag: 3.2.1
+Stable tag: 3.2.1.1
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -135,7 +135,7 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 
 == Changelog ==
 
-= Jul 16, 2026 - Version 3.2.1 =
+= Jul 16, 2026 - Version 3.2.1.1 =
 - Improved: Notification bars for custom post types
 - Improved: License key box in the Pro version
 

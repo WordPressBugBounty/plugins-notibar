@@ -3,7 +3,7 @@
  * Plugin Name: Notibar - WordPress Notification Bar
  * Plugin URI: https://ninjateam.org/notibar-wordpress-notification-bar
  * Description: Multiple notification bars with React-powered Customizer editor, live preview, rotation mode, and per-bar display rules.
- * Version: 3.2.1
+ * Version: 3.2.1.1
  * Author: Ninja Team
  * Author URI: https://ninjateam.org
  * Text Domain: notibar
@@ -17,7 +17,7 @@ namespace NjtNotificationBar;
 defined('ABSPATH') || exit;
 
 define('NJT_NOFI_PREFIX', 'njt_nofi');
-define('NJT_NOFI_VERSION', '3.2.1');
+define('NJT_NOFI_VERSION', '3.2.1.1');
 
 define('NJT_NOFI_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('NJT_NOFI_PLUGIN_PATH', plugin_dir_path(__FILE__));
