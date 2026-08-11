@@ -199,7 +199,7 @@
 .njt-nofi-content {
   width: 100%;
   margin: auto;
-  padding: 10px 50px;
+  padding: 10px 0;
   box-sizing: border-box;
   align-items: center;
   flex-wrap: wrap;
@@ -280,6 +280,125 @@
   transform: scale(1.3);
   transform-origin: center;
   margin: 8px 0;
+}
+
+/* ==========================================================================
+   Marquee content scroll (Pro) — .njt-nofi-marquee wraps content in a clipped
+   viewport holding ONE copy of it. Nothing is cloned.
+
+   THIS FILE OWNS STRUCTURE ONLY. The motion lives in src/shared/marquee.js,
+   which drives it through the Web Animations API. Two reasons it cannot live
+   here: the travel distance is viewport-width + item-width, which no CSS
+   percentage can express (percentages resolve against the track's own width);
+   and rest-then-scroll mode holds the content still for a number of SECONDS,
+   which keyframe percentages cannot encode — a fixed percentage stop would
+   make the hold scale with content length.
+
+   Two modes, both driven from there:
+     loop              enters from off-screen, crosses, exits, repeats
+     rest-then-scroll  sits at rest showing whatever fits, holds, then scrolls
+                       off and re-enters back to rest
+
+   Without that script the track simply never moves, leaving the content at its
+   natural resting position — readable, just static.
+   ========================================================================== */
+
+/* --- Row scope: the whole content block scrolls ------------------------- */
+
+.njt-nofi-marquee--row {
+  overflow: hidden;
+  width: 100%;
+  /* The close/toggle control is absolutely positioned at right:10px over the
+     bar. A capped, centred .njt-nofi-content rarely reached that corner, but a
+     full-bleed ticker would slide its text straight under the button. Reserve
+     the corner with a margin (not padding — padding sits inside the overflow
+     clip, so content would still be painted there). Applied unconditionally:
+     bars with the control disabled lose 45px of an endlessly repeating track,
+     which is not noticeable, and that beats depending on :has(). */
+  margin-inline-end: 45px;
+}
+
+/* --- Text scope: only .njt-nofi-text scrolls, inside the normal row ------ */
+
+.njt-nofi-marquee--text {
+  overflow: hidden;
+  /* Greedy: takes the row space left over by the countdown and CTA, giving a
+     scroll window worth looking at. Side effect, accepted by design: the
+     clustering layouts (centered / content-left / content-right) no longer
+     cluster, because the text zone now fills the row.
+
+     min-width:0 is load-bearing, not tidying. Flex items default to
+     min-width:auto and refuse to shrink below their content's intrinsic
+     width, so without it this never clips, nothing ever scrolls, and the
+     symptom looks like a broken animation rather than a sizing bug. */
+  /* flex: 1 1 0; */
+  min-width: 0;
+}
+
+/* hero is flex-direction:column, where flex:1 would claim vertical space
+   instead of horizontal. Opt out and span the row instead. */
+.njt-nofi-content[data-layout='hero'] .njt-nofi-marquee--text {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+/* The text zone only reaches the absolutely-positioned close control when
+   nothing follows it in the row — no countdown, no CTA. :last-child says
+   exactly that, with no :has() and no marker class. */
+.njt-nofi-marquee--text:last-child {
+  margin-inline-end: 45px;
+}
+
+.njt-nofi-marquee--text .njt-nofi-text {
+  flex: 0 0 auto;
+  width: max-content;
+}
+
+/* --- Shared by both scopes ---------------------------------------------- */
+
+/* The motion lives in marquee.js (Web Animations API), not here — a hold
+   measured in seconds cannot be expressed as a keyframe percentage. Without
+   that script the track simply stays put, leaving the content at its natural
+   resting position. */
+.njt-nofi-marquee-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+}
+
+/* The item must size to its content and never wrap, so the measured width is
+   the true travel distance. Row scope only — in text scope the item is the
+   text div, handled above.
+
+   marquee.js additionally floors min-width at the measured viewport width, so
+   content SHORTER than the bar still fills the window and keeps its layout
+   alignment at rest instead of collapsing to the left edge. That floor cannot
+   live here as min-width:100%: a percentage inside a width:max-content track
+   resolves circularly. */
+.njt-nofi-marquee--row .njt-nofi-content {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: none;
+  flex-wrap: nowrap;
+}
+
+.njt-nofi-marquee .njt-nofi-text {
+  white-space: nowrap;
+}
+
+/* Device visibility mirrors the .njt-nofi-content-desktop/-mobile rules below —
+   in ROW scope the wrapper is what must be hidden, not the inner block.
+   Qualified to --row deliberately: in text scope the wrapper lives INSIDE a
+   content block that already handles its own visibility, so an unqualified
+   selector would reach in and blank the text at one breakpoint. */
+.njt-nofi-marquee--row.njt-nofi-marquee--mobile {
+  display: none;
+}
+
+/* Collapsed (toggle mode) — the content block is nested inside the track now,
+   so the wrapper must be hidden too or an empty clipped strip remains. */
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-marquee {
+  display: none;
 }
 
 .njt-nofi-content-desktop {
@@ -592,11 +711,15 @@
   color: inherit;
   padding: 0;
   transition: transform 0.5s, background 0.2s ease;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .njt-nofi-close:hover,
 .njt-nofi-toggle:hover {
-  transform: scale( 1.1 );
+  transform: scale( 1.1 ) translateY(-50%);
 }
 
 .njt-nofi-close:focus,
@@ -840,6 +963,17 @@
   .njt-nofi-content-mobile {
     display: flex;
   }
+
+  /* Row-scope marquee wrappers follow the same desktop/mobile swap as the
+     blocks above. Text-scope wrappers are nested inside those blocks and are
+     swapped along with them, so they must NOT be matched here. */
+  .njt-nofi-has-mobile .njt-nofi-marquee--row.njt-nofi-marquee--desktop {
+    display: none;
+  }
+
+  .njt-nofi-marquee--row.njt-nofi-marquee--mobile {
+    display: block;
+  }
 }
 
 /* ==========================================================================
@@ -887,6 +1021,26 @@
     .njt-nofi-notification-bar {
     transform: none !important;
     animation: none !important;
+  }
+
+  /* Marquee — marquee.js already declines to animate under reduced motion, so
+     the track needs no override here; it simply never moves. What is still
+     needed is undoing the single-line sizing, so the untransformed content
+     wraps and reads as an ordinary static bar. */
+  .njt-nofi-marquee-track {
+    width: 100%;
+  }
+  .njt-nofi-marquee--row .njt-nofi-content {
+    width: auto;
+    flex-wrap: wrap;
+  }
+  /* Text scope: drop max-content too, or the text stays on one line and
+     overflows its zone even though nothing is animating. */
+  .njt-nofi-marquee--text .njt-nofi-text {
+    width: auto;
+  }
+  .njt-nofi-marquee .njt-nofi-text {
+    white-space: normal;
   }
 
   /* Pro CTA animations — kill the attention loop and any hover transform/sweep. */

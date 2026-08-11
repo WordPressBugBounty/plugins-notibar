@@ -96,7 +96,9 @@ if ( ! class_exists( 'FBSidebarPopup' ) ) {
 			add_action(
 				'init',
 				function () {
-					if ( ! $this->is_plugin_exist() ) {
+					if ( ! $this->is_plugin_exist()
+						&& ( ! function_exists( 'njt_ads_toggle_is_enabled' ) || njt_ads_toggle_is_enabled( 'filebird-sidebar-popup' ) )
+					) {
 						$this->media_page        = get_option( "{$this->plugin_prefix}_sidebar_popup_media_page" ); //Save the next time notification will appear
 						$this->post_page         = get_option( "{$this->plugin_prefix}_sidebar_post_page" );
 						$this->product_page      = get_option( "{$this->plugin_prefix}_sidebar_product_page" );

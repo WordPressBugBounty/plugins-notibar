@@ -281,6 +281,31 @@ trait SchemaSanitizers {
 			isset( $s['contentWidth'] ) ? intval( $s['contentWidth'] ) : $default['contentWidth']
 		) );
 
+		// Marquee content scroll. `enabled` uses empty() rather than a strict bool
+		// check because the Customizer round-trips this through JSON, so it can
+		// arrive as true, 1, or "1". speed is px/sec, clamped to the same 10–300
+		// range the UI slider offers.
+		$mq         = isset( $s['marquee'] ) && is_array( $s['marquee'] ) ? $s['marquee'] : [];
+		$mq_default = $default['marquee'];
+		$marquee    = [
+			'enabled'   => ! empty( $mq['enabled'] ),
+			'scope'     => isset( $mq['scope'] ) && in_array( $mq['scope'], self::ALLOWED_MARQUEE_SCOPE, true )
+				? $mq['scope']
+				: $mq_default['scope'],
+			'mode'      => isset( $mq['mode'] ) && in_array( $mq['mode'], self::ALLOWED_MARQUEE_MODE, true )
+				? $mq['mode']
+				: $mq_default['mode'],
+			'delay'     => max( 0, min( 10,
+				isset( $mq['delay'] ) ? intval( $mq['delay'] ) : $mq_default['delay']
+			) ),
+			'speed'     => max( 10, min( 300,
+				isset( $mq['speed'] ) ? intval( $mq['speed'] ) : $mq_default['speed']
+			) ),
+			'direction' => isset( $mq['direction'] ) && in_array( $mq['direction'], self::ALLOWED_MARQUEE_DIR, true )
+				? $mq['direction']
+				: $mq_default['direction'],
+		];
+
 		return [
 			// Background fills accept an alpha channel (8-digit hex) so the
 			// alpha-enabled colour picker can make them semi-transparent.
@@ -308,6 +333,7 @@ trait SchemaSanitizers {
 			'opacity'      => max( 10, min( 100,
 				isset( $s['opacity'] ) ? intval( $s['opacity'] ) : $default['opacity']
 			) ),
+			'marquee'      => $marquee,
 			'activePreset' => self::sanitizeActivePreset(
 				isset( $s['activePreset'] ) ? $s['activePreset'] : null
 			),
@@ -590,6 +616,9 @@ trait SchemaSanitizers {
 				? (bool) $g['rotationShowArrows']
 				: $default['rotationShowArrows'],
 			'stackPositionType'       => $stack_position,
+			'closeAllOnDismiss'       => isset( $g['closeAllOnDismiss'] )
+				? (bool) $g['closeAllOnDismiss']
+				: $default['closeAllOnDismiss'],
 		];
 	}
 

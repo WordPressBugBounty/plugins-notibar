@@ -65,6 +65,15 @@ class Schema {
 	const ALLOWED_CD_TYPE = [ 'date', 'evergreen', 'schedule' ];
 	const ALLOWED_CD_UI   = [ 'boxes', 'flip', 'circular', 'text' ];
 	const ALLOWED_CD_UNIT = [ 'days', 'hours', 'minutes', 'seconds' ];
+	// Marquee content scroll (Pro). Token == CSS data-attr value == UI value.
+	const ALLOWED_MARQUEE_DIR = [ 'left', 'right' ];
+	// What scrolls: the whole content row, or only the text in its own
+	// container (countdown + CTA stay put). Token == CSS class suffix.
+	const ALLOWED_MARQUEE_SCOPE = [ 'row', 'text' ];
+	// How it scrolls. loop = slide in from off-screen and straight through.
+	// rest-then-scroll = start at the natural position showing whatever fits,
+	// hold for `delay` seconds, then scroll off and re-enter back to rest.
+	const ALLOWED_MARQUEE_MODE = [ 'loop', 'rest-then-scroll' ];
 
 	// ------------------------------------------------------------------
 	// Default values
@@ -101,6 +110,19 @@ class Schema {
 				// Overall bar opacity, percent (10–100). Fades the whole bar via CSS
 				// opacity on the un-animated container. MIRROR: defaults.js style.opacity.
 				'opacity'      => 100,
+				// Marquee content scroll (Pro). speed is px/sec (10–300), not seconds
+				// per loop — marquee.js converts it to an animation duration using the
+				// measured track width. MIRROR: defaults.js DEFAULT_BAR.style.marquee.
+				'marquee'      => [
+					'enabled'   => false,
+					'scope'     => 'row',
+					'mode'      => 'loop',
+					// Seconds to hold at rest before scrolling. Only meaningful
+					// when mode is rest-then-scroll; ignored for loop.
+					'delay'     => 3,
+					'speed'     => 60,
+					'direction' => 'left',
+				],
 				// Snapshot of the colour preset the user last applied to this
 				// bar, or null. Drives the "reset to preset" behaviour of the
 				// per-colour Reset buttons. Shape: { bg, text, btnBg, btnText, name? }.
@@ -212,6 +234,11 @@ class Schema {
 			'rotationOrder'           => 'sequential',
 			'rotationShowArrows'      => true,
 			'stackPositionType'       => 'fixed',
+			// Close-all (Pro): closing any bar dismisses every other dismissible
+			// bar live on the page. The behaviour is stripped in Lite; the field
+			// itself stays so a Pro→Lite→Pro round trip keeps the admin's choice.
+			// MIRROR: defaults.js DEFAULT_GLOBAL.closeAllOnDismiss.
+			'closeAllOnDismiss'       => false,
 		];
 	}
 

@@ -54,7 +54,9 @@ if ( ! class_exists( 'FBPluginsPageNotification' ) ) {
 			add_action(
 				'init',
 				function () {
-					if ( ! $this->is_plugin_exist() ) {
+					if ( ! $this->is_plugin_exist()
+						&& ( ! function_exists( 'njt_ads_toggle_is_enabled' ) || njt_ads_toggle_is_enabled( 'filebird-plugins-page-notification' ) )
+					) {
 					 	$notification_option = get_option( "{$this->plugin_prefix}_plugins_page_notification" );
 						if(false === $notification_option){
 							$this->need_update_option();

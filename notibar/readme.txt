@@ -5,7 +5,7 @@ Tags: notification bar, banner, top bar, announcement, cta
 Requires at least: 4.0
 Requires PHP: 5.3.1
 Tested up to: 7.0
-Stable tag: 3.2.1.1
+Stable tag: 3.2.2
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -134,6 +134,10 @@ Upon activation, you will see a new **Notibar** menu. Simply click to customize 
 2. Edit content and preview it
 
 == Changelog ==
+
+= Aug 11, 2026 - Version 3.2.2 =
+- Added: Ability to show scrolling content/text continuously (Pro)
+- Added: Ability to closing one bar closes them all (Pro)
 
 = Jul 16, 2026 - Version 3.2.1.1 =
 - Improved: Notification bars for custom post types

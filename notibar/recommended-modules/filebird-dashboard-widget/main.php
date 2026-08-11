@@ -52,7 +52,9 @@ if ( ! class_exists( 'FBDashboardWidgetMain' ) ) {
 			add_action(
 				'init',
 				function () {
-					if ( ! $this->is_plugin_exist() ) {
+					if ( ! $this->is_plugin_exist()
+						&& ( ! function_exists( 'njt_ads_toggle_is_enabled' ) || njt_ads_toggle_is_enabled( 'filebird-dashboard-widget' ) )
+					) {
 						add_action( 'wp_dashboard_setup', array( $this, 'add_dashboard_widget' ) );
 						add_action( 'admin_footer', array( $this, 'add_global_script_styles' ) );
 						add_action( "wp_ajax_{$this->plugin_prefix}_dashboard_widget_install", array( $this, 'ajax_install_plugin' ) );

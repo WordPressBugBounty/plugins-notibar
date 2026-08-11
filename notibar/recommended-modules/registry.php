@@ -28,7 +28,7 @@ defined('ABSPATH') || exit;
 // so the guard works as expected.
 if (!class_exists(__NAMESPACE__ . '\\Registry', false)) {
 
-    defined('YAY_CROSS_MODULES_REGISTRY_VERSION') || define('YAY_CROSS_MODULES_REGISTRY_VERSION', '1.1.0');
+    defined('YAY_CROSS_MODULES_REGISTRY_VERSION') || define('YAY_CROSS_MODULES_REGISTRY_VERSION', '1.3.0');
 
     class Registry
     {
@@ -40,6 +40,9 @@ if (!class_exists(__NAMESPACE__ . '\\Registry', false)) {
 
         /** @var bool */
         private static $hooked = false;
+
+        /** @var array<string, array<string, bool>> ad_slug => [consumer_slug => true] */
+        private static $ad_consumers = [];
 
         /**
          * Each consumer's bundled module calls this from its register.php.
@@ -105,6 +108,40 @@ if (!class_exists(__NAMESPACE__ . '\\Registry', false)) {
         public static function active_path(string $name): ?string
         {
             return self::$loaded[$name]['path'] ?? null;
+        }
+
+        /**
+         * Consumer plugin declares it bundles/renders the given ad module (used by the
+         * ads-toggle module — see modules/ads-toggle). Call once per (consumer_slug, ad_slug)
+         * pair, at file scope AFTER this registry.php has loaded (i.e. after requiring
+         * recommended-modules/loader.php) — the class must already exist to call this.
+         */
+        public static function register_ads_consumer(string $consumer_slug, string $ad_slug): void
+        {
+            self::$ad_consumers[$ad_slug][$consumer_slug] = true;
+        }
+
+        /**
+         * @return string[] Consumer slugs that registered themselves against $ad_slug.
+         */
+        public static function get_ads_consumers(string $ad_slug): array
+        {
+            return array_keys(self::$ad_consumers[$ad_slug] ?? []);
+        }
+
+        /**
+         * Is $consumer_slug registered against at least one ad module? Used to validate the
+         * AJAX toggle request without needing a specific ad_slug (one toggle now covers every
+         * ad that consumer registered).
+         */
+        public static function is_ads_consumer(string $consumer_slug): bool
+        {
+            foreach (self::$ad_consumers as $consumers) {
+                if (isset($consumers[$consumer_slug])) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
