@@ -4,7 +4,7 @@ Donate link: https://ninjateam.org/notibar-wordpress-notification-bar/?utm_sourc
 Tags: notification bar, banner, top bar, announcement, cta
 Requires at least: 4.0
 Requires PHP: 5.3.1
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 3.2.2
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
