@@ -222,8 +222,14 @@ if ( ! class_exists( 'FBPluginsPageNotification' ) ) {
 			}
 		}
 
+		// LOCAL edit (gitignored, synced from cross-sell-manager) — not upstream yet. Will silently
+		// revert next `bin/pull-modules.php` sync unless re-applied or ported upstream. Matches the
+		// capability check already used to gate rendering the notice in add_global_script_styles().
 		public function ajax_set_notification() {
 			check_ajax_referer( "{$this->plugin_prefix}_plugins_page_notification_nonce", 'nonce', true );
+			if ( ! current_user_can( 'install_plugins' ) ) {
+				wp_send_json_error( null, 403 );
+			}
 			//Save after 30 days
 			update_option( "{$this->plugin_prefix}_plugins_page_notification", time() + ( 30 * 60 * 60 * 24 ) );
 			wp_send_json_success();
@@ -231,6 +237,9 @@ if ( ! class_exists( 'FBPluginsPageNotification' ) ) {
 
 		public function ajax_hide_notification() {
 			check_ajax_referer( "{$this->plugin_prefix}_plugins_page_notification_nonce", 'nonce', true );
+			if ( ! current_user_can( 'install_plugins' ) ) {
+				wp_send_json_error( null, 403 );
+			}
 			$days = isset( $_POST['days'] ) ? (int) sanitize_text_field( $_POST['days'] ) : 30;
 			$time = time() + ( $days * 60 * 60 * 24 ); // hide X days
 

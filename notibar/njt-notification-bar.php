@@ -3,7 +3,7 @@
  * Plugin Name: Notibar - WordPress Notification Bar
  * Plugin URI: https://ninjateam.org/notibar-wordpress-notification-bar
  * Description: Multiple notification bars with React-powered Customizer editor, live preview, rotation mode, and per-bar display rules.
- * Version: 3.2.2
+ * Version: 3.2.3
  * Author: Ninja Team
  * Author URI: https://ninjateam.org
  * Text Domain: notibar
@@ -17,7 +17,7 @@ namespace NjtNotificationBar;
 defined('ABSPATH') || exit;
 
 define('NJT_NOFI_PREFIX', 'njt_nofi');
-define('NJT_NOFI_VERSION', '3.2.2');
+define('NJT_NOFI_VERSION', '3.2.3');
 
 define('NJT_NOFI_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('NJT_NOFI_PLUGIN_PATH', plugin_dir_path(__FILE__));
@@ -61,6 +61,25 @@ require_once __DIR__ . '/includes/bar-registry-api.php';
 // Recommeneded-modules module loader (gracefully no-op if recommeneded-modules/ hasn't been synced yet).
 if ( file_exists( __DIR__ . '/recommended-modules/loader.php' ) ) {
 	require_once __DIR__ . '/recommended-modules/loader.php';
+}
+
+// Register this plugin as the ads-toggle "consumer" for every ad module it bundles above (see
+// modules.json), so the single toggle rendered on the Settings page (AssetLoader::enqueue_ads_toggle())
+// controls all of them together. Must run after the loader.php require above (Registry class must
+// already exist), and before plugins_loaded:0 (Registry::load_winners()) so the registration isn't
+// dropped as "late". 'notibar' (this plugin's own slug, matching its text domain) is reused as the
+// consumer_slug everywhere else this toggle is wired up (AssetLoader.php).
+if ( class_exists( '\YayRecommendedModules\Registry' ) ) {
+	foreach (
+		[
+			'filebird-dashboard-widget',
+			'filebird-plugins-page-notification',
+			'filebird-sidebar-popup',
+		] as $njt_nofi_ad_slug
+	) {
+		\YayRecommendedModules\Registry::register_ads_consumer( 'notibar', $njt_nofi_ad_slug );
+	}
+	unset( $njt_nofi_ad_slug );
 }
 
 $GLOBALS['yay_reviews_plugins'][] = [

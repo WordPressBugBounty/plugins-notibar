@@ -691,30 +691,56 @@
 /* ==========================================================================
    Close / Toggle buttons — flex children at the right edge
    ----------------------------------------------------------------------------
-   25x25 circle, semi-opaque dark bg, sits on the right via flex (the
-   centred .njt-nofi-content uses margin:auto so the close gets pushed right
-   without needing absolute positioning).
+   24x24 circle, semi-opaque dark bg, pinned to the right edge and vertically
+   centred via absolute positioning. When toggle mode collapses the bar (0px
+   tall), the toggle turns into a tab hanging off the bar edge — see below.
+
+   Themes style every <button> (e.g. Hello Elementor's reset: `[type=button]`
+   border, padding, width:auto, display:inline-block; Astra / GeneratePress /
+   Kadence fill `button:hover/:focus`). Those selectors tie with a bare class
+   and the theme sheet loads later, so the base rules are scoped under
+   .njt-nofi-notification-bar (one class heavier) and pin every property a
+   theme commonly sets. All other rules for these buttons are already at least
+   as specific and come later, so their order is unchanged.
    ========================================================================== */
 
-.njt-nofi-close,
-.njt-nofi-toggle {
+.njt-nofi-notification-bar .njt-nofi-close,
+.njt-nofi-notification-bar .njt-nofi-toggle {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
   border: none;
   background: #0000002e;
   border-radius: 50%;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
   color: inherit;
   padding: 0;
-  transition: transform 0.5s, background 0.2s ease;
+  transition: transform 0.2s, background 0.2s ease;
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
+}
+
+/* Theme `button:hover/:focus/:active` fills — keep the bar's own look. The
+   collapsed tab's colours (same specificity, later) still win. */
+.njt-nofi-notification-bar .njt-nofi-close:hover,
+.njt-nofi-notification-bar .njt-nofi-close:focus,
+.njt-nofi-notification-bar .njt-nofi-close:active,
+.njt-nofi-notification-bar .njt-nofi-toggle:hover,
+.njt-nofi-notification-bar .njt-nofi-toggle:focus,
+.njt-nofi-notification-bar .njt-nofi-toggle:active {
+  background: #0000002e;
+  color: inherit;
 }
 
 .njt-nofi-close:hover,
@@ -732,18 +758,90 @@
 
 .njt-nofi-close-icon {
   pointer-events: none;
-  width: 11px;
-  height: 11px;
+  width: 8px;
+  height: 8px;
+  transition: transform 0.3s;
 }
 
-/* When the bar is collapsed via toggle mode, rotate the arrow 45° to hint
-   the inverse "expand" action (matches v2 .njt-nofi-display-toggle icon). */
+/* Collapsed (toggle mode): the bar is 0px tall, so the toggle becomes a tab in
+   the bar's colours hanging just below the bar edge. The 45° turn (× → +, the
+   inverse "expand" hint) lives on the icon, not the button, so it never
+   replaces the button's own transform — no positional jump. margin-right:0
+   drops the nav-arrow gutter; the arrows themselves are hidden below. */
 .njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-toggle {
-  transform: rotate( 45deg );
+  top: 100%;
+  transform: none;
+  width: 32px;
+  height: 24px;
+  margin-right: 0;
+  border-radius: 0 0 6px 6px;
+  background: var( --njt-bar-bg, #9af4cf );
+  color: var( --njt-bar-color, #1919cf );
+  box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.15 );
+}
+
+/* In stack mode the tab overlaps the next bar, which paints later. Each bar is
+   its own stacking context (the slide-in leaves a transform on it), so the
+   collapsed BAR is lifted above its siblings — a z-index on the tab alone
+   would stay trapped inside it. */
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-notification-bar {
+  z-index: 1;
+}
+
+/* Stack mode: shift the tab left of the neighbouring bar's own close/toggle
+   button, which sits in the same right-hand column. */
+.njt-nofi-stack .njt-nofi-collapsed .njt-nofi-toggle {
+  right: 44px;
+}
+
+/* Collapsed bars in one stack are all 0px tall at the same edge, so their tabs
+   would land on the same spot — step each tab left by its bar's position. */
+.njt-nofi-stack > .njt-nofi-collapsed:nth-child( 2 ) .njt-nofi-toggle {
+  right: 84px;
+}
+.njt-nofi-stack > .njt-nofi-collapsed:nth-child( 3 ) .njt-nofi-toggle {
+  right: 124px;
+}
+.njt-nofi-stack > .njt-nofi-collapsed:nth-child( 4 ) .njt-nofi-toggle {
+  right: 164px;
+}
+.njt-nofi-stack > .njt-nofi-collapsed:nth-child( 5 ) .njt-nofi-toggle {
+  right: 204px;
+}
+
+/* Divi: its fixed headers (#main-header 99999, #top-header 100000) outrank the
+   bar's 10000, and the collapsed tab hangs right over them — so it vanished
+   under the header. Lift the bar above them only while collapsed; expanded,
+   the theme-compat offset keeps the headers clear of the bar. Stack mode lifts
+   the wrapper (the positioned element) when any of its bars is collapsed. */
+.et_divi_theme .njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-container,
+.et_divi_theme .njt-nofi-stack:has( .njt-nofi-collapsed ) {
+  z-index: 100001;
 }
 
 .njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-toggle:hover {
-  transform: rotate( 45deg ) scale( 1.1 );
+  transform: none;
+  filter: brightness( 0.95 );
+}
+
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-close-icon {
+  transform: rotate( 45deg );
+}
+
+/* Rotation arrows can't be used on a collapsed bar, and their 0px-tall zones
+   still let the chevron overflow onto the tab — hide them until expanded. */
+.njt-nofi-container-content.njt-nofi-collapsed .njt-nofi-nav {
+  display: none;
+}
+
+/* Bottom placement — the tab hangs above the bar edge instead. */
+.njt-nofi-container-content.njt-nofi-collapsed
+  .njt-nofi-container[data-placement='bottom']
+  .njt-nofi-toggle {
+  top: auto;
+  bottom: 100%;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -2px 6px rgba( 0, 0, 0, 0.15 );
 }
 
 /* ==========================================================================
@@ -760,17 +858,27 @@
 /* Unobtrusive full-height edge zones (lightbox / gallery-slider style): each
    arrow is a tall transparent click area pinned to the bar's far left/right
    edge — no visible button, border, or fill. Only the chevron shows, dim by
-   default and brightening on hover, with a faint edge wash to hint clickability. */
-.njt-nofi-nav {
+   default and brightening on hover, with a faint edge wash to hint clickability.
+   Scoped one class heavier than a theme's `[type=button]` reset (see the close
+   / toggle section) — otherwise its padding and border leave visible boxes,
+   even while the bar is collapsed (0px tall). */
+.njt-nofi-notification-bar .njt-nofi-nav {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 48px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: none;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
   background: transparent !important;
   color: inherit !important;
   cursor: pointer;
@@ -839,9 +947,12 @@
    initial/auto renders carry no direction class, so the vertical entrance is
    untouched. animation-name override uses !important to beat the base + bottom-
    placement slide rules regardless of selector specificity.
+   The direction class stays after the slide, so a bar collapsed later (0px
+   tall) is never clipped — the clip would hide its toggle tab, and with it the
+   whole bar.
    -------------------------------------------------------------------------- */
-.njt-nofi-nav-slide-next .njt-nofi-container,
-.njt-nofi-nav-slide-prev .njt-nofi-container {
+.njt-nofi-nav-slide-next:not( .njt-nofi-collapsed ) .njt-nofi-container,
+.njt-nofi-nav-slide-prev:not( .njt-nofi-collapsed ) .njt-nofi-container {
   overflow: hidden;
 }
 
@@ -878,7 +989,8 @@
 }
 
 @media only screen and (max-width: 480px) {
-  .njt-nofi-nav {
+  /* Same scope as the base .njt-nofi-nav rule, so this narrower width wins. */
+  .njt-nofi-notification-bar .njt-nofi-nav {
     width: 40px;
   }
 
@@ -1006,6 +1118,7 @@
 @media (prefers-reduced-motion: reduce) {
   .njt-nofi-close,
   .njt-nofi-toggle,
+  .njt-nofi-close-icon,
   .njt-nofi-button-text,
   .njt-nofi-nav {
     transition: none !important;

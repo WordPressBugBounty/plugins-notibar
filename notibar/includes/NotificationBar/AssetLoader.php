@@ -63,6 +63,11 @@ class AssetLoader {
 		add_action( 'customize_preview_init',             array( $this, 'enqueue_customizer_preview' ) );
 		add_action( 'wp_enqueue_scripts',                 array( $this, 'enqueue_frontend' ) );
 		add_action( 'admin_enqueue_scripts',              array( $this, 'enqueue_settings_app' ) );
+		// Priority 20 — after the ads-toggle module's own default-priority admin_enqueue_scripts
+		// hook (recommended-modules/ads-toggle/main.php) has run and wp_register_script()'d the
+		// 'njt-ads-toggle' handle. enqueue_ads_toggle() attaches an inline script onto that handle,
+		// which silently no-ops if the handle isn't registered yet.
+		add_action( 'admin_enqueue_scripts',              array( $this, 'enqueue_ads_toggle' ), 20 );
 	}
 
 	// -------------------------------------------------------------------------
@@ -346,6 +351,43 @@ class AssetLoader {
 				$asset['version']
 			);
 		}
+	}
+
+	/**
+	 * Render the recommended-modules ads on/off toggle into #njt-notibar-ads-toggle (markup in
+	 * NotificationBarHandleAdmin::njt_nofi_renderSettings()) via the shared njt-ads-toggle widget
+	 * (recommended-modules/ads-toggle) — same mechanism as WP Duplicate Page's settings page.
+	 * Fail-open: if that module isn't bundled/loaded, njt_ads_toggle_consumer_is_enabled() won't
+	 * exist and this silently no-ops — no toggle is shown (matches the guard in renderSettings()).
+	 *
+	 * @param string $hook_suffix Current admin page hook suffix.
+	 * @return void
+	 */
+	public function enqueue_ads_toggle( string $hook_suffix ): void {
+		if ( self::SETTINGS_HOOK_SUFFIX !== $hook_suffix ) {
+			return;
+		}
+		if ( ! function_exists( 'njt_ads_toggle_consumer_is_enabled' ) || ! wp_script_is( 'njt-ads-toggle', 'registered' ) ) {
+			return;
+		}
+
+		wp_enqueue_script( 'njt-ads-toggle' );
+		wp_enqueue_style( 'njt-ads-toggle' );
+
+		wp_add_inline_script(
+			'njt-ads-toggle',
+			sprintf(
+				'jQuery(function ($) { if (window.njtAdsToggleRender) { njtAdsToggleRender("#njt-notibar-ads-toggle", %s); } });',
+				wp_json_encode(
+					array(
+						'consumerSlug' => 'notibar',
+						'title'        => __( 'Show Recommended Plugins', 'notibar' ),
+						'description'  => __( 'Enable this to see handy plugin recommendations and occasional offers. Disable anytime to turn all of them off.', 'notibar' ),
+						'checked'      => njt_ads_toggle_consumer_is_enabled( 'notibar' ),
+					)
+				)
+			)
+		);
 	}
 
 	// -------------------------------------------------------------------------

@@ -447,6 +447,12 @@ if ( ! class_exists( 'FBSidebarPopup' ) ) {
 
 		public function ajax_hide() {
 			check_ajax_referer( "{$this->plugin_prefix}_sidebar_popup_nonce", 'nonce', true );
+			// LOCAL edit (gitignored, synced from cross-sell-manager) — not upstream yet. Will silently
+			// revert next `bin/pull-modules.php` sync unless re-applied or ported upstream. Matches the
+			// capability check already used to gate rendering the popup in add_global_script_styles().
+			if ( ! current_user_can( 'install_plugins' ) ) {
+				wp_send_json_error( null, 403 );
+			}
 			$type = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : 'media';
 			$dont_show_again = isset( $_POST['dont_show_again'] ) ? sanitize_text_field( $_POST['dont_show_again'] ) : false;
 			if(!$dont_show_again) {

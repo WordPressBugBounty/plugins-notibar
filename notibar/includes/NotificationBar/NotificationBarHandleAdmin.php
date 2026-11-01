@@ -152,6 +152,16 @@ trait NotificationBarHandleAdmin {
 	 * @return void
 	 */
 	public function njt_nofi_renderSettings(): void {
-		echo '<div class="wrap"><div id="njt-notibar-settings-app"></div></div>';
+		echo '<div class="wrap">';
+
+		// Rendered by AssetLoader::enqueue_ads_toggle() via the shared njt-ads-toggle widget
+		// (recommended-modules/ads-toggle) — sits outside the React mount below since it's saved
+		// independently (its own AJAX action), not part of the settings-app's REST save. Guarded so
+		// nothing prints if the ads-toggle module isn't bundled/loaded.
+		if ( function_exists( 'njt_ads_toggle_consumer_is_enabled' ) ) {
+			echo '<div id="njt-notibar-ads-toggle" style="background:#fff;border:1px solid #dcdcde;border-radius:4px;padding:16px 20px;margin:16px 0;max-width:800px;"></div>';
+		}
+
+		echo '<div id="njt-notibar-settings-app"></div></div>';
 	}
 }
